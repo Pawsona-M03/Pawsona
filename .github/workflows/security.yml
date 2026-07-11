@@ -1,0 +1,73 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  xcsset-scan:
+    name: XCSSET malware scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for XCSSET indicators
+        run: |
+          set -e
+          FAIL=0
+
+          echo "::group::1. Suspicious shell scripts in project.pbxproj"
+          # XCSSET injects a Run Script build phase that downloads/executes a payload
+          if grep -nE 'shellScript.*(curl|eval|base64|osascript|mdfind|python[0-9]? -c|ruby -e|\.zshrc|xxd -p|openssl enc)' \
+              $(find . -name 'project.pbxproj' -not -path './.git/*'); then
+            echo "::error::Suspicious shell script found in an Xcode build phase"
+            FAIL=1
+          else
+            echo "OK"
+          fi
+          echo "::endgroup::"
+
+          echo "::group::2. Any run-script build phase (this repo should have none)"
+          # ponytail: baseline is zero shellScript phases; loosen this if you ever add a legit one
+          if grep -n 'shellScript' $(find . -name 'project.pbxproj' -not -path './.git/*'); then
+            echo "::error::Run-script build phase found — review it; this repo expects none"
+            FAIL=1
+          else
+            echo "OK"
+          fi
+          echo "::endgroup::"
+
+          echo "::group::3. Mach-O binaries hiding in the repo"
+          # XCSSET drops fake executables (e.g. a binary named like an .xcassets resource)
+          FOUND=$(find . -type f -not -path './.git/*' -exec file {} + | grep 'Mach-O' || true)
+          if [ -n "$FOUND" ]; then
+            echo "$FOUND"
+            echo "::error::Mach-O binary committed to the repo — source-only iOS repos should have none"
+            FAIL=1
+          else
+            echo "OK"
+          fi
+          echo "::endgroup::"
+
+          echo "::group::4. Known XCSSET IOC filenames"
+          IOC=$(find . -not -path './.git/*' \( -name 'main.scpt' -o -name '*.applescript' -o -name 'replicator.d' -o -name 'Pods.dat' -o -name '.report' -o -name 'xcode.plist' \) || true)
+          if [ -n "$IOC" ]; then
+            echo "$IOC"
+            echo "::error::File matching a known XCSSET indicator found"
+            FAIL=1
+          else
+            echo "OK"
+          fi
+          echo "::endgroup::"
+
+          echo "::group::5. xcuserdata / user state (common XCSSET hiding spot)"
+          if find . -path '*xcuserdata*' -not -path './.git/*' | grep .; then
+            echo "::error::xcuserdata committed — should be gitignored"
+            FAIL=1
+          else
+            echo "OK"
+          fi
+          echo "::endgroup::"
+
+          exit $FAIL
