@@ -16,7 +16,7 @@ final class Reminder {
     @Relationship(inverse: \Dog.reminders) var dogList: [Dog]? = nil
     var dueDate: Date = Date.now
     var repeatRule: RepeatRule?
-    var category: CategoryType = CategoryType.others
+    var category: ReminderType = ReminderType.others
 
     init(
         id: UUID = UUID(),
@@ -25,7 +25,7 @@ final class Reminder {
         dogList: [Dog]? = nil,
         dueDate: Date = .now,
         repeatRule: RepeatRule? = nil,
-        category: CategoryType = .others
+        category: ReminderType = .others
     ) {
         self.id = id
         self.title = title
