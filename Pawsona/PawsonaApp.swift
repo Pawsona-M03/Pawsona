@@ -5,13 +5,15 @@
 //  Created by Nathan Sudiara on 11/07/26.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct PawsonaApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
+            Dog.self,
+            VaccineRecord.self,
             Item.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)

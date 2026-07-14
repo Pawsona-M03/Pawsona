@@ -11,25 +11,27 @@ import SwiftData
 @Model
 final class Dog {
     var id: UUID = UUID()
-    var name: String?
-    var breed: String
+    var name: String? = ""
+    var breed: String = ""
     var dateOfBirth: Date = Date.now
-    var backGroundColor: ColorType
+    var backgroundColor: ColorType = ColorType.blue
 
     init(
         id: UUID = UUID(),
         name: String = "",
         breed: String = "",
-        dateOfBirth: Date = Date.now
+        dateOfBirth: Date = Date.now,
+        backgroundColor: ColorType = ColorType.blue
     ) {
         self.id = id
         self.name = name
         self.breed = breed
         self.dateOfBirth = dateOfBirth
+        self.backgroundColor = backgroundColor
     }
 }
 
-enum ColorType{
+enum ColorType: String, Codable, CaseIterable {
     case red
     case orange
     case yellow

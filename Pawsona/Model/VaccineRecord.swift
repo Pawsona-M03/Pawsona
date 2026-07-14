@@ -9,24 +9,38 @@ import Foundation
 import SwiftData
 
 @Model
-final class VaccineRecord{
-    var id: UUID
-    var vaccineList: VaccineType
-    var date: Date
-    var dogList: [Dog]
-    
-    init(id: UUID, vaccineList: VaccineType, date: Date, dogList: [Dog]) {
+final class VaccineRecord {
+    var id: UUID = UUID()
+    var vaccineTypeRawValue: String = VaccineType.parvovirus.rawValue
+    var date: Date = Date.now
+    var dog: Dog?
+
+    var vaccineType: VaccineType {
+        get {
+            VaccineType(rawValue: vaccineTypeRawValue) ?? .parvovirus
+        }
+        set {
+            vaccineTypeRawValue = newValue.rawValue
+        }
+    }
+
+    init(
+        id: UUID = UUID(),
+        vaccineType: VaccineType = .parvovirus,
+        date: Date = Date.now,
+        dog: Dog? = nil
+    ) {
         self.id = id
-        self.vaccineList = vaccineList
+        self.vaccineTypeRawValue = vaccineType.rawValue
         self.date = date
-        self.dogList = dogList
+        self.dog = dog
     }
 }
 
-enum VaccineType{
+enum VaccineType: String, Codable, CaseIterable {
     case parvovirus
     case hepatitis
-    case distamper
+    case distemper
     case leptospira
     case rabies
     case parainfluenza
