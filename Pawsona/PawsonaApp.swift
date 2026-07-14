@@ -13,6 +13,9 @@ struct PawsonaApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
+            Dog.self,
+            Reminder.self,
+            VaccineRecord.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
