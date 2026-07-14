@@ -9,26 +9,24 @@ import Foundation
 import SwiftData
 
 @Model
-final class VaccineRecord{
-    var id: UUID
-    var vaccineList: VaccineType
-    var date: Date
-    var dogList: [Dog]
-    
-    init(id: UUID, vaccineList: VaccineType, date: Date, dogList: [Dog]) {
-        self.id = id
-        self.vaccineList = vaccineList
-        self.date = date
-        self.dogList = dogList
-    }
-}
+final class VaccineRecord {
+    var id: UUID = UUID()
+    var name: String = ""
+    var dateGiven: Date = Date.now
+    var notes: String?
+    @Relationship(inverse: \Dog.vaccineRecords) var dog: Dog?
 
-enum VaccineType{
-    case parvovirus
-    case hepatitis
-    case distamper
-    case leptospira
-    case rabies
-    case parainfluenza
-    case bordetella
+    init(
+        id: UUID = UUID(),
+        name: String = "",
+        dateGiven: Date = .now,
+        notes: String? = nil,
+        dog: Dog? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.dateGiven = dateGiven
+        self.notes = notes
+        self.dog = dog
+    }
 }
