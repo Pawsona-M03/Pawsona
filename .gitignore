@@ -50,3 +50,17 @@ fastlane/test_output/
 # --------------------------------------------------
 *.swp
 *.lock
+
+# --------------------------------------------------
+# AI agent tooling
+# Per-developer setup — see AGENTS.md for install steps.
+# Only AGENTS.md and CLAUDE.md are tracked; everything
+# else agent-related stays local so the repo stays clean.
+# --------------------------------------------------
+.claude/
+.agents/
+.agent/
+.codex/
+.cursor/
+.gemini/
+.mcp.json
