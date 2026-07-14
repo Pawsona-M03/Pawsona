@@ -11,20 +11,20 @@ import SwiftData
 @Model
 final class VaccineRecord {
     var id: UUID = UUID()
-    var name: String = ""
+    var vaccine: VaccineType = VaccineType.parvovirus
     var dateGiven: Date = Date.now
     var notes: String?
     @Relationship(inverse: \Dog.vaccineRecords) var dog: Dog?
 
     init(
         id: UUID = UUID(),
-        name: String = "",
+        vaccine: VaccineType = .parvovirus,
         dateGiven: Date = .now,
         notes: String? = nil,
         dog: Dog? = nil
     ) {
         self.id = id
-        self.name = name
+        self.vaccine = vaccine
         self.dateGiven = dateGiven
         self.notes = notes
         self.dog = dog
