@@ -13,4 +13,23 @@ enum VaccineType: String, Codable, CaseIterable {
     case rabies
     case parainfluenza
     case bordetella
+
+    var displayName: String {
+        switch self {
+        case .parvovirus:
+            "Parvovirus"
+        case .hepatitis:
+            "Hepatitis"
+        case .distemper:
+            "Distemper"
+        case .leptospira:
+            "Leptospira"
+        case .rabies:
+            "Rabies"
+        case .parainfluenza:
+            "Parainfluenza"
+        case .bordetella:
+            "Bordetella"
+        }
+    }
 }
