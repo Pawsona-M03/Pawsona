@@ -42,8 +42,6 @@
 		};
 		DA19FD0230020002007D79F8 /* PawsonaTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = PawsonaTests;
 			sourceTree = "<group>";
 		};

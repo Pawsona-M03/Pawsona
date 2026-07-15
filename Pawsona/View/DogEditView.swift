@@ -19,8 +19,9 @@ struct DogEditView: View {
             title: "Edit Dog",
             name: dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
             breed: dog.breed,
-            dateOfBirth: dog.dateOfBirth,
+            dateOfBirth: dog.dateOfBirth ?? .now,
             backgroundColor: dog.backgroundColor,
+            photoData: dog.photoData,
             onSave: editDog
         )
     }
@@ -29,7 +30,8 @@ struct DogEditView: View {
         name: String,
         breed: String,
         dateOfBirth: Date,
-        backgroundColor: ColorType
+        backgroundColor: ColorType,
+        photoData: Data?
     ) {
         viewModel.editDog(
             dog,
@@ -37,6 +39,7 @@ struct DogEditView: View {
             breed: breed,
             dateOfBirth: dateOfBirth,
             backgroundColor: backgroundColor,
+            photoData: photoData,
             in: modelContext
         )
     }
@@ -47,8 +50,8 @@ struct DogEditView: View {
         dog: Dog(
             name: "Berry",
             breed: "Labrador Retriever",
-            dateOfBirth: Date.now,
-            backgroundColor: .green
+            backgroundColor: .green,
+            dateOfBirth: Date.now
         )
     )
     .modelContainer(for: Dog.self, inMemory: true)

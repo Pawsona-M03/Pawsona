@@ -19,13 +19,15 @@ final class DogViewModel {
         breed: String,
         dateOfBirth: Date,
         backgroundColor: ColorType,
+        photoData: Data? = nil,
         in modelContext: ModelContext
     ) {
         let dog = Dog(
             name: resolvedDogName(from: name, in: modelContext),
             breed: breed,
+            backgroundColor: backgroundColor,
             dateOfBirth: dateOfBirth,
-            backgroundColor: backgroundColor
+            photoData: photoData
         )
 
         modelContext.insert(dog)
@@ -68,12 +70,14 @@ final class DogViewModel {
         breed: String,
         dateOfBirth: Date,
         backgroundColor: ColorType,
+        photoData: Data? = nil,
         in modelContext: ModelContext
     ) {
         dog.name = resolvedDogName(from: name, excluding: dog.id, in: modelContext)
         dog.breed = breed
         dog.dateOfBirth = dateOfBirth
         dog.backgroundColor = backgroundColor
+        dog.photoData = photoData
 
         saveChanges(in: modelContext)
         getDogLists(in: modelContext)

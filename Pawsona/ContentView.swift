@@ -20,7 +20,7 @@ struct ContentView: View {
             }
             
             Tab("Vaccine", systemImage: "syringe") {
-                
+                VaccineListView()
             }
             
         }

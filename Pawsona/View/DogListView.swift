@@ -32,6 +32,22 @@ struct DogListView: View {
                 }
             }
             .navigationTitle("Home")
+            .navigationDestination(for: UUID.self) { dogID in
+                if let dog = viewModel.getDog(id: dogID, in: modelContext) {
+                    DogDetailView(dog: dog)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Add Dog", systemImage: "plus", action: showAddDogForm)
+                }
+            }
+            .sheet(isPresented: $isShowingAddDogForm) {
+                DogFormView(onSave: createDog)
+            }
+            .task {
+                viewModel.getDogLists(in: modelContext)
+            }
         }
     }
 
@@ -43,13 +59,15 @@ struct DogListView: View {
         name: String,
         breed: String,
         dateOfBirth: Date,
-        backgroundColor: ColorType
+        backgroundColor: ColorType,
+        photoData: Data?
     ) {
         viewModel.createDog(
             name: name,
             breed: breed,
             dateOfBirth: dateOfBirth,
             backgroundColor: backgroundColor,
+            photoData: photoData,
             in: modelContext
         )
     }
