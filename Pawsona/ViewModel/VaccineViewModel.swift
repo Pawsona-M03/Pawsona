@@ -13,7 +13,7 @@ import SwiftData
 final class VaccineViewModel{
     var vaccines: [VaccineRecord] = []
     var errorMessage: String?
-    
+    // buat variable model context yg bs di panggil dmn2
     func createRecord(
         vaccine: VaccineType,
         dateGiven: Date,

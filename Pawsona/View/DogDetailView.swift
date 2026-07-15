@@ -10,11 +10,14 @@ import SwiftUI
 
 struct DogDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @State private var dogViewModel = DogViewModel()
     @State private var vaccineViewModel = VaccineViewModel()
     @State private var isShowingEditDogForm = false
     @State private var isShowingAddVaccineForm = false
     @State private var isShowingEditVaccineForm = false
     @State private var editingVaccineRecord: VaccineRecord?
+    @State private var exportedPDFURL: URL?
+    @State private var exportedDataURL: URL?
 
     let dog: Dog
 
@@ -64,6 +67,25 @@ struct DogDetailView: View {
                 Button("Edit", systemImage: "pencil", action: showEditDogForm)
                     .accessibilityShowsLargeContentViewer()
             }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    if let exportedDataURL {
+                        ShareLink(item: exportedDataURL, preview: SharePreview(displayName)) {
+                            Label("Share via AirDrop", systemImage: "wifi")
+                        }
+                    }
+
+                    if let exportedPDFURL {
+                        ShareLink(item: exportedPDFURL, preview: SharePreview(displayName)) {
+                            Label("Export as PDF", systemImage: "doc.richtext")
+                        }
+                    }
+                } label: {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+                .disabled(exportedDataURL == nil && exportedPDFURL == nil)
+            }
         }
         .sheet(isPresented: $isShowingEditDogForm) {
             DogEditView(dog: dog)
@@ -83,6 +105,10 @@ struct DogDetailView: View {
                     }
                 )
             }
+        }
+        .task(id: "\(isShowingEditDogForm)-\(isShowingAddVaccineForm)-\(isShowingEditVaccineForm)") {
+            exportedPDFURL = dogViewModel.exportDogToPDF(dog)
+            exportedDataURL = dogViewModel.shareDogData(dog)
         }
     }
 
@@ -133,8 +159,12 @@ struct DogDetailView: View {
     }
 
     private func deleteVaccineRecords(at offsets: IndexSet) {
-        for index in offsets {
-            vaccineViewModel.deleteRecord(id: sortedVaccineRecords[index].id, in: modelContext)
+        let idsToDelete = offsets.map { sortedVaccineRecords[$0].id }
+
+        Task {
+            for id in idsToDelete {
+                vaccineViewModel.deleteRecord(id: id, in: modelContext)
+            }
         }
     }
 }

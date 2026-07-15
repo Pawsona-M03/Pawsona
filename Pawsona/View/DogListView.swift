@@ -12,6 +12,7 @@ struct DogListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = DogViewModel()
     @State private var isShowingAddDogForm = false
+    @State private var exportedPDFURL: URL?
 
     var body: some View {
         NavigationStack {
@@ -41,12 +42,26 @@ struct DogListView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Dog", systemImage: "plus", action: showAddDogForm)
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    if let exportedPDFURL {
+                        ShareLink(item: exportedPDFURL, preview: SharePreview("Pawsona Dogs")) {
+                            Label("Export", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                }
             }
             .sheet(isPresented: $isShowingAddDogForm) {
                 DogFormView(onSave: createDog)
             }
             .task {
                 viewModel.getDogLists(in: modelContext)
+            }
+            .task(id: viewModel.dogs.map(\.id)) {
+                exportedPDFURL = viewModel.exportDogsToPDF()
+            }
+            .onOpenURL { url in
+                viewModel.importDogData(from: url, in: modelContext)
             }
         }
     }
@@ -73,8 +88,12 @@ struct DogListView: View {
     }
 
     private func deleteDogs(at offsets: IndexSet) {
-        for index in offsets {
-            viewModel.deleteDog(id: viewModel.dogs[index].id, in: modelContext)
+        let idsToDelete = offsets.map { viewModel.dogs[$0].id }
+
+        Task {
+            for id in idsToDelete {
+                viewModel.deleteDog(id: id, in: modelContext)
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import SwiftUI
 
 struct VaccineListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \VaccineRecord.dateGiven, order: .reverse) private var vaccineRecords: [VaccineRecord]
     @State private var viewModel = VaccineViewModel()
     @State private var editingVaccineRecord: VaccineRecord?
     @State private var isShowingEditVaccineForm = false
@@ -17,14 +18,14 @@ struct VaccineListView: View {
     var body: some View {
         NavigationStack {
             List {
-                if sortedVaccineRecords.isEmpty {
+                if vaccineRecords.isEmpty {
                     ContentUnavailableView(
                         "No Vaccine Records",
                         systemImage: "syringe",
                         description: Text("Vaccine records you add for your dogs will show up here.")
                     )
                 } else {
-                    ForEach(sortedVaccineRecords, id: \.id) { vaccineRecord in
+                    ForEach(vaccineRecords, id: \.id) { vaccineRecord in
                         Button {
                             editingVaccineRecord = vaccineRecord
                             isShowingEditVaccineForm = true
@@ -37,9 +38,6 @@ struct VaccineListView: View {
                 }
             }
             .navigationTitle("Vaccines")
-            .task {
-                viewModel.getAllRecord(in: modelContext)
-            }
             .sheet(isPresented: $isShowingEditVaccineForm) {
                 if let vaccineRecord = editingVaccineRecord, let dog = vaccineRecord.dog {
                     VaccineRecordFormView(
@@ -54,10 +52,6 @@ struct VaccineListView: View {
                 }
             }
         }
-    }
-
-    private var sortedVaccineRecords: [VaccineRecord] {
-        viewModel.vaccines.sorted { $0.dateGiven > $1.dateGiven }
     }
 
     private func editVaccineRecord(
@@ -78,8 +72,12 @@ struct VaccineListView: View {
     }
 
     private func deleteVaccineRecords(at offsets: IndexSet) {
-        for index in offsets {
-            viewModel.deleteRecord(id: sortedVaccineRecords[index].id, in: modelContext)
+        let idsToDelete = offsets.map { vaccineRecords[$0].id }
+
+        Task {
+            for id in idsToDelete {
+                viewModel.deleteRecord(id: id, in: modelContext)
+            }
         }
     }
 }

@@ -8,6 +8,7 @@
 import Foundation
 import Observation
 import SwiftData
+import PDFKit
 
 @Observable
 final class DogViewModel {
@@ -91,6 +92,88 @@ final class DogViewModel {
         modelContext.delete(dog)
         saveChanges(in: modelContext)
         getDogLists(in: modelContext)
+    }
+    
+    @discardableResult
+    func exportDogsToPDF() -> URL? {
+        guard let pdfData = PDFGenerator.generate(from: dogs), PDFDocument(data: pdfData) != nil else {
+            errorMessage = "Unable to generate PDF."
+            return nil
+        }
+
+        let fileURL = URL.temporaryDirectory.appending(path: "Pawsona-Dogs.pdf")
+
+        do {
+            try pdfData.write(to: fileURL)
+            errorMessage = nil
+            return fileURL
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+    
+    @discardableResult
+    func exportDogToPDF(_ dog: Dog) -> URL? {
+        guard let pdfData = PDFGenerator.generate(from: [dog]), PDFDocument(data: pdfData) != nil else {
+            errorMessage = "Unable to generate PDF."
+            return nil
+        }
+
+        let fileURL = URL.temporaryDirectory.appending(path: "\(sanitizedFileName(for: dog))-data.pdf")
+
+        do {
+            try pdfData.write(to: fileURL)
+            errorMessage = nil
+            return fileURL
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
+    @discardableResult
+    func shareDogData(_ dog: Dog) -> URL? {
+        do {
+            let data = try JSONEncoder().encode(DogTransferPackage(dog: dog))
+            let fileURL = URL.temporaryDirectory.appending(path: "\(sanitizedFileName(for: dog)).pawsonadog")
+
+            try data.write(to: fileURL)
+            errorMessage = nil
+            return fileURL
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
+    @discardableResult
+    func importDogData(from url: URL, in modelContext: ModelContext) -> Dog? {
+        do {
+            let data = try Data(contentsOf: url)
+            let package = try JSONDecoder().decode(DogTransferPackage.self, from: data)
+            let dog = package.makeDog()
+
+            modelContext.insert(dog)
+            for vaccineRecord in dog.vaccineRecords ?? [] {
+                modelContext.insert(vaccineRecord)
+            }
+
+            saveChanges(in: modelContext)
+            getDogLists(in: modelContext)
+            try? FileManager.default.removeItem(at: url)
+
+            return dog
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
+    private func sanitizedFileName(for dog: Dog) -> String {
+        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let name = trimmedName.isEmpty ? "Dog" : trimmedName
+        return name.components(separatedBy: CharacterSet.alphanumerics.inverted).joined()
     }
 
     private func resolvedDogName(
