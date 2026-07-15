@@ -11,38 +11,22 @@ import SwiftData
 @Model
 final class VaccineRecord {
     var id: UUID = UUID()
-    var vaccineTypeRawValue: String = VaccineType.parvovirus.rawValue
-    var date: Date = Date.now
-    var dog: Dog?
-
-    var vaccineType: VaccineType {
-        get {
-            VaccineType(rawValue: vaccineTypeRawValue) ?? .parvovirus
-        }
-        set {
-            vaccineTypeRawValue = newValue.rawValue
-        }
-    }
+    var vaccine: VaccineType = VaccineType.parvovirus
+    var dateGiven: Date = Date.now
+    var notes: String?
+    @Relationship(inverse: \Dog.vaccineRecords) var dog: Dog?
 
     init(
         id: UUID = UUID(),
-        vaccineType: VaccineType = .parvovirus,
-        date: Date = Date.now,
+        vaccine: VaccineType = .parvovirus,
+        dateGiven: Date = .now,
+        notes: String? = nil,
         dog: Dog? = nil
     ) {
         self.id = id
-        self.vaccineTypeRawValue = vaccineType.rawValue
-        self.date = date
+        self.vaccine = vaccine
+        self.dateGiven = dateGiven
+        self.notes = notes
         self.dog = dog
     }
-}
-
-enum VaccineType: String, Codable, CaseIterable {
-    case parvovirus
-    case hepatitis
-    case distemper
-    case leptospira
-    case rabies
-    case parainfluenza
-    case bordetella
 }

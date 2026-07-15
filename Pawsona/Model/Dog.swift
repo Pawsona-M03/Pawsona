@@ -11,33 +11,38 @@ import SwiftData
 @Model
 final class Dog {
     var id: UUID = UUID()
-    var name: String? = ""
+    var name: String?
     var breed: String = ""
-    var dateOfBirth: Date = Date.now
-    var backgroundColor: ColorType = ColorType.blue
+    var backgroundColor: ColorType = ColorType.gray
+    var dateOfBirth: Date?
+    var weight: Double?
+    var sex: Sex?
+    @Attribute(.externalStorage) var photoData: Data?
+    var reminders: [Reminder]? = nil
+    var vaccineRecords: [VaccineRecord]? = nil
+
+    var age: Int? {
+        guard let dateOfBirth else { return nil }
+        return Calendar.current.dateComponents([.year], from: dateOfBirth, to: .now).year
+    }
 
     init(
         id: UUID = UUID(),
-        name: String = "",
+        name: String? = nil,
         breed: String = "",
-        dateOfBirth: Date = Date.now,
-        backgroundColor: ColorType = ColorType.blue
+        backgroundColor: ColorType = .gray,
+        dateOfBirth: Date? = nil,
+        weight: Double? = nil,
+        sex: Sex? = nil,
+        photoData: Data? = nil
     ) {
         self.id = id
         self.name = name
         self.breed = breed
-        self.dateOfBirth = dateOfBirth
         self.backgroundColor = backgroundColor
+        self.dateOfBirth = dateOfBirth
+        self.weight = weight
+        self.sex = sex
+        self.photoData = photoData
     }
-}
-
-enum ColorType: String, Codable, CaseIterable {
-    case red
-    case orange
-    case yellow
-    case green
-    case blue
-    case purple
-    case pink
-    case gray
 }

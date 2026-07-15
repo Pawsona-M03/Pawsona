@@ -9,47 +9,30 @@ import Foundation
 import SwiftData
 
 @Model
-final class Reminder{
-    var id: UUID
-    var title: String
-    var notes: String
-    var dogList: [Dog]
-    var reminderDateAndHour: Date
+final class Reminder {
+    var id: UUID = UUID()
+    var title: String = ""
+    var notes: String?
+    @Relationship(inverse: \Dog.reminders) var dogList: [Dog]? = nil
+    var dueDate: Date = Date.now
     var repeatRule: RepeatRule?
-    var category: CategoryType
-    
+    var category: ReminderType = ReminderType.others
+
     init(
-        id: UUID = .init(),
-        title: String,
-        notes: String,
-        dogList: [Dog],
-        type: CategoryType
-    ){
+        id: UUID = UUID(),
+        title: String = "",
+        notes: String? = nil,
+        dogList: [Dog]? = nil,
+        dueDate: Date = .now,
+        repeatRule: RepeatRule? = nil,
+        category: ReminderType = .others
+    ) {
         self.id = id
         self.title = title
         self.notes = notes
         self.dogList = dogList
-        self.reminderDateAndHour = Date()
-        self.repeatRule = nil
-        self.category = .medicine
+        self.dueDate = dueDate
+        self.repeatRule = repeatRule
+        self.category = category
     }
-}
-
-enum CategoryType: String, Codable {
-    case medicine
-    case vitamin
-    case vaccine
-    case others
-}
-
-struct RepeatRule: Codable {
-    var interval: Int
-    var unit: RepeatUnit
-}
-
-enum RepeatUnit: String, Codable {
-    case day
-    case week
-    case month
-    case year
 }

@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		DA19FD0630020006007D79F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D819FD093001F219007D79F8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D819FD103001F219007D79F8;
+			remoteInfo = Pawsona;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		D819FD113001F219007D79F8 /* Pawsona.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pawsona.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA19FD0130020001007D79F8 /* PawsonaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PawsonaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -29,10 +40,24 @@
 			path = Pawsona;
 			sourceTree = "<group>";
 		};
+		DA19FD0230020002007D79F8 /* PawsonaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = PawsonaTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D819FD0E3001F219007D79F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA19FD0530020005007D79F8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,6 +71,7 @@
 			isa = PBXGroup;
 			children = (
 				D819FD133001F219007D79F8 /* Pawsona */,
+				DA19FD0230020002007D79F8 /* PawsonaTests */,
 				D819FD123001F219007D79F8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +80,7 @@
 			isa = PBXGroup;
 			children = (
 				D819FD113001F219007D79F8 /* Pawsona.app */,
+				DA19FD0130020001007D79F8 /* PawsonaTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -83,6 +110,28 @@
 			productReference = D819FD113001F219007D79F8 /* Pawsona.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DA19FD0330020003007D79F8 /* PawsonaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA19FD0830020008007D79F8 /* Build configuration list for PBXNativeTarget "PawsonaTests" */;
+			buildPhases = (
+				DA19FD0430020004007D79F8 /* Sources */,
+				DA19FD0530020005007D79F8 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DA19FD0730020007007D79F8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DA19FD0230020002007D79F8 /* PawsonaTests */,
+			);
+			name = PawsonaTests;
+			packageProductDependencies = (
+			);
+			productName = PawsonaTests;
+			productReference = DA19FD0130020001007D79F8 /* PawsonaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -95,6 +144,10 @@
 				TargetAttributes = {
 					D819FD103001F219007D79F8 = {
 						CreatedOnToolsVersion = 26.6;
+					};
+					DA19FD0330020003007D79F8 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = D819FD103001F219007D79F8;
 					};
 				};
 			};
@@ -113,6 +166,7 @@
 			projectRoot = "";
 			targets = (
 				D819FD103001F219007D79F8 /* Pawsona */,
+				DA19FD0330020003007D79F8 /* PawsonaTests */,
 			);
 		};
 /* End PBXProject section */
@@ -135,7 +189,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DA19FD0430020004007D79F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DA19FD0730020007007D79F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D819FD103001F219007D79F8 /* Pawsona */;
+			targetProxy = DA19FD0630020006007D79F8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D819FD203001F21A007D79F8 /* Debug */ = {
@@ -327,6 +396,48 @@
 			};
 			name = Release;
 		};
+		DA19FD0930020009007D79F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K64G2J8QL7;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.PawsonaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pawsona.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Pawsona";
+			};
+			name = Debug;
+		};
+		DA19FD0A3002000A007D79F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K64G2J8QL7;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.PawsonaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pawsona.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Pawsona";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -344,6 +455,15 @@
 			buildConfigurations = (
 				D819FD203001F21A007D79F8 /* Debug */,
 				D819FD213001F21A007D79F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA19FD0830020008007D79F8 /* Build configuration list for PBXNativeTarget "PawsonaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA19FD0930020009007D79F8 /* Debug */,
+				DA19FD0A3002000A007D79F8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

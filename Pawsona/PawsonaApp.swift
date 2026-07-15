@@ -15,6 +15,9 @@ struct PawsonaApp: App {
             Dog.self,
             VaccineRecord.self,
             Item.self,
+            Dog.self,
+            Reminder.self,
+            VaccineRecord.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
