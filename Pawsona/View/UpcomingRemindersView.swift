@@ -13,9 +13,18 @@ import SwiftUI
 struct UpcomingRemindersView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Reminder.dueDate) private var reminders: [Reminder]
-    @State private var viewModel = UpcomingRemindersViewModel()
+    @State private var notificationService: NotificationService
+    @State private var viewModel: UpcomingRemindersViewModel
     @State private var editingReminder: Reminder?
     @State private var isShowingNewReminderForm = false
+
+    init() {
+        // One service instance shared by the list (permission state, deletes) and
+        // injected into the view model so cancel/schedule hit the same center.
+        let service = NotificationService()
+        _notificationService = State(initialValue: service)
+        _viewModel = State(initialValue: UpcomingRemindersViewModel(notificationService: service))
+    }
 
     var body: some View {
         NavigationStack {
@@ -35,6 +44,15 @@ struct UpcomingRemindersView: View {
                 }
             }
             .navigationTitle("Reminders")
+            .safeAreaInset(edge: .top) {
+                if notificationService.permissionState == .denied {
+                    NotificationPermissionBanner()
+                        .padding(.horizontal)
+                }
+            }
+            .task {
+                await notificationService.requestPermission()
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("New Reminder", systemImage: "plus") {
