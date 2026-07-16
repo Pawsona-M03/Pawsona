@@ -13,12 +13,14 @@ struct ReminderRowView: View {
     let reminder: Reminder
     var isOverdue: Bool = false
 
+    @ScaledMetric(relativeTo: .title3) private var iconWidth = 32
+
     var body: some View {
         HStack {
             Image(systemName: categoryIcon)
                 .font(.title3)
                 .foregroundStyle(.tint)
-                .frame(width: 32)
+                .frame(width: iconWidth)
 
             VStack(alignment: .leading) {
                 Text(reminder.title)
