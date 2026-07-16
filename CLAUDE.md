@@ -13,6 +13,13 @@ You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and relat
 Your code must always adhere to Apple's Human Interface Guidelines and App Review guidelines.
 
 
+## Ask when unsure
+
+**When you are confused, uncertain, or have a question, ALWAYS ask Nathan before proceeding** —
+even when running in auto / accept-edits / bypass-permissions mode. Do not guess or paper over
+ambiguity to keep moving. A short question now beats an confidently wrong change.
+
+
 ## Project facts
 
 Confirmed from the Xcode project — do not assume otherwise:
@@ -25,9 +32,9 @@ Confirmed from the Xcode project — do not assume otherwise:
 - **Swift language mode is 5.0**, not 6. Strict concurrency is therefore not fully enforced by
   the compiler yet. Still write code as if it were: prefer `async`/`await`, avoid shared mutable
   state across actors. Do not rely on Swift 6-only diagnostics to catch mistakes.
-- **CloudKit is enabled in entitlements** but the container identifier list is empty, so it is
-  half-configured. Treat the SwiftData CloudKit constraints below as **mandatory** — see that
-  section for a known violation in the existing code.
+- **CloudKit is wired up.** The entitlements declare container `iCloud.com.nathansudiara.Pawsona`,
+  and the `ModelContainer` opts in via `cloudKitDatabase: .automatic`. Treat the SwiftData
+  CloudKit constraints below as **mandatory** — every model must stay CloudKit-legal.
 
 
 ## Core instructions
@@ -142,14 +149,9 @@ CloudKit is enabled in this project's entitlements, so **these constraints are m
 - **Every model property must have a default value or be optional.**
 - **Every relationship must be marked optional.**
 
-**Known violation:** `Pawsona/Item.swift` declares `var timestamp: Date` with no default and no
-optionality. This is Xcode template code and will break the moment the `ModelContainer` is
-actually pointed at CloudKit. Fix it (`var timestamp: Date = .now`) when you next touch that
-file — or delete `Item` outright once real models exist.
-
-Note the empty `com.apple.developer.icloud-container-identifiers` array: CloudKit is entitled but
-not wired up. If the team decides against CloudKit sync, remove the entitlement and these
-constraints relax.
+These are not theoretical: the `ModelContainer` is pointed at CloudKit (`cloudKitDatabase:
+.automatic`), so a model that violates them will fail to load the store at launch. `Item.swift`
+is leftover Xcode template code — delete it once you're sure nothing references it.
 
 
 ## Project structure
