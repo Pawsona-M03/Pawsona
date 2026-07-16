@@ -47,6 +47,53 @@ struct UpcomingRemindersViewModelTests {
         #expect(sections.first(where: { $0.group == .today })?.reminders.first?.title == "Today")
     }
 
+    @Test("A reminder late today (23:59) still groups as Today")
+    func lateTodayGroupsAsToday() throws {
+        let (service, _) = makeService()
+        let viewModel = UpcomingRemindersViewModel(notificationService: service)
+        let now = try fixedNow()
+        let calendar = Calendar.current
+        let endOfToday = try #require(
+            calendar.date(bySettingHour: 23, minute: 59, second: 0, of: now)
+        )
+
+        #expect(viewModel.group(for: endOfToday, now: now) == .today)
+    }
+
+    @Test("Midnight tomorrow crosses out of Today")
+    func midnightTomorrowIsNotToday() throws {
+        let (service, _) = makeService()
+        let viewModel = UpcomingRemindersViewModel(notificationService: service)
+        let now = try fixedNow()
+        let calendar = Calendar.current
+        let startOfTomorrow = try #require(
+            calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))
+        )
+
+        // fixedNow() is early in the week, so tomorrow is still this week.
+        #expect(viewModel.group(for: startOfTomorrow, now: now) == .thisWeek)
+    }
+
+    @Test("A time earlier today but already past groups as Overdue, not Today")
+    func earlierTodayButPastIsOverdue() throws {
+        let (service, _) = makeService()
+        let viewModel = UpcomingRemindersViewModel(notificationService: service)
+        let now = try fixedNow()
+        let calendar = Calendar.current
+        let earlierToday = try #require(calendar.date(byAdding: .minute, value: -1, to: now))
+
+        #expect(viewModel.group(for: earlierToday, now: now) == .overdue)
+    }
+
+    @Test("A reminder due exactly now counts as Today")
+    func exactlyNowIsToday() throws {
+        let (service, _) = makeService()
+        let viewModel = UpcomingRemindersViewModel(notificationService: service)
+        let now = try fixedNow()
+
+        #expect(viewModel.group(for: now, now: now) == .today)
+    }
+
     @Test("Empty groups are omitted")
     func omitsEmptyGroups() throws {
         let (service, _) = makeService()

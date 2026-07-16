@@ -15,11 +15,13 @@ import UserNotifications
 /// system permissions.
 final class SpyNotificationCenter: NotificationScheduling {
     var authorizationResult = true
+    var authorizationError: Error?
     private(set) var added: [UNNotificationRequest] = []
     private(set) var removedIdentifiers: [String] = []
 
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
-        authorizationResult
+        if let authorizationError { throw authorizationError }
+        return authorizationResult
     }
 
     func add(_ request: UNNotificationRequest) async throws {
@@ -121,6 +123,17 @@ struct NotificationServiceTests {
     func permissionDenied() async {
         let spy = SpyNotificationCenter()
         spy.authorizationResult = false
+        let service = NotificationService(center: spy)
+
+        await service.requestPermission()
+
+        #expect(service.permissionState == .denied)
+    }
+
+    @Test("A thrown authorization error lands in denied, not a crash")
+    func permissionErrorFallsBackToDenied() async {
+        let spy = SpyNotificationCenter()
+        spy.authorizationError = CocoaError(.userCancelled)
         let service = NotificationService(center: spy)
 
         await service.requestPermission()
