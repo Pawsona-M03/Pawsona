@@ -19,7 +19,7 @@ final class Dog {
     var sex: Sex?
     @Attribute(.externalStorage) var photoData: Data?
     var reminders: [Reminder]? = nil
-    var vaccineRecords: [VaccineRecord]? = nil
+    @Relationship(deleteRule: .cascade) var vaccineRecords: [VaccineRecord]? = nil
 
     var age: Int? {
         guard let dateOfBirth else { return nil }
