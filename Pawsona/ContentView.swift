@@ -16,7 +16,7 @@ struct ContentView: View {
             }
             
             Tab("Reminder", systemImage: "bell") {
-                
+                UpcomingRemindersView()
             }
             
             Tab("Vaccine", systemImage: "syringe") {
