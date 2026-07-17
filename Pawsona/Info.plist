@@ -2,7 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-<<<<<<< Updated upstream
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -18,12 +17,10 @@
 			</array>
 		</dict>
 	</array>
-=======
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Pawsona uses the microphone so you can dictate search terms instead of typing.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Pawsona uses speech recognition to turn your dictated search into text.</string>
->>>>>>> Stashed changes
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
