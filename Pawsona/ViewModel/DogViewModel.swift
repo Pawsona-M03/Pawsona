@@ -14,6 +14,7 @@ import PDFKit
 final class DogViewModel {
     var dogs: [Dog] = []
     var errorMessage: String?
+    var sortOption: DogSortOption = .dateAdded
 
     func createDog(
         name: String,
@@ -38,7 +39,7 @@ final class DogViewModel {
 
     func getDogLists(in modelContext: ModelContext) {
         let descriptor = FetchDescriptor<Dog>(
-            sortBy: [SortDescriptor(\Dog.name)]
+            sortBy: [sortOption.sortDescriptor]
         )
 
         do {

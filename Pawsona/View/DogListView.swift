@@ -13,42 +13,45 @@ struct DogListView: View {
     @State private var viewModel = DogViewModel()
     @State private var isShowingAddDogForm = false
     @State private var exportedPDFURL: URL?
+    @State private var searchText = ""
+    
+
+    private var filteredDogs: [Dog] {
+        guard !searchText.isEmpty else {
+            return viewModel.dogs
+        }
+
+        return viewModel.dogs.filter { dog in
+            dog.name?.localizedStandardContains(searchText) == true
+            || dog.breed.localizedStandardContains(searchText) == true
+        }
+    }
+
+    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         NavigationStack {
-            List {
-                if viewModel.dogs.isEmpty {
-                    ContentUnavailableView(
-                        "No Dogs Yet",
-                        systemImage: "pawprint",
-                        description: Text("Add a dog to start tracking reminders and vaccines.")
-                    )
-                } else {
-                    ForEach(viewModel.dogs, id: \.id) { dog in
-                        NavigationLink(value: dog.id) {
-                            DogCardView(dog: dog)
-                        }
-                    }
-                    .onDelete(perform: deleteDogs)
-                }
-            }
-            .navigationTitle("Home")
+            DogListContentView(filteredDogs: filteredDogs, searchText: searchText, columns: columns)
+                .navigationTitle("Puppy")
             .navigationDestination(for: UUID.self) { dogID in
                 if let dog = viewModel.getDog(id: dogID, in: modelContext) {
                     DogDetailView(dog: dog)
                 }
             }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .searchDictationBehavior(.inline(activation: .onSelect))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add Dog", systemImage: "plus", action: showAddDogForm)
+                    Menu("Sort", systemImage: "arrow.up.arrow.down") {
+                        SortOrderPicker(selection: $viewModel.sortOption)
+                    }
+                    .tint(Color(.black))
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    if let exportedPDFURL {
-                        ShareLink(item: exportedPDFURL, preview: SharePreview("Pawsona Dogs")) {
-                            Label("Export", systemImage: "square.and.arrow.up")
-                        }
-                    }
+                    Button("Add Dog", systemImage: "plus", action: showAddDogForm)
+                        .buttonStyle(.glassProminent)
+                        .tint(Color(.brown))
                 }
             }
             .sheet(isPresented: $isShowingAddDogForm) {
@@ -60,11 +63,15 @@ struct DogListView: View {
             .task(id: viewModel.dogs.map(\.id)) {
                 exportedPDFURL = viewModel.exportDogsToPDF()
             }
+            .onChange(of: viewModel.sortOption) { _, _ in
+                viewModel.getDogLists(in: modelContext)
+            }
             .onOpenURL { url in
                 viewModel.importDogData(from: url, in: modelContext)
             }
         }
     }
+    
 
     private func showAddDogForm() {
         isShowingAddDogForm = true
@@ -99,6 +106,23 @@ struct DogListView: View {
 }
 
 #Preview {
-    DogListView()
-        .modelContainer(for: Dog.self, inMemory: true)
+    let container = try! ModelContainer(
+        for: Dog.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+
+    let sampleDogs = [
+        Dog(name: "Berry", breed: "Labrador Retriever", backgroundColor: .green, dateOfBirth: .now),
+        Dog(name: "Milo", breed: "Golden Retriever", backgroundColor: .orange, dateOfBirth: .now),
+        Dog(name: "Coco", breed: "Poodle", backgroundColor: .pink, dateOfBirth: .now),
+        Dog(name: "Rex", breed: "German Shepherd", backgroundColor: .blue, dateOfBirth: .now),
+        Dog(name: "Luna", breed: "Beagle", backgroundColor: .purple, dateOfBirth: .now)
+    ]
+
+    for dog in sampleDogs {
+        container.mainContext.insert(dog)
+    }
+
+    return DogListView()
+        .modelContainer(container)
 }
