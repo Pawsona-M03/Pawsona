@@ -18,6 +18,7 @@ struct VaccineRecordFormView: View {
 
     // @State viewModel: sumber kebenaran field form ini
     @State private var viewModel: VaccineRecordFormViewModel
+    @State private var isShowingDeleteConfirmation = false
     private let navigationTitle: String
 
     // fungsi: init utk TAMBAH record baru
@@ -38,6 +39,11 @@ struct VaccineRecordFormView: View {
         navigationTitle = "Edit Vaccination Record"
     }
 
+    // fungsi: batas atas date/time picker -> sekarang, biar nggak bisa input tanggal masa depan
+    private var latestAllowedDate: ClosedRange<Date> {
+        .distantPast...Date.now
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -47,6 +53,10 @@ struct VaccineRecordFormView: View {
 
                 if !dogs.isEmpty {
                     dogSection
+                }
+
+                if viewModel.isEditing {
+                    deleteSection
                 }
             }
             .navigationTitle(navigationTitle)
@@ -60,36 +70,51 @@ struct VaccineRecordFormView: View {
                         .clipShape(.circle)
                 }
 
-                // ToolbarItem checkmark: simpan, disabled kalau belum ada dog kepilih
+                // ToolbarItem checkmark: simpan, disabled kalau belum ada dog/vaccine kepilih
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save", systemImage: "checkmark", action: save)
                         .labelStyle(.iconOnly)
                         .buttonStyle(.borderedProminent)
+                        .tint(Color("VaccineBrown"))
                         .clipShape(.circle)
                         .disabled(!viewModel.isSaveEnabled)
                 }
             }
+            .confirmationDialog(
+                "Delete this vaccination record?",
+                isPresented: $isShowingDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive, action: delete)
+            }
         }
     }
 
-    // fungsi: Section pilih vaccine, pakai VaccineSelectionRow (single-select radio)
+    // fungsi: Section pilih vaccine, pakai VaccineSelectionRow (multi-select checkbox)
     private var vaccineSection: some View {
         Section("Vaccine") {
             ForEach(VaccineType.allCases, id: \.self) { vaccine in
-                VaccineSelectionRow(vaccine: vaccine, isSelected: viewModel.vaccine == vaccine) {
-                    viewModel.vaccine = vaccine
+                VaccineSelectionRow(vaccine: vaccine, isSelected: viewModel.isVaccineSelected(vaccine)) {
+                    viewModel.toggleVaccine(vaccine)
                 }
             }
         }
     }
 
-    // fungsi: Section tanggal & jam, dua DatePicker compact sejajar
+    // fungsi: Section tanggal & jam, dua DatePicker compact sejajar dalam 1 baris,
+    // dibatasi sampai sekarang aja (nggak bisa input tanggal/jam di masa depan)
     private var dateSection: some View {
-        Section("Date") {
-            DatePicker("Date", selection: $viewModel.dateGiven, displayedComponents: .date)
-                .labelsHidden()
-            DatePicker("Time", selection: $viewModel.dateGiven, displayedComponents: .hourAndMinute)
-                .labelsHidden()
+        Section("") {
+            HStack {
+                Text("Date")
+                Spacer()
+                HStack(){
+                    DatePicker("Date", selection: $viewModel.dateGiven, in: latestAllowedDate, displayedComponents: .date)
+                        .labelsHidden()
+                    DatePicker("Time", selection: $viewModel.dateGiven, in: latestAllowedDate, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                }
+            }
         }
     }
 
@@ -115,8 +140,23 @@ struct VaccineRecordFormView: View {
         }
     }
 
+    // fungsi: Section tombol delete, cuma muncul di mode edit, dibungkus footer biar jelas fungsinya
+    private var deleteSection: some View {
+        Section {
+            Button("Delete Vaccination Record", systemImage: "trash", role: .destructive) {
+                isShowingDeleteConfirmation = true
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+
     private func save() {
         viewModel.save(in: modelContext)
+        dismiss()
+    }
+
+    private func delete() {
+        viewModel.delete(in: modelContext)
         dismiss()
     }
 }

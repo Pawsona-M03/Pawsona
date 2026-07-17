@@ -11,7 +11,7 @@ import SwiftData
 /// nge-gate tombol save, dan nyimpen record-nya (bisa ke beberapa dog sekaligus).
 @Observable
 final class VaccineRecordFormViewModel {
-    var vaccine: VaccineType
+    var selectedVaccines: [VaccineType]
     var dateGiven: Date
     var notes: String
     var selectedDogs: [Dog]
@@ -20,9 +20,9 @@ final class VaccineRecordFormViewModel {
     private let editingRecord: VaccineRecord?
     private let vaccineViewModel: VaccineViewModel
 
-    // fungsi: init buat record BARU, default vaccine pertama & tanggal sekarang
+    // fungsi: init buat record BARU, belum ada vaccine/dog kepilih
     init(vaccineViewModel: VaccineViewModel = VaccineViewModel()) {
-        self.vaccine = .parvovirus
+        self.selectedVaccines = []
         self.dateGiven = .now
         self.notes = ""
         self.selectedDogs = []
@@ -33,7 +33,7 @@ final class VaccineRecordFormViewModel {
     // fungsi: init buat record BARU dari konteks 1 dog spesifik (mis. DogDetailView) —
     // dog-nya udah kepilih duluan, user tetap bisa nambah dog lain di avatar selector
     init(preselecting dog: Dog, vaccineViewModel: VaccineViewModel = VaccineViewModel()) {
-        self.vaccine = .parvovirus
+        self.selectedVaccines = []
         self.dateGiven = .now
         self.notes = ""
         self.selectedDogs = [dog]
@@ -43,7 +43,7 @@ final class VaccineRecordFormViewModel {
 
     // fungsi: init buat EDIT record yang udah ada, isi field dari data lama
     init(editing record: VaccineRecord, vaccineViewModel: VaccineViewModel = VaccineViewModel()) {
-        self.vaccine = record.vaccine
+        self.selectedVaccines = [record.vaccine]
         self.dateGiven = record.dateGiven
         self.notes = record.notes ?? ""
         self.selectedDogs = record.dog.map { [$0] } ?? []
@@ -51,9 +51,14 @@ final class VaccineRecordFormViewModel {
         self.vaccineViewModel = vaccineViewModel
     }
 
-    // fungsi: tombol Save aktif kalau minimal 1 dog kepilih
+    // fungsi: form ini lagi mode edit (bukan bikin baru) -> dipake buat nampilin tombol delete
+    var isEditing: Bool {
+        editingRecord != nil
+    }
+
+    // fungsi: tombol Save aktif kalau minimal 1 dog & 1 vaccine kepilih
     var isSaveEnabled: Bool {
-        !selectedDogs.isEmpty
+        !selectedDogs.isEmpty && !selectedVaccines.isEmpty
     }
 
     // fungsi: tambah/hapus dog dari daftar terpilih (dipanggil dari DogAvatarSelectionRow)
@@ -70,15 +75,30 @@ final class VaccineRecordFormViewModel {
         selectedDogs.contains { $0.id == dog.id }
     }
 
-    // fungsi: simpen. Kalau lagi edit -> update 1 record.
-    // Kalau baru -> loop createRecord per dog yang kepilih (VaccineRecord.dog itu 1-ke-1).
+    // fungsi: tambah/hapus vaccine dari daftar terpilih (dipanggil dari VaccineSelectionRow)
+    func toggleVaccine(_ vaccine: VaccineType) {
+        if let index = selectedVaccines.firstIndex(of: vaccine) {
+            selectedVaccines.remove(at: index)
+        } else {
+            selectedVaccines.append(vaccine)
+        }
+    }
+
+    // fungsi: dicek VaccineSelectionRow buat nentuin checkbox nyala atau enggak
+    func isVaccineSelected(_ vaccine: VaccineType) -> Bool {
+        selectedVaccines.contains(vaccine)
+    }
+
+    // fungsi: simpen. Kalau lagi edit -> update 1 record (ambil dog & vaccine pertama).
+    // Kalau baru -> loop createRecord per kombinasi dog x vaccine yang kepilih
+    // (VaccineRecord.dog dan .vaccine itu 1-ke-1, jadi tiap kombinasi jadi record sendiri).
     func save(in modelContext: ModelContext) {
         guard isSaveEnabled else { return }
 
         let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
         let noteValue = trimmedNotes.isEmpty ? nil : trimmedNotes
 
-        if let editingRecord, let dog = selectedDogs.first {
+        if let editingRecord, let dog = selectedDogs.first, let vaccine = selectedVaccines.first {
             vaccineViewModel.editRecord(
                 editingRecord,
                 vaccine: vaccine,
@@ -89,16 +109,25 @@ final class VaccineRecordFormViewModel {
             )
         } else {
             for dog in selectedDogs {
-                vaccineViewModel.createRecord(
-                    vaccine: vaccine,
-                    dateGiven: dateGiven,
-                    notes: noteValue,
-                    dog: dog,
-                    in: modelContext
-                )
+                for vaccine in selectedVaccines {
+                    vaccineViewModel.createRecord(
+                        vaccine: vaccine,
+                        dateGiven: dateGiven,
+                        notes: noteValue,
+                        dog: dog,
+                        in: modelContext
+                    )
+                }
             }
         }
 
+        errorMessage = vaccineViewModel.errorMessage
+    }
+
+    // fungsi: hapus record yang lagi diedit (dipanggil dari tombol delete di form)
+    func delete(in modelContext: ModelContext) {
+        guard let editingRecord else { return }
+        vaccineViewModel.deleteRecord(id: editingRecord.id, in: modelContext)
         errorMessage = vaccineViewModel.errorMessage
     }
 }
