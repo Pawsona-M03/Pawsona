@@ -213,6 +213,9 @@ If it is configured, prefer its tools over generic alternatives:
 
 ## PR instructions
 
+- **Always fill the PR body from `.github/pull_request_template.md`.** Match its section
+  headings exactly (Summary, Related Issue, Why, How, Checklist, Verification) — do not invent
+  your own structure or skip the checklist.
 - Follow the branch naming and conventional-commit rules in `README.md`.
 - If SwiftLint is installed, make sure it returns no warnings or errors before committing.
 - **Never add AI attribution to commits.** No `Co-Authored-By: Claude` (or any other
