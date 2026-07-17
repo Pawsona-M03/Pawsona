@@ -13,13 +13,15 @@ struct PawsonaApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Dog.self,
-            VaccineRecord.self,
-            Item.self,
-            Dog.self,
             Reminder.self,
             VaccineRecord.self,
+            Item.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .automatic
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
