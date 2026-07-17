@@ -6,19 +6,19 @@
 //
 
 import SwiftUI
-import UIKit
 
 struct DogCardView: View {
     let dog: Dog
 
     @ScaledMetric(relativeTo: .largeTitle) private var cardHeight = 211
-    @ScaledMetric(relativeTo: .largeTitle) private var placeholderIconSize = 128
+
+    private var photoHeight: CGFloat { cardHeight * 0.75 }
 
     var body: some View {
         VStack(spacing: 8) {
-            photo
+            DogPhotoView(dog: dog, placeholderIconHeight: photoHeight * 0.6)
                 .frame(width: .infinity)
-                .frame(height: cardHeight * 0.75)
+                .frame(height: photoHeight)
                 .clipped()
 
             VStack(alignment: .center, spacing: 4) {
@@ -41,24 +41,6 @@ struct DogCardView: View {
         .accessibilityLabel(accessibilityLabel)
     }
 
-    @ViewBuilder
-    private var photo: some View {
-        if let photoData = dog.photoData, let image = Image(data: photoData) {
-            image
-                .resizable()
-                .scaledToFill()
-        } else {
-            Rectangle()
-                .fill(dog.backgroundColor.color.opacity(0.2))
-                .overlay(alignment: .bottom) {
-                    Image(.dogPlaceholder)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: placeholderIconSize)
-                }
-        }
-    }
-
     private var displayName: String {
         let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return trimmedName.isEmpty ? "Dog" : trimmedName
@@ -79,13 +61,6 @@ struct DogCardView: View {
             label += ", \(ageText)"
         }
         return label
-    }
-}
-
-private extension Image {
-    init?(data: Data) {
-        guard let uiImage = UIImage(data: data) else { return nil }
-        self.init(uiImage: uiImage)
     }
 }
 
