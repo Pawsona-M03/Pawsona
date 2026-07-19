@@ -17,31 +17,19 @@ struct DogEditView: View {
     var body: some View {
         DogFormView(
             title: "Edit Dog",
-            name: dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
-            breed: dog.breed,
-            dateOfBirth: dog.dateOfBirth ?? .now,
-            backgroundColor: dog.backgroundColor,
-            photoData: dog.photoData,
+            profile: DogProfile(
+                name: dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+                breed: dog.breed,
+                dateOfBirth: dog.dateOfBirth ?? .now,
+                backgroundColor: dog.backgroundColor,
+                photoData: dog.photoData
+            ),
             onSave: editDog
         )
     }
 
-    private func editDog(
-        name: String,
-        breed: String,
-        dateOfBirth: Date,
-        backgroundColor: ColorType,
-        photoData: Data?
-    ) {
-        viewModel.editDog(
-            dog,
-            name: name,
-            breed: breed,
-            dateOfBirth: dateOfBirth,
-            backgroundColor: backgroundColor,
-            photoData: photoData,
-            in: modelContext
-        )
+    private func editDog(_ profile: DogProfile) {
+        viewModel.editDog(dog, profile: profile, in: modelContext)
     }
 }
 

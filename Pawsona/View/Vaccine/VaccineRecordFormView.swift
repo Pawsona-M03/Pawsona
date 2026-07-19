@@ -108,11 +108,22 @@ struct VaccineRecordFormView: View {
             HStack {
                 Text("Date")
                 Spacer()
-                HStack(){
-                    DatePicker("Date", selection: $viewModel.dateGiven, in: latestAllowedDate, displayedComponents: .date)
-                        .labelsHidden()
-                    DatePicker("Time", selection: $viewModel.dateGiven, in: latestAllowedDate, displayedComponents: .hourAndMinute)
-                        .labelsHidden()
+                HStack {
+                    DatePicker(
+                        "Date",
+                        selection: $viewModel.dateGiven,
+                        in: latestAllowedDate,
+                        displayedComponents: .date
+                    )
+                    .labelsHidden()
+
+                    DatePicker(
+                        "Time",
+                        selection: $viewModel.dateGiven,
+                        in: latestAllowedDate,
+                        displayedComponents: .hourAndMinute
+                    )
+                    .labelsHidden()
                 }
             }
         }

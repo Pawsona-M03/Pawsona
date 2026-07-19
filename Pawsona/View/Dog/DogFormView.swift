@@ -13,31 +13,19 @@ struct DogFormView: View {
     @Environment(\.dismiss) private var dismiss
 
     let title: String
-    let onSave: (String, String, Date, ColorType, Data?) -> Void
+    let onSave: (DogProfile) -> Void
 
-    @State private var name: String
-    @State private var breed: String
-    @State private var dateOfBirth: Date
-    @State private var backgroundColor: ColorType
-    @State private var photoData: Data?
+    @State private var profile: DogProfile
     @State private var photoSelection: PhotosPickerItem?
 
     init(
         title: String = "Add Dog",
-        name: String = "",
-        breed: String = "",
-        dateOfBirth: Date = Date.now,
-        backgroundColor: ColorType = .blue,
-        photoData: Data? = nil,
-        onSave: @escaping (String, String, Date, ColorType, Data?) -> Void
+        profile: DogProfile = DogProfile(),
+        onSave: @escaping (DogProfile) -> Void
     ) {
         self.title = title
         self.onSave = onSave
-        self._name = State(initialValue: name)
-        self._breed = State(initialValue: breed)
-        self._dateOfBirth = State(initialValue: dateOfBirth)
-        self._backgroundColor = State(initialValue: backgroundColor)
-        self._photoData = State(initialValue: photoData)
+        self._profile = State(initialValue: profile)
     }
 
     var body: some View {
@@ -48,21 +36,21 @@ struct DogFormView: View {
                         photoPickerLabel
                     }
 
-                    TextField("Name", text: $name)
+                    TextField("Name", text: $profile.name)
                         .textInputAutocapitalization(.words)
 
-                    TextField("Breed", text: $breed)
+                    TextField("Breed", text: $profile.breed)
                         .textInputAutocapitalization(.words)
 
                     DatePicker(
                         "Birthday",
-                        selection: $dateOfBirth,
+                        selection: $profile.dateOfBirth,
                         displayedComponents: .date
                     )
                 }
 
                 Section("Card Color") {
-                    Picker("Color", selection: $backgroundColor) {
+                    Picker("Color", selection: $profile.backgroundColor) {
                         ForEach(ColorType.allCases, id: \.self) { color in
                             DogColorPickerRow(color: color)
                                 .tag(color)
@@ -91,7 +79,7 @@ struct DogFormView: View {
     @ViewBuilder
     private var photoPickerLabel: some View {
         HStack {
-            if let photoData, let image = Image(data: photoData) {
+            if let photoData = profile.photoData, let image = Image(data: photoData) {
                 image
                     .resizable()
                     .scaledToFill()
@@ -103,30 +91,33 @@ struct DogFormView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text(photoData == nil ? "Add Photo" : "Change Photo")
+            Text(profile.photoData == nil ? "Add Photo" : "Change Photo")
         }
     }
 
     private var trimmedName: String {
-        name.trimmingCharacters(in: .whitespacesAndNewlines)
+        profile.name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var trimmedBreed: String {
-        breed.trimmingCharacters(in: .whitespacesAndNewlines)
+        profile.breed.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func loadPhoto(from selection: PhotosPickerItem?) {
         Task {
-            photoData = try? await selection?.loadTransferable(type: Data.self)
+            profile.photoData = try? await selection?.loadTransferable(type: Data.self)
         }
     }
 
     private func saveDog() {
-        onSave(trimmedName, trimmedBreed, dateOfBirth, backgroundColor, photoData)
+        var savedProfile = profile
+        savedProfile.name = trimmedName
+        savedProfile.breed = trimmedBreed
+        onSave(savedProfile)
         dismiss()
     }
 }
 
 #Preview {
-    DogFormView { _, _, _, _, _ in }
+    DogFormView { _ in }
 }

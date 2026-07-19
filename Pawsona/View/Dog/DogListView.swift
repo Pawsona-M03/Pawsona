@@ -14,7 +14,6 @@ struct DogListView: View {
     @State private var isShowingAddDogForm = false
     @State private var exportedPDFURL: URL?
     @State private var searchText = ""
-    
 
     private var filteredDogs: [Dog] {
         guard !searchText.isEmpty else {
@@ -71,27 +70,13 @@ struct DogListView: View {
             }
         }
     }
-    
 
     private func showAddDogForm() {
         isShowingAddDogForm = true
     }
 
-    private func createDog(
-        name: String,
-        breed: String,
-        dateOfBirth: Date,
-        backgroundColor: ColorType,
-        photoData: Data?
-    ) {
-        viewModel.createDog(
-            name: name,
-            breed: breed,
-            dateOfBirth: dateOfBirth,
-            backgroundColor: backgroundColor,
-            photoData: photoData,
-            in: modelContext
-        )
+    private func createDog(_ profile: DogProfile) {
+        viewModel.createDog(profile, in: modelContext)
     }
 
     private func deleteDogs(at offsets: IndexSet) {
@@ -105,24 +90,33 @@ struct DogListView: View {
     }
 }
 
-#Preview {
-    let container = try! ModelContainer(
-        for: Dog.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
+private struct SampleDogsPreviewModifier: PreviewModifier {
+    static func makeSharedContext() throws -> ModelContainer {
+        let container = try ModelContainer(
+            for: Dog.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
 
-    let sampleDogs = [
-        Dog(name: "Berry", breed: "Labrador Retriever", backgroundColor: .green, dateOfBirth: .now),
-        Dog(name: "Milo", breed: "Golden Retriever", backgroundColor: .orange, dateOfBirth: .now),
-        Dog(name: "Coco", breed: "Poodle", backgroundColor: .pink, dateOfBirth: .now),
-        Dog(name: "Rex", breed: "German Shepherd", backgroundColor: .blue, dateOfBirth: .now),
-        Dog(name: "Luna", breed: "Beagle", backgroundColor: .purple, dateOfBirth: .now)
-    ]
+        let sampleDogs = [
+            Dog(name: "Berry", breed: "Labrador Retriever", backgroundColor: .green, dateOfBirth: .now),
+            Dog(name: "Milo", breed: "Golden Retriever", backgroundColor: .orange, dateOfBirth: .now),
+            Dog(name: "Coco", breed: "Poodle", backgroundColor: .pink, dateOfBirth: .now),
+            Dog(name: "Rex", breed: "German Shepherd", backgroundColor: .blue, dateOfBirth: .now),
+            Dog(name: "Luna", breed: "Beagle", backgroundColor: .purple, dateOfBirth: .now)
+        ]
 
-    for dog in sampleDogs {
-        container.mainContext.insert(dog)
+        for dog in sampleDogs {
+            container.mainContext.insert(dog)
+        }
+
+        return container
     }
 
-    return DogListView()
-        .modelContainer(container)
+    func body(content: Content, context: ModelContainer) -> some View {
+        content.modelContainer(context)
+    }
+}
+
+#Preview(traits: .modifier(SampleDogsPreviewModifier())) {
+    DogListView()
 }
