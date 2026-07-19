@@ -47,16 +47,16 @@ struct VaccineRecordFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                vaccineSection
-                dateSection
-                notesSection
+                VaccineRecordFormVaccineSection(viewModel: viewModel)
+                VaccineRecordFormDateSection(viewModel: viewModel)
+                VaccineRecordFormNotesSection(viewModel: viewModel)
 
                 if !dogs.isEmpty {
-                    dogSection
+                    VaccineRecordFormDogSection(viewModel: viewModel, dogs: dogs)
                 }
 
                 if viewModel.isEditing {
-                    deleteSection
+                    VaccineRecordFormDeleteSection(isShowingDeleteConfirmation: $isShowingDeleteConfirmation)
                 }
             }
             .navigationTitle(navigationTitle)
@@ -87,66 +87,6 @@ struct VaccineRecordFormView: View {
             ) {
                 Button("Delete", role: .destructive, action: delete)
             }
-        }
-    }
-
-    // Function: Section to select vaccine, using VaccineSelectionRow (multi-select checkbox)
-    private var vaccineSection: some View {
-        Section("Vaccine") {
-            ForEach(VaccineType.allCases, id: \.self) { vaccine in
-                VaccineSelectionRow(vaccine: vaccine, isSelected: viewModel.isVaccineSelected(vaccine)) {
-                    viewModel.toggleVaccine(vaccine)
-                }
-            }
-        }
-    }
-
-    // Function: Date & time section, single DatePicker limited to now
-    private var dateSection: some View {
-        Section {
-            HStack {
-                Text("Date")
-                Spacer()
-                DatePicker(
-                    "Date",
-                    selection: $viewModel.dateGiven,
-                    in: latestAllowedDate,
-                    displayedComponents: [.date, .hourAndMinute]
-                )
-                .labelsHidden()
-            }
-        }
-    }
-
-    private var notesSection: some View {
-        Section("Notes") {
-            TextField("Notes", text: $viewModel.notes, axis: .vertical)
-        }
-    }
-
-    // Function: Section to select dog, horizontal rounded avatars, multi-select
-    private var dogSection: some View {
-        Section("Dog") {
-            ScrollView(.horizontal) {
-                HStack(spacing: 16) {
-                    ForEach(dogs) { dog in
-                        DogAvatarSelectionRow(dog: dog, isSelected: viewModel.isSelected(dog)) {
-                            viewModel.toggleDog(dog)
-                        }
-                    }
-                }
-            }
-            .scrollIndicators(.hidden)
-        }
-    }
-
-    // Function: Section for delete button, only shown in edit mode, wrapped in footer for clarity
-    private var deleteSection: some View {
-        Section {
-            Button("Delete Vaccination Record", systemImage: "trash", role: .destructive) {
-                isShowingDeleteConfirmation = true
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
         }
     }
 

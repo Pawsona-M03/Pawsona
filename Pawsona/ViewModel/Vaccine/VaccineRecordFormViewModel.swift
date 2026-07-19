@@ -81,14 +81,10 @@ final class VaccineRecordFormViewModel {
 
     // Function: Add/remove vaccine from selection (called from VaccineSelectionRow)
     func toggleVaccine(_ vaccine: VaccineType) {
-        if isEditing {
-            selectedVaccines = [vaccine]
+        if let index = selectedVaccines.firstIndex(of: vaccine) {
+            selectedVaccines.remove(at: index)
         } else {
-            if let index = selectedVaccines.firstIndex(of: vaccine) {
-                selectedVaccines.remove(at: index)
-            } else {
-                selectedVaccines.append(vaccine)
-            }
+            selectedVaccines.append(vaccine)
         }
     }
 
@@ -97,7 +93,8 @@ final class VaccineRecordFormViewModel {
         selectedVaccines.contains(vaccine)
     }
 
-    // Function: Save. If editing -> update 1 record (take first dog & vaccine).
+    // Function: Save. If editing -> update the editing record with the first vaccine (plus dog/date).
+    // For any additional selected vaccines, create new records sharing the editing record's batch ID.
     // If new -> bulk create records per selected dog and vaccine combination.
     func save(in modelContext: ModelContext) {
         guard isSaveEnabled else { return }
@@ -105,15 +102,32 @@ final class VaccineRecordFormViewModel {
         let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
         let noteValue = trimmedNotes.isEmpty ? nil : trimmedNotes
 
-        if let editingRecord, let dog = selectedDogs.first, let vaccine = selectedVaccines.first {
+        if let editingRecord, let dog = selectedDogs.first, let firstVaccine = selectedVaccines.first {
+            if selectedVaccines.count > 1 && editingRecord.batchID == nil {
+                editingRecord.batchID = UUID()
+            }
+            let batchID = editingRecord.batchID
+
             vaccineViewModel.editRecord(
                 editingRecord,
-                vaccine: vaccine,
+                vaccine: firstVaccine,
                 dateGiven: dateGiven,
                 notes: noteValue,
                 dog: dog,
                 in: modelContext
             )
+
+            let additionalVaccines = Array(selectedVaccines.dropFirst())
+            if !additionalVaccines.isEmpty {
+                vaccineViewModel.createRecords(
+                    vaccines: additionalVaccines,
+                    dateGiven: dateGiven,
+                    notes: noteValue,
+                    dogs: [dog],
+                    batchID: batchID,
+                    in: modelContext
+                )
+            }
         } else {
             vaccineViewModel.createRecords(
                 vaccines: selectedVaccines,

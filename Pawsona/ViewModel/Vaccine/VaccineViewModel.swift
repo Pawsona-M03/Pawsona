@@ -12,19 +12,19 @@ import SwiftData
 @Observable
 final class VaccineViewModel {
     var errorMessage: String?
-    // Create a model context variable that can be used anywhere
     func createRecords(
         vaccines: [VaccineType],
         dateGiven: Date,
         notes: String?,
         dogs: [Dog],
+        batchID: UUID? = nil,
         in modelContext: ModelContext
     ) {
-        let batchID = UUID()
+        let sharedBatchID = batchID ?? UUID()
         for dog in dogs {
             for vaccine in vaccines {
                 let vaccineRecord = VaccineRecord(
-                    batchID: batchID,
+                    batchID: sharedBatchID,
                     vaccine: vaccine,
                     dateGiven: dateGiven,
                     notes: notes,
