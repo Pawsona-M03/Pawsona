@@ -22,8 +22,9 @@ struct ContentView: View {
             Tab("Vaccine", systemImage: "syringe") {
                 VaccineListView()
             }
-            
+
         }
+        .tint(.brown)
     }
 }
 #Preview {
