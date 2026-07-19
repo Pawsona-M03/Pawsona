@@ -71,6 +71,12 @@ final class DogViewModel {
         saveChanges(in: modelContext)
     }
 
+    func clearExportsDirectory() {
+        let exportsURL = URL.temporaryDirectory.appending(path: "Exports")
+        try? FileManager.default.removeItem(at: exportsURL)
+        try? FileManager.default.createDirectory(at: exportsURL, withIntermediateDirectories: true)
+    }
+
     @discardableResult
     func exportDogToPDF(_ dog: Dog) -> URL? {
         guard let pdfData = PDFGenerator.generate(from: [dog]), PDFDocument(data: pdfData) != nil else {
@@ -78,7 +84,9 @@ final class DogViewModel {
             return nil
         }
 
-        let fileURL = URL.temporaryDirectory.appending(path: "\(sanitizedFileName(for: dog))-data.pdf")
+        let exportsURL = URL.temporaryDirectory.appending(path: "Exports")
+        try? FileManager.default.createDirectory(at: exportsURL, withIntermediateDirectories: true)
+        let fileURL = exportsURL.appending(path: "\(sanitizedFileName(for: dog))-data.pdf")
 
         do {
             try pdfData.write(to: fileURL)
@@ -94,7 +102,9 @@ final class DogViewModel {
     func shareDogData(_ dog: Dog) -> URL? {
         do {
             let data = try JSONEncoder().encode(DogTransferPackage(dog: dog))
-            let fileURL = URL.temporaryDirectory.appending(path: "\(sanitizedFileName(for: dog)).pawsonadog")
+            let exportsURL = URL.temporaryDirectory.appending(path: "Exports")
+            try? FileManager.default.createDirectory(at: exportsURL, withIntermediateDirectories: true)
+            let fileURL = exportsURL.appending(path: "\(sanitizedFileName(for: dog)).pawsonadog")
 
             try data.write(to: fileURL)
             errorMessage = nil
@@ -105,26 +115,29 @@ final class DogViewModel {
         }
     }
 
-    @discardableResult
-    func importDogData(from url: URL, in modelContext: ModelContext) -> Dog? {
-        do {
-            let data = try Data(contentsOf: url)
-            let package = try JSONDecoder().decode(DogTransferPackage.self, from: data)
-            let dog = package.makeDog()
+    func importDogData(from url: URL, in modelContext: ModelContext) {
+        Task {
+            do {
+                let package = try await Self.decodeTransferPackage(from: url)
+                try Task.checkCancellation()
 
-            modelContext.insert(dog)
-            for vaccineRecord in dog.vaccineRecords ?? [] {
-                modelContext.insert(vaccineRecord)
+                let dog = package.makeDog()
+                modelContext.insert(dog)
+                for vaccineRecord in dog.vaccineRecords ?? [] {
+                    modelContext.insert(vaccineRecord)
+                }
+
+                saveChanges(in: modelContext)
+                try? FileManager.default.removeItem(at: url)
+            } catch {
+                errorMessage = error.localizedDescription
             }
-
-            saveChanges(in: modelContext)
-            try? FileManager.default.removeItem(at: url)
-
-            return dog
-        } catch {
-            errorMessage = error.localizedDescription
-            return nil
         }
+    }
+
+    nonisolated private static func decodeTransferPackage(from url: URL) async throws -> DogTransferPackage {
+        let data = try Data(contentsOf: url)
+        return try JSONDecoder().decode(DogTransferPackage.self, from: data)
     }
 
     private func sanitizedFileName(for dog: Dog) -> String {
