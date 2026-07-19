@@ -52,11 +52,11 @@ struct DogVaccinationRecordView: View {
             if let vaccineRecord = editingVaccineRecord {
                 VaccineRecordFormView(
                     title: "Edit Vaccine Record",
-                    vaccine: vaccineRecord.vaccine,
+                    vaccine: vaccineRecord.vaccines.first ?? .parvovirus,
                     dateGiven: vaccineRecord.dateGiven,
                     notes: vaccineRecord.notes ?? "",
-                    onSave: { vaccine, dateGiven, notes in
-                        editVaccineRecord(vaccineRecord, vaccine: vaccine, dateGiven: dateGiven, notes: notes)
+                    onSave: { vaccines, dateGiven, notes in
+                        editVaccineRecord(vaccineRecord, vaccines: vaccines, dateGiven: dateGiven, notes: notes)
                     }
                 )
             }
@@ -76,23 +76,27 @@ struct DogVaccinationRecordView: View {
         isShowingAddVaccineForm = true
     }
 
-    private func createVaccineRecord(vaccine: VaccineType, dateGiven: Date, notes: String?) {
+    private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, notes: String?) {
         vaccineViewModel.createRecord(
-            vaccine: vaccine,
+            vaccines: vaccines,
             dateGiven: dateGiven,
             notes: notes,
-            dog: dog,
+            dogs: [dog],
             in: modelContext
         )
     }
 
-    private func editVaccineRecord(_ vaccineRecord: VaccineRecord, vaccine: VaccineType, dateGiven: Date, notes: String?) {
+    private func editVaccineRecord(
+        _ vaccineRecord: VaccineRecord,
+        vaccines: [VaccineType],
+        dateGiven: Date,
+        notes: String?
+    ) {
         vaccineViewModel.editRecord(
             vaccineRecord,
-            vaccine: vaccine,
+            vaccines: vaccines,
             dateGiven: dateGiven,
             notes: notes,
-            dog: dog,
             in: modelContext
         )
     }

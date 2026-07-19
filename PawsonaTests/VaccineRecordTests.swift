@@ -36,8 +36,8 @@ struct VaccineRecordTests {
         #expect(dog.vaccineRecords?.first?.vaccines == [.parvovirus])
     }
 
-    @Test("Record with no dog is valid (scan-before-assign case)")
-    func nilDogIsValid() throws {
+    @Test("Record can be shared by multiple dogs")
+    func recordSharedByMultipleDogs() throws {
         let context = try TestSupport.makeContext()
         context.insert(VaccineRecord(vaccines: [.bordetella]))
         try context.save()
