@@ -79,6 +79,8 @@ struct DogDetailView: View {
             DogEditView(dog: dog)
         }
         .task(id: isShowingEditDogForm) {
+            // Skip PDF and data regeneration when the edit sheet is opening.
+            guard !isShowingEditDogForm else { return }
             exportedPDFURL = dogViewModel.exportDogToPDF(dog)
             exportedDataURL = dogViewModel.shareDogData(dog)
         }
