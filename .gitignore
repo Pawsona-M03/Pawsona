@@ -66,3 +66,4 @@ fastlane/test_output/
 .mcp.json
 skills-lock.json
 .gemini-swarm/
+.derivedData/
