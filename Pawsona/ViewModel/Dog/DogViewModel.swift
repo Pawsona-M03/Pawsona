@@ -16,20 +16,13 @@ final class DogViewModel {
     var errorMessage: String?
     var sortOption: DogSortOption = .dateAdded
 
-    func createDog(
-        name: String,
-        breed: String,
-        dateOfBirth: Date,
-        backgroundColor: ColorType,
-        photoData: Data? = nil,
-        in modelContext: ModelContext
-    ) {
+    func createDog(from draft: DogDraft, in modelContext: ModelContext) {
         let dog = Dog(
-            name: resolvedDogName(from: name, in: modelContext),
-            breed: breed,
-            backgroundColor: backgroundColor,
-            dateOfBirth: dateOfBirth,
-            photoData: photoData
+            name: resolvedDogName(from: draft.name, in: modelContext),
+            breed: draft.breed,
+            backgroundColor: draft.backgroundColor,
+            dateOfBirth: draft.dateOfBirth,
+            photoData: draft.photoData
         )
 
         modelContext.insert(dog)
@@ -66,20 +59,12 @@ final class DogViewModel {
         }
     }
 
-    func editDog(
-        _ dog: Dog,
-        name: String,
-        breed: String,
-        dateOfBirth: Date,
-        backgroundColor: ColorType,
-        photoData: Data? = nil,
-        in modelContext: ModelContext
-    ) {
-        dog.name = resolvedDogName(from: name, excluding: dog.id, in: modelContext)
-        dog.breed = breed
-        dog.dateOfBirth = dateOfBirth
-        dog.backgroundColor = backgroundColor
-        dog.photoData = photoData
+    func editDog(_ dog: Dog, from draft: DogDraft, in modelContext: ModelContext) {
+        dog.name = resolvedDogName(from: draft.name, excluding: dog.id, in: modelContext)
+        dog.breed = draft.breed
+        dog.dateOfBirth = draft.dateOfBirth
+        dog.backgroundColor = draft.backgroundColor
+        dog.photoData = draft.photoData
 
         saveChanges(in: modelContext)
         getDogLists(in: modelContext)
@@ -94,7 +79,7 @@ final class DogViewModel {
         saveChanges(in: modelContext)
         getDogLists(in: modelContext)
     }
-    
+
     @discardableResult
     func exportDogsToPDF() -> URL? {
         guard let pdfData = PDFGenerator.generate(from: dogs), PDFDocument(data: pdfData) != nil else {
@@ -113,7 +98,7 @@ final class DogViewModel {
             return nil
         }
     }
-    
+
     @discardableResult
     func exportDogToPDF(_ dog: Dog) -> URL? {
         guard let pdfData = PDFGenerator.generate(from: [dog]), PDFDocument(data: pdfData) != nil else {

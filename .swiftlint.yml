@@ -1,0 +1,5 @@
+excluded:
+  - .claude
+  - .derivedData
+  - .gemini-swarm
+  - build

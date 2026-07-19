@@ -14,7 +14,6 @@ struct DogListView: View {
     @State private var isShowingAddDogForm = false
     @State private var exportedPDFURL: URL?
     @State private var searchText = ""
-    
 
     private var filteredDogs: [Dog] {
         guard !searchText.isEmpty else {
@@ -55,7 +54,9 @@ struct DogListView: View {
                 }
             }
             .sheet(isPresented: $isShowingAddDogForm) {
-                DogFormView(onSave: createDog)
+                DogFormView { draft in
+                    viewModel.createDog(from: draft, in: modelContext)
+                }
             }
             .task {
                 viewModel.getDogLists(in: modelContext)
@@ -71,41 +72,14 @@ struct DogListView: View {
             }
         }
     }
-    
 
     private func showAddDogForm() {
         isShowingAddDogForm = true
     }
-
-    private func createDog(
-        name: String,
-        breed: String,
-        dateOfBirth: Date,
-        backgroundColor: ColorType,
-        photoData: Data?
-    ) {
-        viewModel.createDog(
-            name: name,
-            breed: breed,
-            dateOfBirth: dateOfBirth,
-            backgroundColor: backgroundColor,
-            photoData: photoData,
-            in: modelContext
-        )
-    }
-
-    private func deleteDogs(at offsets: IndexSet) {
-        let idsToDelete = offsets.map { viewModel.dogs[$0].id }
-
-        Task {
-            for id in idsToDelete {
-                viewModel.deleteDog(id: id, in: modelContext)
-            }
-        }
-    }
 }
 
 #Preview {
+    // swiftlint:disable:next force_try
     let container = try! ModelContainer(
         for: Dog.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
