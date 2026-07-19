@@ -12,9 +12,7 @@ import PDFKit
 
 @Observable
 final class DogViewModel {
-    var dogs: [Dog] = []
     var errorMessage: String?
-    var sortOption: DogSortOption = .dateAdded
 
     func createDog(_ profile: DogProfile, in modelContext: ModelContext) {
         let dog = Dog(
@@ -27,20 +25,6 @@ final class DogViewModel {
 
         modelContext.insert(dog)
         saveChanges(in: modelContext)
-        getDogLists(in: modelContext)
-    }
-
-    func getDogLists(in modelContext: ModelContext) {
-        let descriptor = FetchDescriptor<Dog>(
-            sortBy: [sortOption.sortDescriptor]
-        )
-
-        do {
-            dogs = try modelContext.fetch(descriptor)
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
-        }
     }
 
     func getDog(id: UUID, in modelContext: ModelContext) -> Dog? {
@@ -67,7 +51,6 @@ final class DogViewModel {
         dog.photoData = profile.photoData
 
         saveChanges(in: modelContext)
-        getDogLists(in: modelContext)
     }
 
     func deleteDog(id: UUID, in modelContext: ModelContext) {
@@ -75,28 +58,17 @@ final class DogViewModel {
             return
         }
 
+        let notificationService = NotificationService()
+        for reminder in dog.reminders ?? [] {
+            let remainingDogs = reminder.dogList?.filter { $0.id != dog.id } ?? []
+            if remainingDogs.isEmpty {
+                notificationService.cancel(reminder)
+                modelContext.delete(reminder)
+            }
+        }
+
         modelContext.delete(dog)
         saveChanges(in: modelContext)
-        getDogLists(in: modelContext)
-    }
-
-    @discardableResult
-    func exportDogsToPDF() -> URL? {
-        guard let pdfData = PDFGenerator.generate(from: dogs), PDFDocument(data: pdfData) != nil else {
-            errorMessage = "Unable to generate PDF."
-            return nil
-        }
-
-        let fileURL = URL.temporaryDirectory.appending(path: "Pawsona-Dogs.pdf")
-
-        do {
-            try pdfData.write(to: fileURL)
-            errorMessage = nil
-            return fileURL
-        } catch {
-            errorMessage = error.localizedDescription
-            return nil
-        }
     }
 
     @discardableResult
@@ -146,7 +118,6 @@ final class DogViewModel {
             }
 
             saveChanges(in: modelContext)
-            getDogLists(in: modelContext)
             try? FileManager.default.removeItem(at: url)
 
             return dog

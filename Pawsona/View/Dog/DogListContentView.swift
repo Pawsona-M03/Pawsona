@@ -5,12 +5,32 @@
 //  Created by Christianto Elvern Haryanto on 17/07/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct DogListContentView: View {
-    let filteredDogs: [Dog]
+    @Query private var filteredDogs: [Dog]
     let searchText: String
     let columns: [GridItem]
+    var onDelete: ((UUID) -> Void)?
+
+    init(sortOption: DogSortOption, searchText: String, columns: [GridItem], onDelete: ((UUID) -> Void)? = nil) {
+        self.searchText = searchText
+        self.columns = columns
+        self.onDelete = onDelete
+
+        let predicate: Predicate<Dog>
+        if searchText.isEmpty {
+            predicate = #Predicate<Dog> { _ in true }
+        } else {
+            predicate = #Predicate<Dog> { dog in
+                dog.name?.localizedStandardContains(searchText) == true
+                || dog.breed.localizedStandardContains(searchText) == true
+            }
+        }
+
+        _filteredDogs = Query(filter: predicate, sort: [sortOption.sortDescriptor])
+    }
 
     var body: some View {
         Group {
@@ -28,7 +48,9 @@ struct DogListContentView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 24) {
                         ForEach(filteredDogs, id: \.id) { dog in
-                            DogGridItemView(dog: dog)
+                            DogGridItemView(dog: dog) {
+                                onDelete?(dog.id)
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -47,7 +69,7 @@ struct DogListContentView: View {
 
 #Preview {
     DogListContentView(
-        filteredDogs: [Dog(name: "Berry", breed: "Labrador Retriever", backgroundColor: .green)],
+        sortOption: .dateAdded,
         searchText: "",
         columns: [GridItem(.flexible()), GridItem(.flexible())]
     )

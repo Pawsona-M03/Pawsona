@@ -12,25 +12,17 @@ struct DogListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = DogViewModel()
     @State private var isShowingAddDogForm = false
-    @State private var exportedPDFURL: URL?
+    @State private var sortOption: DogSortOption = .dateAdded
+
     @State private var searchText = ""
-
-    private var filteredDogs: [Dog] {
-        guard !searchText.isEmpty else {
-            return viewModel.dogs
-        }
-
-        return viewModel.dogs.filter { dog in
-            dog.name?.localizedStandardContains(searchText) == true
-            || dog.breed.localizedStandardContains(searchText) == true
-        }
-    }
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         NavigationStack {
-            DogListContentView(filteredDogs: filteredDogs, searchText: searchText, columns: columns)
+            DogListContentView(sortOption: sortOption, searchText: searchText, columns: columns) { id in
+                viewModel.deleteDog(id: id, in: modelContext)
+            }
                 .navigationTitle("Puppy")
             .navigationDestination(for: UUID.self) { dogID in
                 if let dog = viewModel.getDog(id: dogID, in: modelContext) {
@@ -42,31 +34,34 @@ struct DogListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu("Sort", systemImage: "arrow.up.arrow.down") {
-                        SortOrderPicker(selection: $viewModel.sortOption)
+                        SortOrderPicker(selection: $sortOption)
                     }
-                    .tint(Color(.black))
+                    .tint(.primary)
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Dog", systemImage: "plus", action: showAddDogForm)
                         .buttonStyle(.glassProminent)
-                        .tint(Color(.brown))
+                        .tint(.brown)
                 }
             }
             .sheet(isPresented: $isShowingAddDogForm) {
                 DogFormView(onSave: createDog)
             }
-            .task {
-                viewModel.getDogLists(in: modelContext)
-            }
-            .task(id: viewModel.dogs.map(\.id)) {
-                exportedPDFURL = viewModel.exportDogsToPDF()
-            }
-            .onChange(of: viewModel.sortOption) { _, _ in
-                viewModel.getDogLists(in: modelContext)
-            }
             .onOpenURL { url in
                 viewModel.importDogData(from: url, in: modelContext)
+            }
+            .alert(
+                "Error",
+                isPresented: Binding(
+                    get: { viewModel.errorMessage != nil },
+                    set: { if !$0 { viewModel.errorMessage = nil } }
+                ),
+                presenting: viewModel.errorMessage
+            ) { _ in
+                Button("OK", role: .cancel) { }
+            } message: { message in
+                Text(message)
             }
         }
     }
@@ -77,16 +72,6 @@ struct DogListView: View {
 
     private func createDog(_ profile: DogProfile) {
         viewModel.createDog(profile, in: modelContext)
-    }
-
-    private func deleteDogs(at offsets: IndexSet) {
-        let idsToDelete = offsets.map { viewModel.dogs[$0].id }
-
-        Task {
-            for id in idsToDelete {
-                viewModel.deleteDog(id: id, in: modelContext)
-            }
-        }
     }
 }
 
