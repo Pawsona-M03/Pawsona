@@ -150,8 +150,7 @@ CloudKit is enabled in this project's entitlements, so **these constraints are m
 - **Every relationship must be marked optional.**
 
 These are not theoretical: the `ModelContainer` is pointed at CloudKit (`cloudKitDatabase:
-.automatic`), so a model that violates them will fail to load the store at launch. `Item.swift`
-is leftover Xcode template code — delete it once you're sure nothing references it.
+.automatic`), so a model that violates them will fail to load the store at launch.
 
 
 ## Project structure

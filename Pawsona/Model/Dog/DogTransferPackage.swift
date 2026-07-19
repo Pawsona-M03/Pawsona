@@ -9,7 +9,7 @@ import Foundation
 
 /// A `Codable` snapshot of a `Dog` and its vaccine records, used to move a puppy's data
 /// between devices (e.g. via AirDrop) without exposing SwiftData's `@Model` machinery.
-struct DogTransferPackage: Codable {
+nonisolated struct DogTransferPackage: Codable, Sendable {
     var name: String?
     var breed: String
     var backgroundColor: ColorType
@@ -19,6 +19,7 @@ struct DogTransferPackage: Codable {
     var photoData: Data?
     var vaccineRecords: [VaccineRecordTransferPackage]
 
+    @MainActor
     init(dog: Dog) {
         name = dog.name
         breed = dog.breed
@@ -27,9 +28,10 @@ struct DogTransferPackage: Codable {
         weight = dog.weight
         sex = dog.sex
         photoData = dog.photoData
-        vaccineRecords = (dog.vaccineRecords ?? []).map(VaccineRecordTransferPackage.init)
+        vaccineRecords = (dog.vaccineRecords ?? []).map { VaccineRecordTransferPackage(vaccineRecord: $0) }
     }
 
+    @MainActor
     func makeDog() -> Dog {
         let dog = Dog(
             name: name,
