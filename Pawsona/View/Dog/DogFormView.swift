@@ -17,6 +17,7 @@ struct DogFormView: View {
 
     @State private var profile: DogProfile
     @State private var photoSelection: PhotosPickerItem?
+    @State private var showPhotoError = false
 
     init(
         title: String = "Add Dog",
@@ -70,8 +71,21 @@ struct DogFormView: View {
                         .disabled(trimmedBreed.isEmpty)
                 }
             }
-            .onChange(of: photoSelection) { _, newSelection in
-                loadPhoto(from: newSelection)
+            .task(id: photoSelection) {
+                guard let selection = photoSelection else { return }
+                do {
+                    if let rawData = try await selection.loadTransferable(type: Data.self) {
+                        let processedData = await Task.detached {
+                            ImageDownscaler.downscale(imageData: rawData)
+                        }.value
+                        profile.photoData = processedData
+                    }
+                } catch {
+                    showPhotoError = true
+                }
+            }
+            .alert("Couldn't load that photo.", isPresented: $showPhotoError) {
+                Button("OK", role: .cancel) { }
             }
         }
     }
@@ -101,12 +115,6 @@ struct DogFormView: View {
 
     private var trimmedBreed: String {
         profile.breed.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private func loadPhoto(from selection: PhotosPickerItem?) {
-        Task {
-            profile.photoData = try? await selection?.loadTransferable(type: Data.self)
-        }
     }
 
     private func saveDog() {
