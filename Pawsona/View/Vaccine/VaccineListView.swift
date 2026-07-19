@@ -2,7 +2,7 @@
 //  VaccineListView.swift
 //  Pawsona
 //
-//  Created by Christianto Elvern Haryanto on 15/07/26.
+//  Created by Raff Melvern Surya Gunawan on 16/07/26.
 //
 
 import SwiftData
@@ -12,67 +12,89 @@ struct VaccineListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \VaccineRecord.dateGiven, order: .reverse) private var vaccineRecords: [VaccineRecord]
     @State private var viewModel = VaccineViewModel()
+
+    @State private var isShowingAddVaccineForm = false
     @State private var editingVaccineRecord: VaccineRecord?
     @State private var isShowingEditVaccineForm = false
 
     var body: some View {
         NavigationStack {
-            List {
-                if vaccineRecords.isEmpty {
-                    ContentUnavailableView(
-                        "No Vaccine Records",
-                        systemImage: "syringe",
-                        description: Text("Vaccine records you add for your dogs will show up here.")
-                    )
-                } else {
-                    ForEach(vaccineRecords, id: \.id) { vaccineRecord in
-                        Button {
-                            editingVaccineRecord = vaccineRecord
-                            isShowingEditVaccineForm = true
-                        } label: {
-                            VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: true)
+            content
+                .navigationTitle("Vaccination Record")
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        // fungsi: buka sheet VaccineRecordFormView utk tambah record baru
+                        Button("Add Vaccination Record", systemImage: "plus") {
+                            isShowingAddVaccineForm = true
                         }
-                        .buttonStyle(.plain)
                     }
-                    .onDelete(perform: deleteVaccineRecords)
                 }
-            }
-            .navigationTitle("Vaccines")
-            .sheet(isPresented: $isShowingEditVaccineForm) {
-                if let vaccineRecord = editingVaccineRecord, let dog = vaccineRecord.dog {
-                    VaccineRecordFormView(
-                        title: "Edit Vaccine Record",
-                        vaccine: vaccineRecord.vaccine,
-                        dateGiven: vaccineRecord.dateGiven,
-                        notes: vaccineRecord.notes ?? "",
-                        onSave: { vaccine, dateGiven, notes in
-                            editVaccineRecord(vaccineRecord, dog: dog, vaccine: vaccine, dateGiven: dateGiven, notes: notes)
-                        }
-                    )
+                .sheet(isPresented: $isShowingAddVaccineForm) {
+                    VaccineRecordFormView()
                 }
-            }
+                .sheet(isPresented: $isShowingEditVaccineForm) {
+                    if let editingVaccineRecord {
+                        VaccineRecordFormView(editing: editingVaccineRecord)
+                    }
+                }
         }
     }
 
-    private func editVaccineRecord(
-        _ vaccineRecord: VaccineRecord,
-        dog: Dog,
-        vaccine: VaccineType,
-        dateGiven: Date,
-        notes: String?
-    ) {
-        viewModel.editRecord(
-            vaccineRecord,
-            vaccine: vaccine,
-            dateGiven: dateGiven,
-            notes: notes,
-            dog: dog,
-            in: modelContext
+    // fungsi: tampilan kondisional -> empty state kalau vaccineRecords kosong, list grouped kalau ada isinya
+    @ViewBuilder
+    private var content: some View {
+        if vaccineRecords.isEmpty {
+            emptyState
+        } else {
+            recordList
+        }
+    }
+
+    // fungsi: empty state sesuai referensi (paw pattern background + "Tap '+' to add Vaccination Record")
+    private var emptyState: some View {
+        ContentUnavailableView(
+            "Vaccination Record",
+            systemImage: "syringe",
+            description: Text("Tap '+' to add Vaccination Record")
         )
     }
 
-    private func deleteVaccineRecords(at offsets: IndexSet) {
-        let idsToDelete = offsets.map { vaccineRecords[$0].id }
+    // fungsi: list card, satu card = satu grup (vaccine + tanggal yg sama), isi stacked avatar dog
+    private var recordList: some View {
+        List {
+            // id: record pertama tiap grup — grup nggak pernah kosong (hasil Dictionary(grouping:))
+            ForEach(groupedRecords, id: \.[0].id) { group in
+                Button {
+                    // ponytail: tap-to-edit ambil record pertama di grup, edit form
+                    // cuma nampilin 1 dog. Kalau nanti butuh edit semua dog dalam
+                    // grup sekaligus, form-nya perlu diubah nerima banyak record.
+                    editingVaccineRecord = group.first
+                    isShowingEditVaccineForm = true
+                } label: {
+                    VaccineRecordGroupRowView(records: group)
+                }
+                .buttonStyle(.plain)
+            }
+            .onDelete(perform: deleteVaccineRecordGroups)
+        }
+    }
+
+    // fungsi: kelompokkan vaccineRecords by (vaccine, dateGiven dibulatkan ke menit)
+    // biar record yg dibikin dari 1x submit form (banyak dog) nyatu jadi 1 card
+    private var groupedRecords: [[VaccineRecord]] {
+        let groups = Dictionary(grouping: vaccineRecords, by: groupKey)
+        return groups.values.sorted { lhs, rhs in
+            (lhs.first?.dateGiven ?? .distantPast) > (rhs.first?.dateGiven ?? .distantPast)
+        }
+    }
+
+    private func groupKey(for record: VaccineRecord) -> String {
+        let roundedMinute = Int(record.dateGiven.timeIntervalSinceReferenceDate / 60)
+        return "\(record.vaccine.rawValue)-\(roundedMinute)"
+    }
+
+    private func deleteVaccineRecordGroups(at offsets: IndexSet) {
+        let idsToDelete = offsets.flatMap { groupedRecords[$0].map(\.id) }
 
         Task {
             for id in idsToDelete {

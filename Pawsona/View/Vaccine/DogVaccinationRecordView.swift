@@ -46,19 +46,11 @@ struct DogVaccinationRecordView: View {
             }
         }
         .sheet(isPresented: $isShowingAddVaccineForm) {
-            VaccineRecordFormView(onSave: createVaccineRecord)
+            VaccineRecordFormView(preselecting: dog)
         }
         .sheet(isPresented: $isShowingEditVaccineForm) {
-            if let vaccineRecord = editingVaccineRecord {
-                VaccineRecordFormView(
-                    title: "Edit Vaccine Record",
-                    vaccine: vaccineRecord.vaccine,
-                    dateGiven: vaccineRecord.dateGiven,
-                    notes: vaccineRecord.notes ?? "",
-                    onSave: { vaccine, dateGiven, notes in
-                        editVaccineRecord(vaccineRecord, vaccine: vaccine, dateGiven: dateGiven, notes: notes)
-                    }
-                )
+            if let editingVaccineRecord {
+                VaccineRecordFormView(editing: editingVaccineRecord)
             }
         }
     }
@@ -74,27 +66,6 @@ struct DogVaccinationRecordView: View {
 
     private func showAddVaccineForm() {
         isShowingAddVaccineForm = true
-    }
-
-    private func createVaccineRecord(vaccine: VaccineType, dateGiven: Date, notes: String?) {
-        vaccineViewModel.createRecord(
-            vaccine: vaccine,
-            dateGiven: dateGiven,
-            notes: notes,
-            dog: dog,
-            in: modelContext
-        )
-    }
-
-    private func editVaccineRecord(_ vaccineRecord: VaccineRecord, vaccine: VaccineType, dateGiven: Date, notes: String?) {
-        vaccineViewModel.editRecord(
-            vaccineRecord,
-            vaccine: vaccine,
-            dateGiven: dateGiven,
-            notes: notes,
-            dog: dog,
-            in: modelContext
-        )
     }
 
     private func deleteVaccineRecords(at offsets: IndexSet) {
