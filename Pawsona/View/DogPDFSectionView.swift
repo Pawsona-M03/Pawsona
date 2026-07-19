@@ -57,7 +57,7 @@ struct DogPDFSectionView: View {
 
     private func vaccineRecordLine(for vaccineRecord: VaccineRecord) -> String {
         let dateGiven = vaccineRecord.dateGiven.formatted(date: .abbreviated, time: .omitted)
-        return "\u{2022} \(vaccineRecord.vaccine.displayName) — \(dateGiven)"
+        return "\u{2022} \(vaccineRecord.vaccineNames) — \(vaccineRecord.dogNames) — \(dateGiven)"
     }
 }
 

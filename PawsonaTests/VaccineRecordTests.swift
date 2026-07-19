@@ -12,15 +12,15 @@ import Testing
 
 @Suite("VaccineRecord model")
 struct VaccineRecordTests {
-    @Test("Record round-trips with vaccine and date")
+    @Test("Record round-trips with vaccines and date")
     func vaccineAndDateRoundTrip() throws {
         let context = try TestSupport.makeContext()
         let given = Date(timeIntervalSince1970: 1_752_451_200)
-        context.insert(VaccineRecord(vaccine: .rabies, dateGiven: given))
+        context.insert(VaccineRecord(vaccines: [.rabies, .bordetella], dateGiven: given))
         try context.save()
 
         let record = try #require(try context.fetch(FetchDescriptor<VaccineRecord>()).first)
-        #expect(record.vaccine == .rabies)
+        #expect(record.vaccines == [.rabies, .bordetella])
         #expect(record.dateGiven == given)
     }
 
@@ -29,20 +29,20 @@ struct VaccineRecordTests {
         let context = try TestSupport.makeContext()
         let dog = Dog(name: "Rex", breed: "Husky")
         context.insert(dog)
-        context.insert(VaccineRecord(vaccine: .parvovirus, dog: dog))
+        context.insert(VaccineRecord(vaccines: [.parvovirus], dogList: [dog]))
         try context.save()
 
         #expect(dog.vaccineRecords?.count == 1)
-        #expect(dog.vaccineRecords?.first?.vaccine == .parvovirus)
+        #expect(dog.vaccineRecords?.first?.vaccines == [.parvovirus])
     }
 
     @Test("Record with no dog is valid (scan-before-assign case)")
     func nilDogIsValid() throws {
         let context = try TestSupport.makeContext()
-        context.insert(VaccineRecord(vaccine: .bordetella))
+        context.insert(VaccineRecord(vaccines: [.bordetella]))
         try context.save()
 
         let record = try #require(try context.fetch(FetchDescriptor<VaccineRecord>()).first)
-        #expect(record.dog == nil)
+        #expect(record.dogList?.isEmpty ?? true)
     }
 }

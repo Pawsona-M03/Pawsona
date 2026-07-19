@@ -11,22 +11,42 @@ import SwiftData
 @Model
 final class VaccineRecord {
     var id: UUID = UUID()
-    var vaccine: VaccineType = VaccineType.parvovirus
+    var vaccines: [VaccineType] = []
     var dateGiven: Date = Date.now
     var notes: String?
-    @Relationship(inverse: \Dog.vaccineRecords) var dog: Dog?
+    @Relationship(inverse: \Dog.vaccineRecords) var dogList: [Dog]? = nil
+
+    var vaccineNames: String {
+        guard !vaccines.isEmpty else {
+            return "No vaccines selected"
+        }
+
+        return vaccines.map(\.displayName).joined(separator: ", ")
+    }
+
+    var dogNames: String {
+        let names = (dogList ?? [])
+            .compactMap { $0.name?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        guard !names.isEmpty else {
+            return "No dogs selected"
+        }
+
+        return names.joined(separator: ", ")
+    }
 
     init(
         id: UUID = UUID(),
-        vaccine: VaccineType = .parvovirus,
+        vaccines: [VaccineType] = [],
         dateGiven: Date = .now,
         notes: String? = nil,
-        dog: Dog? = nil
+        dogList: [Dog]? = nil
     ) {
         self.id = id
-        self.vaccine = vaccine
+        self.vaccines = vaccines
         self.dateGiven = dateGiven
         self.notes = notes
-        self.dog = dog
+        self.dogList = dogList
     }
 }

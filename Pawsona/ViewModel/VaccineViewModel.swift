@@ -15,17 +15,17 @@ final class VaccineViewModel{
     var errorMessage: String?
     // buat variable model context yg bs di panggil dmn2
     func createRecord(
-        vaccine: VaccineType,
+        vaccines: [VaccineType],
         dateGiven: Date,
         notes: String?,
-        dog: Dog,
+        dogList: [Dog],
         in modelContext: ModelContext
     ){
         let vaccineRecord = VaccineRecord(
-            vaccine: vaccine,
+            vaccines: vaccines,
             dateGiven: dateGiven,
             notes: notes,
-            dog: dog
+            dogList: dogList
         )
         
         modelContext.insert(vaccineRecord)
@@ -63,16 +63,16 @@ final class VaccineViewModel{
     
     func editRecord(
         _ vaccineRecord: VaccineRecord,
-        vaccine: VaccineType,
+        vaccines: [VaccineType],
         dateGiven: Date,
         notes: String?,
-        dog: Dog,
+        dogList: [Dog],
         in modelContext: ModelContext
     ){
-        vaccineRecord.vaccine = vaccine
+        vaccineRecord.vaccines = vaccines
         vaccineRecord.dateGiven = dateGiven
         vaccineRecord.notes = notes
-        vaccineRecord.dog = dog
+        vaccineRecord.dogList = dogList
 
         saveChanges(in: modelContext)
         getAllRecord(in: modelContext)
