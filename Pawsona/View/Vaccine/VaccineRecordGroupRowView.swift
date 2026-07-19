@@ -19,7 +19,7 @@ struct VaccineRecordGroupRowView: View {
 
             // Text: tanggal + jam, sama buat semua record dalam grup ini
             if let dateGiven {
-                Text(dateGiven.formatted(date: .abbreviated, time: .shortened))
+                Text(dateGiven.displayDateTime)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -48,7 +48,7 @@ struct VaccineRecordGroupRowView: View {
     }
 
     private var accessibilityLabel: String {
-        let dateText = dateGiven?.formatted(date: .abbreviated, time: .shortened) ?? ""
+        let dateText = dateGiven?.displayDateTime ?? ""
         let dogNames = dogs.compactMap(\.name).joined(separator: ", ")
 
         if dogNames.isEmpty {

@@ -27,7 +27,7 @@ struct ReminderRowView: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                Text(reminder.dueDate.formatted(date: .abbreviated, time: .shortened))
+                Text(reminder.dueDate.displayDateTime)
                     .font(.subheadline)
                     .foregroundStyle(isOverdue ? Color.red : Color.secondary)
 
@@ -59,7 +59,7 @@ struct ReminderRowView: View {
     }
 
     private var accessibilityLabel: String {
-        let due = reminder.dueDate.formatted(date: .abbreviated, time: .shortened)
+        let due = reminder.dueDate.displayDateTime
         var label = "\(reminder.title), \(reminder.category.rawValue), due \(due)"
         if isOverdue { label += ", overdue" }
         if let puppyNames { label += ", for \(puppyNames)" }

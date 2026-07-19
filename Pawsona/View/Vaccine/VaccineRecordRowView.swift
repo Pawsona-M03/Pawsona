@@ -16,7 +16,7 @@ struct VaccineRecordRowView: View {
                 .font(.headline)
                 .foregroundStyle(.primary)
 
-            Text(vaccineRecord.dateGiven.formatted(date: .abbreviated, time: .omitted))
+            Text(vaccineRecord.dateGiven.displayDate)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -31,7 +31,7 @@ struct VaccineRecordRowView: View {
     }
 
     private var accessibilityLabel: String {
-        let dateGiven = vaccineRecord.dateGiven.formatted(date: .abbreviated, time: .omitted)
+        let dateGiven = vaccineRecord.dateGiven.displayDate
         return "\(vaccineRecord.vaccine.displayName), given \(dateGiven)"
     }
 }

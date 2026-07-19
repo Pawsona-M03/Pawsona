@@ -19,7 +19,7 @@ struct DogPDFReportView: View {
             Text("Pawsona Dog Report")
                 .font(.largeTitle.bold())
 
-            Text(Date.now.formatted(date: .long, time: .omitted))
+            Text(Date.now.displayLongDate)
                 .font(.subheadline)
                 .foregroundStyle(.gray)
 

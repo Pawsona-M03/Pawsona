@@ -48,7 +48,7 @@ struct DogPDFSectionView: View {
             return "date not set"
         }
 
-        return dateOfBirth.formatted(date: .long, time: .omitted)
+        return dateOfBirth.displayLongDate
     }
 
     private var vaccineRecords: [VaccineRecord] {
@@ -56,7 +56,7 @@ struct DogPDFSectionView: View {
     }
 
     private func vaccineRecordLine(for vaccineRecord: VaccineRecord) -> String {
-        let dateGiven = vaccineRecord.dateGiven.formatted(date: .abbreviated, time: .omitted)
+        let dateGiven = vaccineRecord.dateGiven.displayDate
         return "\u{2022} \(vaccineRecord.vaccine.displayName) — \(dateGiven)"
     }
 }
