@@ -53,6 +53,14 @@ struct ReminderFormView: View {
                         in: Date.now...,
                         displayedComponents: [.date, .hourAndMinute]
                     )
+
+                    Picker("Repeat", selection: $viewModel.repeatUnit) {
+                        Text("Never").tag(RepeatUnit?.none)
+                        Text("Daily").tag(RepeatUnit?.some(.day))
+                        Text("Weekly").tag(RepeatUnit?.some(.week))
+                        Text("Monthly").tag(RepeatUnit?.some(.month))
+                        Text("Yearly").tag(RepeatUnit?.some(.year))
+                    }
                 }
 
                 Section("Notes") {

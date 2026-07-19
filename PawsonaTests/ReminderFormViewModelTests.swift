@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 import Testing
+import UserNotifications
 @testable import Pawsona
 
 @Suite("ReminderFormViewModel")
@@ -66,6 +67,27 @@ struct ReminderFormViewModelTests {
         #expect(reminders.count == 1)
         #expect(reminders.first?.title == "Vet visit")
         #expect(spy.added.count == 1)
+    }
+
+    @Test("Saving a reminder with a repeat rule persists the rule")
+    func savePersistsRepeatRule() async throws {
+        let context = try TestSupport.makeContext()
+        let (service, spy) = makeService()
+        let viewModel = ReminderFormViewModel(notificationService: service)
+        viewModel.title = "Flea meds"
+        viewModel.dueDate = futureDate()
+        viewModel.repeatUnit = .month
+
+        await viewModel.save(in: context)
+
+        let reminders = try context.fetch(FetchDescriptor<Reminder>())
+        let savedReminder = try #require(reminders.first)
+        #expect(savedReminder.repeatRule?.unit == .month)
+        #expect(savedReminder.repeatRule?.interval == 1)
+
+        let request = try #require(spy.added.first)
+        let trigger = try #require(request.trigger as? UNCalendarNotificationTrigger)
+        #expect(trigger.repeats == true)
     }
 
     @Test("Selected puppies are linked to the saved reminder")

@@ -44,10 +44,29 @@ final class NotificationService {
         if let notes = reminder.notes { content.body = notes }
         content.sound = .default
 
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute], from: reminder.dueDate
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        // ponytail: interval == 1 only — UNCalendarNotificationTrigger can't express "every N units";
+        // interval > 1 needs manual rescheduling of the next occurrence when one fires.
+        let trigger: UNCalendarNotificationTrigger
+        if let rule = reminder.repeatRule {
+            let componentTypes: Set<Calendar.Component>
+            switch rule.unit {
+            case .day:
+                componentTypes = [.hour, .minute]
+            case .week:
+                componentTypes = [.weekday, .hour, .minute]
+            case .month:
+                componentTypes = [.day, .hour, .minute]
+            case .year:
+                componentTypes = [.month, .day, .hour, .minute]
+            }
+            let components = Calendar.current.dateComponents(componentTypes, from: reminder.dueDate)
+            trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        } else {
+            let components = Calendar.current.dateComponents(
+                [.year, .month, .day, .hour, .minute], from: reminder.dueDate
+            )
+            trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        }
         let request = UNNotificationRequest(
             identifier: reminder.id.uuidString, content: content, trigger: trigger
         )

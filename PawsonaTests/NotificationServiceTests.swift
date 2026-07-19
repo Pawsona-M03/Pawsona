@@ -65,6 +65,42 @@ struct NotificationServiceTests {
         #expect(trigger.repeats == false)
     }
 
+    @Test("Scheduling a daily repeating reminder sets correct components and repeats")
+    func scheduleDailyRepeatingReminder() async throws {
+        let spy = SpyNotificationCenter()
+        let service = NotificationService(center: spy)
+        let due = try #require(Calendar.current.date(byAdding: .hour, value: 2, to: .now))
+        let reminder = Reminder(title: "Meds", dueDate: due, repeatRule: RepeatRule(interval: 1, unit: .day))
+
+        try await service.schedule(reminder)
+
+        let pending = await spy.pendingNotificationRequests()
+        let request = try #require(pending.first)
+        let trigger = try #require(request.trigger as? UNCalendarNotificationTrigger)
+
+        let expected = Calendar.current.dateComponents([.hour, .minute], from: due)
+        #expect(trigger.dateComponents == expected)
+        #expect(trigger.repeats == true)
+    }
+
+    @Test("Scheduling a weekly repeating reminder sets correct components and repeats")
+    func scheduleWeeklyRepeatingReminder() async throws {
+        let spy = SpyNotificationCenter()
+        let service = NotificationService(center: spy)
+        let due = try #require(Calendar.current.date(byAdding: .hour, value: 2, to: .now))
+        let reminder = Reminder(title: "Flea meds", dueDate: due, repeatRule: RepeatRule(interval: 1, unit: .week))
+
+        try await service.schedule(reminder)
+
+        let pending = await spy.pendingNotificationRequests()
+        let request = try #require(pending.first)
+        let trigger = try #require(request.trigger as? UNCalendarNotificationTrigger)
+
+        let expected = Calendar.current.dateComponents([.weekday, .hour, .minute], from: due)
+        #expect(trigger.dateComponents == expected)
+        #expect(trigger.repeats == true)
+    }
+
     @Test("Scheduling a past reminder registers nothing")
     func schedulePastReminder() async throws {
         let spy = SpyNotificationCenter()

@@ -18,7 +18,19 @@ final class ReminderFormViewModel {
     var dueDate: Date
     var notes: String
     var selectedDogs: [Dog]
+    var repeatRule: RepeatRule?
     var errorMessage: String?
+
+    var repeatUnit: RepeatUnit? {
+        get { repeatRule?.unit }
+        set {
+            if let newValue {
+                repeatRule = RepeatRule(interval: 1, unit: newValue)
+            } else {
+                repeatRule = nil
+            }
+        }
+    }
 
     private let editingReminder: Reminder?
     private let notificationService: NotificationService
@@ -31,6 +43,7 @@ final class ReminderFormViewModel {
         self.dueDate = Date.now.addingTimeInterval(3600)
         self.notes = ""
         self.selectedDogs = []
+        self.repeatRule = nil
         self.editingReminder = nil
         self.notificationService = notificationService
     }
@@ -42,6 +55,7 @@ final class ReminderFormViewModel {
         self.dueDate = reminder.dueDate
         self.notes = reminder.notes ?? ""
         self.selectedDogs = reminder.dogList ?? []
+        self.repeatRule = reminder.repeatRule
         self.editingReminder = reminder
         self.notificationService = notificationService
     }
@@ -77,6 +91,7 @@ final class ReminderFormViewModel {
             editingReminder.title = trimmedTitle
             editingReminder.category = category
             editingReminder.dueDate = dueDate
+            editingReminder.repeatRule = repeatRule
             editingReminder.notes = trimmedNotes.isEmpty ? nil : trimmedNotes
             editingReminder.dogList = selectedDogs
             reminder = editingReminder
@@ -86,6 +101,7 @@ final class ReminderFormViewModel {
                 notes: trimmedNotes.isEmpty ? nil : trimmedNotes,
                 dogList: selectedDogs,
                 dueDate: dueDate,
+                repeatRule: repeatRule,
                 category: category
             )
             modelContext.insert(reminder)
