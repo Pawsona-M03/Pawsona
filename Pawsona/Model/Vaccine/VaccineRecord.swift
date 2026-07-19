@@ -11,6 +11,7 @@ import SwiftData
 @Model
 final class VaccineRecord {
     var id: UUID = UUID()
+    var batchID: UUID?
     var vaccine: VaccineType = VaccineType.parvovirus
     var dateGiven: Date = Date.now
     var notes: String?
@@ -18,12 +19,14 @@ final class VaccineRecord {
 
     init(
         id: UUID = UUID(),
+        batchID: UUID? = nil,
         vaccine: VaccineType = .parvovirus,
         dateGiven: Date = .now,
         notes: String? = nil,
         dog: Dog? = nil
     ) {
         self.id = id
+        self.batchID = batchID
         self.vaccine = vaccine
         self.dateGiven = dateGiven
         self.notes = notes

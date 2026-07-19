@@ -23,7 +23,7 @@ struct VaccineListView: View {
                 .navigationTitle("Vaccination Record")
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
-                        // fungsi: buka sheet VaccineRecordFormView utk tambah record baru
+                        // Function: open VaccineRecordFormView sheet to add a new record
                         Button("Add Vaccination Record", systemImage: "plus") {
                             isShowingAddVaccineForm = true
                         }
@@ -37,10 +37,25 @@ struct VaccineListView: View {
                         VaccineRecordFormView(editing: editingVaccineRecord)
                     }
                 }
+                .alert(
+                    "Error",
+                    isPresented: Binding<Bool>(
+                        get: { viewModel.errorMessage != nil },
+                        set: { if !$0 { viewModel.errorMessage = nil } }
+                    ),
+                    actions: {
+                        Button("OK", role: .cancel) { }
+                    },
+                    message: {
+                        if let errorMessage = viewModel.errorMessage {
+                            Text(errorMessage)
+                        }
+                    }
+                )
         }
     }
 
-    // fungsi: tampilan kondisional -> empty state kalau vaccineRecords kosong, list grouped kalau ada isinya
+    // Function: conditional view -> empty state if vaccineRecords is empty, grouped list if it has content
     @ViewBuilder
     private var content: some View {
         if vaccineRecords.isEmpty {
@@ -50,7 +65,7 @@ struct VaccineListView: View {
         }
     }
 
-    // fungsi: empty state sesuai referensi (paw pattern background + "Tap '+' to add Vaccination Record")
+    // Function: empty state according to reference (paw pattern background + "Tap '+' to add Vaccination Record")
     private var emptyState: some View {
         ContentUnavailableView(
             "Vaccination Record",
@@ -59,15 +74,15 @@ struct VaccineListView: View {
         )
     }
 
-    // fungsi: list card, satu card = satu grup (vaccine + tanggal yg sama), isi stacked avatar dog
+    // Function: list of cards, one card = one group (same vaccine + date), contains stacked dog avatars
     private var recordList: some View {
         List {
-            // id: record pertama tiap grup — grup nggak pernah kosong (hasil Dictionary(grouping:))
+            // id: first record of each group — group is never empty (result of Dictionary(grouping:))
             ForEach(groupedRecords, id: \.[0].id) { group in
                 Button {
-                    // ponytail: tap-to-edit ambil record pertama di grup, edit form
-                    // cuma nampilin 1 dog. Kalau nanti butuh edit semua dog dalam
-                    // grup sekaligus, form-nya perlu diubah nerima banyak record.
+                    // ponytail: tap-to-edit gets the first record in the group, edit form
+                    // only shows 1 dog. If editing all dogs in a group is needed later,
+                    // the form needs to be updated to accept multiple records.
                     editingVaccineRecord = group.first
                     isShowingEditVaccineForm = true
                 } label: {
@@ -79,8 +94,8 @@ struct VaccineListView: View {
         }
     }
 
-    // fungsi: kelompokkan vaccineRecords by (vaccine, dateGiven dibulatkan ke menit)
-    // biar record yg dibikin dari 1x submit form (banyak dog) nyatu jadi 1 card
+    // Function: group vaccineRecords by batchID, or fallback to vaccine and dateGiven rounded to minute,
+    // so records from 1 submit form (multiple dogs) merge into 1 card
     private var groupedRecords: [[VaccineRecord]] {
         let groups = Dictionary(grouping: vaccineRecords, by: groupKey)
         return groups.values.sorted { lhs, rhs in
@@ -89,17 +104,18 @@ struct VaccineListView: View {
     }
 
     private func groupKey(for record: VaccineRecord) -> String {
+        if let batchID = record.batchID {
+            return "batch-\(batchID.uuidString)"
+        }
         let roundedMinute = Int(record.dateGiven.timeIntervalSinceReferenceDate / 60)
-        return "\(record.vaccine.rawValue)-\(roundedMinute)"
+        return "legacy-\(record.vaccine.rawValue)-\(roundedMinute)"
     }
 
     private func deleteVaccineRecordGroups(at offsets: IndexSet) {
         let idsToDelete = offsets.flatMap { groupedRecords[$0].map(\.id) }
 
-        Task {
-            for id in idsToDelete {
-                viewModel.deleteRecord(id: id, in: modelContext)
-            }
+        for id in idsToDelete {
+            viewModel.deleteRecord(id: id, in: modelContext)
         }
     }
 }

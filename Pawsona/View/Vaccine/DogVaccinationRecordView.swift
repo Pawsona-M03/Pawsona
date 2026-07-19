@@ -71,10 +71,8 @@ struct DogVaccinationRecordView: View {
     private func deleteVaccineRecords(at offsets: IndexSet) {
         let idsToDelete = offsets.map { sortedVaccineRecords[$0].id }
 
-        Task {
-            for id in idsToDelete {
-                vaccineViewModel.deleteRecord(id: id, in: modelContext)
-            }
+        for id in idsToDelete {
+            vaccineViewModel.deleteRecord(id: id, in: modelContext)
         }
     }
 }

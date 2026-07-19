@@ -8,38 +8,38 @@
 import SwiftData
 import SwiftUI
 
-/// Form tambah/edit vaccine record: pilih 1 vaccine, tanggal & jam, catatan,
-/// dan multi-select puppy. Simpennya lewat VaccineRecordFormViewModel.
+/// Add/edit vaccine record form: select 1 vaccine, date & time, notes,
+/// and multi-select puppy. Saved via VaccineRecordFormViewModel.
 struct VaccineRecordFormView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    // @Query: ambil semua dog buat ditampilin di avatar selector
+    // @Query: fetch all dogs to display in the avatar selector
     @Query(sort: \Dog.name) private var dogs: [Dog]
 
-    // @State viewModel: sumber kebenaran field form ini
+    // @State viewModel: source of truth for this form's fields
     @State private var viewModel: VaccineRecordFormViewModel
     @State private var isShowingDeleteConfirmation = false
     private let navigationTitle: String
 
-    // fungsi: init utk TAMBAH record baru
+    // Function: Init for ADDING a new record
     init() {
         _viewModel = State(initialValue: VaccineRecordFormViewModel())
         navigationTitle = "New Vaccination Record"
     }
 
-    // fungsi: init utk TAMBAH record baru dari konteks 1 dog spesifik (mis. DogDetailView)
+    // Function: Init for ADDING a new record from a specific dog context (e.g. DogDetailView)
     init(preselecting dog: Dog) {
         _viewModel = State(initialValue: VaccineRecordFormViewModel(preselecting: dog))
         navigationTitle = "New Vaccination Record"
     }
 
-    // fungsi: init utk EDIT record yang sudah ada
+    // Function: Init for EDITING an existing record
     init(editing record: VaccineRecord) {
         _viewModel = State(initialValue: VaccineRecordFormViewModel(editing: record))
         navigationTitle = "Edit Vaccination Record"
     }
 
-    // fungsi: batas atas date/time picker -> sekarang, biar nggak bisa input tanggal masa depan
+    // Function: Upper limit for date/time picker -> now, to prevent inputting future dates
     private var latestAllowedDate: ClosedRange<Date> {
         .distantPast...Date.now
     }
@@ -62,7 +62,7 @@ struct VaccineRecordFormView: View {
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // ToolbarItem X: batal, bentuk bulat sesuai referensi
+                // ToolbarItem X: cancel, rounded shape according to reference
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", systemImage: "xmark", action: dismiss.callAsFunction)
                         .labelStyle(.iconOnly)
@@ -70,12 +70,12 @@ struct VaccineRecordFormView: View {
                         .clipShape(.circle)
                 }
 
-                // ToolbarItem checkmark: simpan, disabled kalau belum ada dog/vaccine kepilih
+                // ToolbarItem checkmark: save, disabled if no dog/vaccine is selected
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save", systemImage: "checkmark", action: save)
                         .labelStyle(.iconOnly)
                         .buttonStyle(.borderedProminent)
-                        .tint(Color("VaccineBrown"))
+                        .tint(Color(.vaccineBrown))
                         .clipShape(.circle)
                         .disabled(!viewModel.isSaveEnabled)
                 }
@@ -90,7 +90,7 @@ struct VaccineRecordFormView: View {
         }
     }
 
-    // fungsi: Section pilih vaccine, pakai VaccineSelectionRow (multi-select checkbox)
+    // Function: Section to select vaccine, using VaccineSelectionRow (multi-select checkbox)
     private var vaccineSection: some View {
         Section("Vaccine") {
             ForEach(VaccineType.allCases, id: \.self) { vaccine in
@@ -101,30 +101,19 @@ struct VaccineRecordFormView: View {
         }
     }
 
-    // fungsi: Section tanggal & jam, dua DatePicker compact sejajar dalam 1 baris,
-    // dibatasi sampai sekarang aja (nggak bisa input tanggal/jam di masa depan)
+    // Function: Date & time section, single DatePicker limited to now
     private var dateSection: some View {
-        Section("") {
+        Section {
             HStack {
                 Text("Date")
                 Spacer()
-                HStack {
-                    DatePicker(
-                        "Date",
-                        selection: $viewModel.dateGiven,
-                        in: latestAllowedDate,
-                        displayedComponents: .date
-                    )
-                    .labelsHidden()
-
-                    DatePicker(
-                        "Time",
-                        selection: $viewModel.dateGiven,
-                        in: latestAllowedDate,
-                        displayedComponents: .hourAndMinute
-                    )
-                    .labelsHidden()
-                }
+                DatePicker(
+                    "Date",
+                    selection: $viewModel.dateGiven,
+                    in: latestAllowedDate,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .labelsHidden()
             }
         }
     }
@@ -135,7 +124,7 @@ struct VaccineRecordFormView: View {
         }
     }
 
-    // fungsi: Section pilih dog, avatar bulat berjejer horizontal, multi-select
+    // Function: Section to select dog, horizontal rounded avatars, multi-select
     private var dogSection: some View {
         Section("Dog") {
             ScrollView(.horizontal) {
@@ -151,7 +140,7 @@ struct VaccineRecordFormView: View {
         }
     }
 
-    // fungsi: Section tombol delete, cuma muncul di mode edit, dibungkus footer biar jelas fungsinya
+    // Function: Section for delete button, only shown in edit mode, wrapped in footer for clarity
     private var deleteSection: some View {
         Section {
             Button("Delete Vaccination Record", systemImage: "trash", role: .destructive) {

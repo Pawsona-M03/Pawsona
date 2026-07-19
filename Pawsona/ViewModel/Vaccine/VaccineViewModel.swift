@@ -11,39 +11,29 @@ import SwiftData
 
 @Observable
 final class VaccineViewModel {
-    var vaccines: [VaccineRecord] = []
     var errorMessage: String?
-    // buat variable model context yg bs di panggil dmn2
-    func createRecord(
-        vaccine: VaccineType,
+    // Create a model context variable that can be used anywhere
+    func createRecords(
+        vaccines: [VaccineType],
         dateGiven: Date,
         notes: String?,
-        dog: Dog,
+        dogs: [Dog],
         in modelContext: ModelContext
     ) {
-        let vaccineRecord = VaccineRecord(
-            vaccine: vaccine,
-            dateGiven: dateGiven,
-            notes: notes,
-            dog: dog
-        )
-
-        modelContext.insert(vaccineRecord)
-        saveChanges(in: modelContext)
-        getAllRecord(in: modelContext)
-    }
-
-    func getAllRecord(in modelContext: ModelContext) {
-        let descriptor = FetchDescriptor<VaccineRecord>(
-            sortBy: [SortDescriptor(\VaccineRecord.dateGiven)]
-        )
-
-        do {
-            vaccines = try modelContext.fetch(descriptor)
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
+        let batchID = UUID()
+        for dog in dogs {
+            for vaccine in vaccines {
+                let vaccineRecord = VaccineRecord(
+                    batchID: batchID,
+                    vaccine: vaccine,
+                    dateGiven: dateGiven,
+                    notes: notes,
+                    dog: dog
+                )
+                modelContext.insert(vaccineRecord)
+            }
         }
+        saveChanges(in: modelContext)
     }
 
     func getRecordById(id: UUID, in modelContext: ModelContext) -> VaccineRecord? {
@@ -75,7 +65,6 @@ final class VaccineViewModel {
         vaccineRecord.dog = dog
 
         saveChanges(in: modelContext)
-        getAllRecord(in: modelContext)
     }
 
     func deleteRecord(id: UUID, in modelContext: ModelContext) {
@@ -85,7 +74,6 @@ final class VaccineViewModel {
 
         modelContext.delete(vaccineRecord)
         saveChanges(in: modelContext)
-        getAllRecord(in: modelContext)
     }
 
     private func saveChanges(in modelContext: ModelContext) {
