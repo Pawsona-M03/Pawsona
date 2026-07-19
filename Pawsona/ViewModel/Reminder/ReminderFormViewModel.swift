@@ -98,7 +98,14 @@ final class ReminderFormViewModel {
             errorMessage = error.localizedDescription
         }
 
-        await notificationService.schedule(reminder)
+        do {
+            try await notificationService.schedule(reminder)
+        } catch {
+            if errorMessage == nil {
+                errorMessage = "Reminder saved, but scheduling the notification failed: \(error.localizedDescription)"
+            }
+        }
+
         return reminder
     }
 }

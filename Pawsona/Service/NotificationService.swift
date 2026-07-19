@@ -36,7 +36,7 @@ final class NotificationService {
 
     /// Registers (or, for a matching id, replaces) one pending notification for
     /// the reminder. Reminders due in the past are skipped — they can never fire.
-    func schedule(_ reminder: Reminder) async {
+    func schedule(_ reminder: Reminder) async throws {
         guard reminder.dueDate > .now else { return }
 
         let content = UNMutableNotificationContent()
@@ -51,7 +51,7 @@ final class NotificationService {
         let request = UNNotificationRequest(
             identifier: reminder.id.uuidString, content: content, trigger: trigger
         )
-        try? await center.add(request)
+        try await center.add(request)
     }
 
     /// Cancels the pending notification for the reminder, if any.

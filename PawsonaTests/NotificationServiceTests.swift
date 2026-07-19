@@ -49,7 +49,7 @@ struct NotificationServiceTests {
         let due = try #require(Calendar.current.date(byAdding: .hour, value: 2, to: .now))
         let reminder = Reminder(title: "Vet visit", dueDate: due)
 
-        await service.schedule(reminder)
+        try await service.schedule(reminder)
 
         let pending = await spy.pendingNotificationRequests()
         #expect(pending.count == 1)
@@ -71,7 +71,7 @@ struct NotificationServiceTests {
         let service = NotificationService(center: spy)
         let due = try #require(Calendar.current.date(byAdding: .hour, value: -2, to: .now))
 
-        await service.schedule(Reminder(title: "Missed dose", dueDate: due))
+        try await service.schedule(Reminder(title: "Missed dose", dueDate: due))
 
         let pending = await spy.pendingNotificationRequests()
         #expect(pending.isEmpty)
@@ -84,9 +84,9 @@ struct NotificationServiceTests {
         let due = try #require(Calendar.current.date(byAdding: .hour, value: 2, to: .now))
         let reminder = Reminder(title: "Original", dueDate: due)
 
-        await service.schedule(reminder)
+        try await service.schedule(reminder)
         reminder.title = "Edited"
-        await service.schedule(reminder)
+        try await service.schedule(reminder)
 
         let pending = await spy.pendingNotificationRequests()
         #expect(pending.count == 1)
@@ -99,7 +99,7 @@ struct NotificationServiceTests {
         let service = NotificationService(center: spy)
         let due = try #require(Calendar.current.date(byAdding: .hour, value: 2, to: .now))
         let reminder = Reminder(title: "Grooming", dueDate: due)
-        await service.schedule(reminder)
+        try await service.schedule(reminder)
 
         service.cancel(reminder)
 

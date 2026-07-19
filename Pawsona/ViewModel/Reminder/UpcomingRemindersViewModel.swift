@@ -20,9 +20,11 @@ final class UpcomingRemindersViewModel {
         var id: ReminderGroup { group }
     }
 
+    var errorMessage: String?
+
     private let notificationService: NotificationService
 
-    init(notificationService: NotificationService = NotificationService()) {
+    init(notificationService: NotificationService) {
         self.notificationService = notificationService
     }
 
@@ -56,7 +58,9 @@ final class UpcomingRemindersViewModel {
         modelContext.delete(reminder)
         do {
             try modelContext.save()
+            errorMessage = nil
         } catch {
+            errorMessage = error.localizedDescription
             // Deletion failed to persist; the @Query will still reflect reality.
         }
     }

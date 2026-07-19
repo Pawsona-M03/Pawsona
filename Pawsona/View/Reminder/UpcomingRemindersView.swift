@@ -61,12 +61,25 @@ struct UpcomingRemindersView: View {
                 }
             }
             .sheet(isPresented: $isShowingNewReminderForm) {
-                ReminderFormView()
+                ReminderFormView(notificationService: notificationService)
             }
             .sheet(item: $editingReminder) { reminder in
-                ReminderFormView(editing: reminder)
+                ReminderFormView(editing: reminder, notificationService: notificationService)
             }
         }
+        .alert(
+            "Error",
+            isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            ),
+            actions: {
+                Button("OK", role: .cancel) {}
+            },
+            message: {
+                Text(viewModel.errorMessage ?? "")
+            }
+        )
     }
 
     private var reminderList: some View {

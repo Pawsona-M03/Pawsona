@@ -20,7 +20,7 @@ struct ReminderFormView: View {
 
     init(
         editing reminder: Reminder? = nil,
-        notificationService: NotificationService = NotificationService()
+        notificationService: NotificationService
     ) {
         if let reminder {
             _viewModel = State(
@@ -82,17 +82,32 @@ struct ReminderFormView: View {
                 }
             }
         }
+        .alert(
+            "Error",
+            isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            ),
+            actions: {
+                Button("OK", role: .cancel) {}
+            },
+            message: {
+                Text(viewModel.errorMessage ?? "")
+            }
+        )
     }
 
     private func save() {
         Task {
             await viewModel.save(in: modelContext)
-            dismiss()
+            if viewModel.errorMessage == nil {
+                dismiss()
+            }
         }
     }
 }
 
 #Preview {
-    ReminderFormView()
+    ReminderFormView(notificationService: NotificationService())
         .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
 }
