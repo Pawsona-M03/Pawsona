@@ -14,11 +14,11 @@ struct ContentView: View {
             Tab("Puppy", systemImage: "dog") {
                 DogListView()
             }
-            
+
             Tab("Reminder", systemImage: "bell") {
                 UpcomingRemindersView()
             }
-            
+
             Tab("Vaccine", systemImage: "syringe") {
                 VaccineListView()
             }
