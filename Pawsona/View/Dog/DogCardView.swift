@@ -17,12 +17,12 @@ struct DogCardView: View {
     var body: some View {
         VStack(spacing: 8) {
             DogPhotoView(dog: dog, placeholderIconHeight: photoHeight * 0.6)
-                .frame(width: .infinity)
+                .frame(maxWidth: .infinity)
                 .frame(height: photoHeight)
                 .clipped()
 
             VStack(alignment: .center, spacing: 4) {
-                Text("\(displayName)")
+                Text(displayName)
                     .font(.headline)
                     .foregroundStyle(.primary)
 

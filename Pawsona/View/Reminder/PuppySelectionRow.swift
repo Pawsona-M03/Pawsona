@@ -14,18 +14,11 @@ struct PuppySelectionRow: View {
     let toggle: () -> Void
 
     var body: some View {
-        Button(action: toggle) {
-            HStack {
-                Text(dog.name ?? "Puppy")
-                    .foregroundStyle(.primary)
-                Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(.tint)
-                }
+        SelectionRow(title: dog.name ?? "Puppy", isSelected: isSelected, toggle: toggle) {
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .foregroundStyle(.tint)
             }
-            .contentShape(.rect)
         }
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

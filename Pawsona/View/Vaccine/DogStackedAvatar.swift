@@ -4,31 +4,19 @@
 //
 
 import SwiftUI
-import UIKit
 
-/// Foto bulat kecil dog buat ditampilin numpuk (overlap) dalam VaccineRecordGroupRowView.
+/// A small circular dog photo to be displayed stacked (overlapping) in VaccineRecordGroupRowView.
 struct DogStackedAvatar: View {
     let dog: Dog
 
-    var body: some View {
-        photo
-            .frame(width: 32, height: 32)
-            .clipShape(.circle)
-            .overlay(Circle().stroke(.background, lineWidth: 2))
-    }
+    private let avatarDiameter: CGFloat = 32
+    private var stackOverlap: CGFloat { avatarDiameter / 16 }
 
-    @ViewBuilder
-    private var photo: some View {
-        if let photoData = dog.photoData, let uiImage = UIImage(data: photoData) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFill()
-        } else {
-            Image(systemName: "pawprint.circle.fill")
-                .resizable()
-                .scaledToFit()
-                .foregroundStyle(.secondary)
-        }
+    var body: some View {
+        DogAvatarImage(dog: dog)
+            .frame(width: avatarDiameter, height: avatarDiameter)
+            .clipShape(.circle)
+            .overlay(Circle().stroke(.background, lineWidth: stackOverlap))
     }
 }
 
