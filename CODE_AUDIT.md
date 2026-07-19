@@ -173,6 +173,7 @@ _No findings._ The codebase already uses `FormatStyle`, `foregroundStyle`, `clip
 - **Why:** Unused capability surface; if push is added later, the development APS value breaks release builds silently.
 - **Action:** Remove both until remote push is actually planned.
 - **Severity:** Low
+- **Correction (post-review):** *Do not apply.* SwiftData's CloudKit sync (`cloudKitDatabase: .automatic`) uses silent remote notifications to learn about changes from other devices, so both declarations are in use; `aps-environment` is also switched to `production` automatically at distribution signing. Finding retained for the record but withdrawn.
 
 _Verified clean:_ no hardcoded secrets/keys/tokens anywhere; all three `@Model` types satisfy the CloudKit rules (defaults/optionals everywhere, optional relationships, no `.unique`).
 
