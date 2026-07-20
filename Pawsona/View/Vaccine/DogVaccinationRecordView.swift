@@ -46,17 +46,21 @@ struct DogVaccinationRecordView: View {
             }
         }
         .sheet(isPresented: $isShowingAddVaccineForm) {
-            VaccineRecordFormView(onSave: createVaccineRecord)
+            VaccineRecordFormView(
+                selectedDogs: [dog],
+                onSave: createVaccineRecord
+            )
         }
         .sheet(isPresented: $isShowingEditVaccineForm) {
             if let vaccineRecord = editingVaccineRecord {
                 VaccineRecordFormView(
                     title: "Edit Vaccine Record",
-                    vaccine: vaccineRecord.vaccines.first ?? .parvovirus,
+                    vaccines: vaccineRecord.vaccines,
                     dateGiven: vaccineRecord.dateGiven,
+                    selectedDogs: vaccineRecord.dogList ?? [dog],
                     notes: vaccineRecord.notes ?? "",
-                    onSave: { vaccines, dateGiven, notes in
-                        editVaccineRecord(vaccineRecord, vaccines: vaccines, dateGiven: dateGiven, notes: notes)
+                    onSave: { vaccines, dateGiven, dogList, notes in
+                        editVaccineRecord(vaccineRecord, vaccines: vaccines, dateGiven: dateGiven, dogList: dogList, notes: notes)
                     }
                 )
             }
@@ -76,12 +80,12 @@ struct DogVaccinationRecordView: View {
         isShowingAddVaccineForm = true
     }
 
-    private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, notes: String?) {
+    private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, dogList: [Dog], notes: String?) {
         vaccineViewModel.createRecord(
             vaccines: vaccines,
             dateGiven: dateGiven,
             notes: notes,
-            dogs: [dog],
+            dogList: dogList,
             in: modelContext
         )
     }
@@ -90,6 +94,7 @@ struct DogVaccinationRecordView: View {
         _ vaccineRecord: VaccineRecord,
         vaccines: [VaccineType],
         dateGiven: Date,
+        dogList: [Dog],
         notes: String?
     ) {
         vaccineViewModel.editRecord(
@@ -97,6 +102,7 @@ struct DogVaccinationRecordView: View {
             vaccines: vaccines,
             dateGiven: dateGiven,
             notes: notes,
+            dogList: dogList,
             in: modelContext
         )
     }
