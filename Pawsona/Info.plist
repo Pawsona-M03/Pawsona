@@ -17,14 +17,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<false/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Pawsona uses the microphone so you can dictate search terms instead of typing.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Pawsona uses speech recognition to turn your dictated search into text.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

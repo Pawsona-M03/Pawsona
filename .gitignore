@@ -68,3 +68,4 @@ docs/
 .mcp.json
 .gemini-swarm/
 skills-lock.json
+Secrets.swift
