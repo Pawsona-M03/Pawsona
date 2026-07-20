@@ -10,6 +10,7 @@ import SwiftUI
 
 struct DogListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var viewModel = DogViewModel()
     @State private var isShowingAddDogForm = false
     @State private var exportedPDFURL: URL?
@@ -26,7 +27,13 @@ struct DogListView: View {
         }
     }
 
-    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+    private var columns: [GridItem] {
+        if dynamicTypeSize.isAccessibilitySize {
+            [GridItem(.flexible())]
+        } else {
+            [GridItem(.flexible()), GridItem(.flexible())]
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -37,7 +44,11 @@ struct DogListView: View {
                     DogDetailView(dog: dog)
                 }
             }
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search dogs by name or breed"
+            )
             .searchDictationBehavior(.inline(activation: .onSelect))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -45,12 +56,15 @@ struct DogListView: View {
                         SortOrderPicker(selection: $viewModel.sortOption)
                     }
                     .tint(Color(.black))
+                    .accessibilityLabel("Sort dogs")
+                    .accessibilityValue(viewModel.sortOption.title)
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Dog", systemImage: "plus", action: showAddDogForm)
                         .buttonStyle(.glassProminent)
                         .tint(Color(.brown))
+                        .accessibilityLabel("Add dog")
                 }
             }
             .sheet(isPresented: $isShowingAddDogForm) {
@@ -64,6 +78,9 @@ struct DogListView: View {
             .task(id: viewModel.dogs.map(\.id)) {
                 exportedPDFURL = viewModel.exportDogsToPDF()
             }
+            .task(id: searchText) {
+                await announceSearchResults()
+            }
             .onChange(of: viewModel.sortOption) { _, _ in
                 viewModel.getDogLists(in: modelContext)
             }
@@ -75,6 +92,27 @@ struct DogListView: View {
 
     private func showAddDogForm() {
         isShowingAddDogForm = true
+    }
+
+    private func announceSearchResults() async {
+        guard !searchText.isEmpty else {
+            return
+        }
+
+        do {
+            try await Task.sleep(for: .milliseconds(500))
+        } catch {
+            return
+        }
+
+        let resultCount = filteredDogs.count
+        let announcement = switch resultCount {
+        case 0: "No dogs found"
+        case 1: "1 dog found"
+        default: "\(resultCount) dogs found"
+        }
+
+        AccessibilityNotification.Announcement(announcement).post()
     }
 }
 

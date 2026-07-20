@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct DogCardView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let dog: Dog
 
     @ScaledMetric(relativeTo: .largeTitle) private var cardHeight = 211
@@ -17,7 +19,8 @@ struct DogCardView: View {
     var body: some View {
         VStack(spacing: 8) {
             DogPhotoView(dog: dog, placeholderIconHeight: photoHeight * 0.6)
-                .frame(width: .infinity)
+                .frame(width: dynamicTypeSize.isAccessibilitySize ? nil : 162)
+                .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil)
                 .frame(height: photoHeight)
                 .clipped()
 
@@ -33,7 +36,8 @@ struct DogCardView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .frame(width: 162)
+        .frame(width: dynamicTypeSize.isAccessibilitySize ? nil : 162)
+        .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil)
         .background(.background)
         .clipShape(.rect(cornerRadius: 10))
         .shadow(radius: 2)

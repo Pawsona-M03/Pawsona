@@ -30,6 +30,7 @@ struct DogEditView: View {
 
     private func editDog(from draft: DogDraft) {
         viewModel.editDog(dog, from: draft, in: modelContext)
+        AccessibilityNotification.Announcement("Dog updated").post()
     }
 }
 
