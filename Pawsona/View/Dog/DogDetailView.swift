@@ -9,6 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct DogDetailView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var dogViewModel = DogViewModel()
     @State private var isShowingEditDogForm = false
     @State private var exportedPDFURL: URL?
@@ -23,9 +24,9 @@ struct DogDetailView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            DogPhotoView(dog: dog, placeholderIconHeight: heroHeight * 0.6)
+            DogPhotoView(dog: dog, placeholderIconHeight: displayedHeroHeight * 0.6)
                 .frame(maxWidth: 410)
-                .frame(height: heroHeight)
+                .frame(height: displayedHeroHeight)
                 .background(dog.backgroundColor.color.opacity(0.3))
                 .clipped()
                 .ignoresSafeArea(edges: .top)
@@ -35,7 +36,7 @@ struct DogDetailView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     Color.clear
-                        .frame(height: heroHeight - sheetCornerRadius)
+                        .frame(height: displayedHeroHeight - sheetCornerRadius)
 
                     sheetContent
                 }
@@ -104,10 +105,16 @@ struct DogDetailView: View {
             }
             .padding(.top, 24)
 
-            HStack(spacing: 12) {
+            statLayout {
                 DogStatBox(title: "Age", value: ageText)
+                    .accessibilityLabel("Age")
+                    .accessibilityValue(ageAccessibilityValue)
                 DogStatBox(title: "Sex", value: sexText)
+                    .accessibilityLabel("Sex")
+                    .accessibilityValue(sexAccessibilityValue)
                 DogStatBox(title: "Weight", value: weightText)
+                    .accessibilityLabel("Weight")
+                    .accessibilityValue(weightAccessibilityValue)
             }
             .padding(.horizontal)
 
@@ -161,6 +168,18 @@ struct DogDetailView: View {
         return trimmedName.isEmpty ? "Dog" : trimmedName
     }
 
+    private var displayedHeroHeight: CGFloat {
+        min(heroHeight, 380)
+    }
+
+    private var statLayout: AnyLayout {
+        if dynamicTypeSize.isAccessibilitySize {
+            AnyLayout(VStackLayout(spacing: 12))
+        } else {
+            AnyLayout(HStackLayout(spacing: 12))
+        }
+    }
+
     private var breedText: String {
         dog.breed.isEmpty ? "Breed not set" : dog.breed
     }
@@ -168,6 +187,11 @@ struct DogDetailView: View {
     private var ageText: String {
         guard let age = dog.age else { return "-" }
         return "\(age)"
+    }
+
+    private var ageAccessibilityValue: String {
+        guard let age = dog.age else { return "Not set" }
+        return age == 1 ? "1 year" : "\(age) years"
     }
 
     private var sexText: String {
@@ -178,9 +202,21 @@ struct DogDetailView: View {
         }
     }
 
+    private var sexAccessibilityValue: String {
+        switch dog.sex {
+        case .male: "Male"
+        case .female: "Female"
+        case nil: "Not set"
+        }
+    }
+
     private var weightText: String {
         guard let weight = dog.weight else { return "-" }
         return weight.formatted(.number.precision(.fractionLength(1)))
+    }
+
+    private var weightAccessibilityValue: String {
+        dog.weight == nil ? "Not set" : weightText
     }
 
     private var vaccineRecordCount: Int {

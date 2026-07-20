@@ -59,7 +59,6 @@ struct DogFormView: View {
                         selection: $dateOfBirth,
                         displayedComponents: .date
                     )
-                    .accessibilityLabel("Dog birthday")
                 }
 
                 Section("Card Color") {
@@ -69,7 +68,6 @@ struct DogFormView: View {
                                 .tag(color)
                         }
                     }
-                    .accessibilityLabel("Card color")
                 }
             }
             .navigationTitle(title)
