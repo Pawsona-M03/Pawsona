@@ -12,131 +12,93 @@ import Testing
 
 @Suite("UpcomingRemindersViewModel")
 struct UpcomingRemindersViewModelTests {
-    private func makeService() -> (NotificationService, SpyNotificationCenter) {
+    private let calendar = Calendar.current
+
+    private func makeViewModel() -> (UpcomingRemindersViewModel, SpyNotificationCenter) {
         let spy = SpyNotificationCenter()
-        return (NotificationService(center: spy), spy)
+        let service = NotificationService(center: spy)
+        return (UpcomingRemindersViewModel(notificationService: service), spy)
     }
 
-    /// A deterministic "now" 1.5 days into the current week so that "tomorrow"
-    /// is still inside this week regardless of which weekday the tests run on.
-    private func fixedNow() throws -> Date {
-        let calendar = Calendar.current
-        let weekStart = try #require(calendar.dateInterval(of: .weekOfYear, for: .now)?.start)
-        return try #require(calendar.date(byAdding: .hour, value: 36, to: weekStart))
+    private func day(_ offset: Int, from date: Date = .now) throws -> Date {
+        let base = calendar.startOfDay(for: date)
+        return try #require(calendar.date(byAdding: .day, value: offset, to: base))
     }
 
-    @Test("A reminder is grouped by how far away its due date is")
-    func groupsByDueDate() throws {
-        let (service, _) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
-        let now = try fixedNow()
-        let calendar = Calendar.current
+    @Test("The week strip has seven consecutive days containing the given date")
+    func weekDaysAreSevenConsecutive() throws {
+        let (viewModel, _) = makeViewModel()
 
-        let overdue = Reminder(title: "Overdue",
-                               dueDate: try #require(calendar.date(byAdding: .hour, value: -1, to: now)))
-        let today = Reminder(title: "Today",
-                             dueDate: try #require(calendar.date(byAdding: .hour, value: 1, to: now)))
-        let thisWeek = Reminder(title: "This week",
-                                dueDate: try #require(calendar.date(byAdding: .day, value: 2, to: now)))
-        let later = Reminder(title: "Later",
-                             dueDate: try #require(calendar.date(byAdding: .day, value: 8, to: now)))
+        let days = viewModel.weekDays(containing: .now)
 
-        let sections = viewModel.sections(for: [later, today, overdue, thisWeek], now: now)
-
-        #expect(sections.map(\.group) == [.overdue, .today, .thisWeek, .later])
-        #expect(sections.first(where: { $0.group == .today })?.reminders.first?.title == "Today")
+        #expect(days.count == 7)
+        #expect(days.contains { calendar.isDateInToday($0) })
+        for (earlier, later) in zip(days, days.dropFirst()) {
+            #expect(calendar.dateComponents([.day], from: earlier, to: later).day == 1)
+        }
+        #expect(calendar.component(.weekday, from: try #require(days.first)) == calendar.firstWeekday)
     }
 
-    @Test("A reminder late today (23:59) still groups as Today")
-    func lateTodayGroupsAsToday() throws {
-        let (service, _) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
-        let now = try fixedNow()
-        let calendar = Calendar.current
-        let endOfToday = try #require(
-            calendar.date(bySettingHour: 23, minute: 59, second: 0, of: now)
-        )
+    @Test("A one-shot reminder appears only on its due day")
+    func oneShotOnlyOnItsDay() throws {
+        let (viewModel, _) = makeViewModel()
+        let today = try day(0)
+        let reminder = Reminder(title: "Vet", dueDate: today.addingTimeInterval(3600))
 
-        #expect(viewModel.group(for: endOfToday, now: now) == .today)
+        #expect(viewModel.reminders(from: [reminder], on: today).count == 1)
+        #expect(viewModel.reminders(from: [reminder], on: try day(1)).isEmpty)
     }
 
-    @Test("Midnight tomorrow crosses out of Today")
-    func midnightTomorrowIsNotToday() throws {
-        let (service, _) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
-        let now = try fixedNow()
-        let calendar = Calendar.current
-        let startOfTomorrow = try #require(
-            calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))
-        )
+    @Test("A repeating reminder appears on matching weekdays only")
+    func repeatingAppearsOnMatchingWeekday() throws {
+        let (viewModel, _) = makeViewModel()
+        let today = try day(0)
+        let todayWeekday = calendar.component(.weekday, from: today)
+        let reminder = Reminder(title: "Vitamin", dueDate: .now, repeatDays: [todayWeekday])
 
-        // fixedNow() is early in the week, so tomorrow is still this week.
-        #expect(viewModel.group(for: startOfTomorrow, now: now) == .thisWeek)
+        #expect(viewModel.reminders(from: [reminder], on: today).count == 1)
+        #expect(viewModel.reminders(from: [reminder], on: try day(1)).isEmpty)
+        // Matches again a week later.
+        #expect(viewModel.reminders(from: [reminder], on: try day(7)).count == 1)
     }
 
-    @Test("A time earlier today but already past groups as Overdue, not Today")
-    func earlierTodayButPastIsOverdue() throws {
-        let (service, _) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
-        let now = try fixedNow()
-        let calendar = Calendar.current
-        let earlierToday = try #require(calendar.date(byAdding: .minute, value: -1, to: now))
+    @Test("A repeating reminder does not appear before its start date")
+    func repeatingHiddenBeforeStartDate() throws {
+        let (viewModel, _) = makeViewModel()
+        let nextWeek = try day(7)
+        let weekday = calendar.component(.weekday, from: nextWeek)
+        let reminder = Reminder(title: "Vitamin", dueDate: nextWeek, repeatDays: [weekday])
 
-        #expect(viewModel.group(for: earlierToday, now: now) == .overdue)
+        #expect(viewModel.reminders(from: [reminder], on: try day(0)).isEmpty)
+        #expect(viewModel.reminders(from: [reminder], on: nextWeek).count == 1)
     }
 
-    @Test("A reminder due exactly now counts as Today")
-    func exactlyNowIsToday() throws {
-        let (service, _) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
-        let now = try fixedNow()
+    @Test("A day's reminders are sorted by time of day, repeats included")
+    func sortsByTimeOfDay() throws {
+        let (viewModel, _) = makeViewModel()
+        let today = try day(0)
+        let weekday = calendar.component(.weekday, from: today)
+        let nineAM = try #require(calendar.date(bySettingHour: 9, minute: 0, second: 0, of: today))
+        let tenAM = try #require(calendar.date(bySettingHour: 10, minute: 0, second: 0, of: today))
+        let earlyRepeat = Reminder(title: "Early repeat", dueDate: nineAM, repeatDays: [weekday])
+        let lateOneShot = Reminder(title: "Late one-shot", dueDate: tenAM)
 
-        #expect(viewModel.group(for: now, now: now) == .today)
+        let titles = viewModel.reminders(from: [lateOneShot, earlyRepeat], on: today).map(\.title)
+
+        #expect(titles == ["Early repeat", "Late one-shot"])
     }
 
-    @Test("Empty groups are omitted")
-    func omitsEmptyGroups() throws {
-        let (service, _) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
-        let now = try fixedNow()
-        let calendar = Calendar.current
-        let today = Reminder(title: "Today",
-                             dueDate: try #require(calendar.date(byAdding: .hour, value: 1, to: now)))
-
-        let sections = viewModel.sections(for: [today], now: now)
-
-        #expect(sections.map(\.group) == [.today])
-    }
-
-    @Test("Within a group reminders are sorted soonest first")
-    func sortsWithinGroup() throws {
-        let (service, _) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
-        let now = try fixedNow()
-        let calendar = Calendar.current
-        let later = Reminder(title: "Later today",
-                             dueDate: try #require(calendar.date(byAdding: .hour, value: 5, to: now)))
-        let sooner = Reminder(title: "Sooner today",
-                              dueDate: try #require(calendar.date(byAdding: .hour, value: 1, to: now)))
-
-        let sections = viewModel.sections(for: [later, sooner], now: now)
-        let todayTitles = try #require(sections.first(where: { $0.group == .today })).reminders.map(\.title)
-
-        #expect(todayTitles == ["Sooner today", "Later today"])
-    }
-
-    @Test("Deleting a reminder cancels its notification and removes it")
+    @Test("Deleting a reminder cancels its notifications and removes it")
     func deleteCancelsAndRemoves() throws {
         let context = try TestSupport.makeContext()
-        let (service, spy) = makeService()
-        let viewModel = UpcomingRemindersViewModel(notificationService: service)
+        let (viewModel, spy) = makeViewModel()
         let reminder = Reminder(title: "Grooming", dueDate: .now.addingTimeInterval(3600))
         context.insert(reminder)
         try context.save()
 
         viewModel.delete(reminder, in: context)
 
-        #expect(spy.removedIdentifiers == [reminder.id.uuidString])
+        #expect(spy.removedIdentifiers.contains(reminder.id.uuidString))
         #expect(try context.fetch(FetchDescriptor<Reminder>()).isEmpty)
     }
 }

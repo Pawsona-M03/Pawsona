@@ -8,8 +8,8 @@
 import SwiftData
 import SwiftUI
 
-/// The reminders home screen: upcoming reminders grouped by how soon they are
-/// due, with create/edit forms and swipe-to-delete.
+/// The reminders home screen: a week strip to pick a day, that day's reminder
+/// cards, and the create/edit form. Matches the hifi's calendar-per-day layout.
 struct UpcomingRemindersView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Reminder.dueDate) private var reminders: [Reminder]
@@ -28,22 +28,53 @@ struct UpcomingRemindersView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if reminders.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Reminders", systemImage: "bell")
-                    } description: {
-                        Text("Reminders you create will show up here, soonest first.")
-                    } actions: {
-                        Button("Create Reminder", systemImage: "plus") {
-                            isShowingNewReminderForm = true
+            List {
+                Group {
+                    WeekStripView(days: viewModel.weekDays(), selectedDate: $viewModel.selectedDate)
+
+                    Text(viewModel.selectedDate.formatted(
+                        .dateTime.weekday(.wide).day().month(.wide).year()
+                    ))
+                    .font(.title3)
+                    .bold()
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+
+                if dayReminders.isEmpty {
+                    Text(emptyMessage)
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 80)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                } else {
+                    ForEach(dayReminders) { reminder in
+                        Section {
+                            Button {
+                                editingReminder = reminder
+                            } label: {
+                                ReminderRowView(reminder: reminder)
+                            }
+                            .buttonStyle(.plain)
+                            .swipeActions {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    viewModel.delete(reminder, in: modelContext)
+                                }
+                            }
                         }
                     }
-                } else {
-                    reminderList
                 }
             }
-            .navigationTitle("Reminders")
+            .scrollContentBackground(.hidden)
+            .background {
+                Image(.pawsBg)
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+            }
+            .navigationTitle("Reminder")
             .safeAreaInset(edge: .top) {
                 if notificationService.permissionState == .denied {
                     NotificationPermissionBanner()
@@ -69,34 +100,19 @@ struct UpcomingRemindersView: View {
         }
     }
 
-    private var reminderList: some View {
-        List {
-            ForEach(viewModel.sections(for: reminders)) { section in
-                Section(section.group.title) {
-                    ForEach(section.reminders) { reminder in
-                        Button {
-                            editingReminder = reminder
-                        } label: {
-                            ReminderRowView(reminder: reminder, isOverdue: section.group == .overdue)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .onDelete { offsets in
-                        delete(offsets, in: section.reminders)
-                    }
-                }
-            }
-        }
+    private var dayReminders: [Reminder] {
+        viewModel.reminders(from: reminders, on: viewModel.selectedDate)
     }
 
-    private func delete(_ offsets: IndexSet, in sectionReminders: [Reminder]) {
-        for reminder in offsets.map({ sectionReminders[$0] }) {
-            viewModel.delete(reminder, in: modelContext)
-        }
+    private var emptyMessage: String {
+        Calendar.current.isDateInToday(viewModel.selectedDate)
+            ? "No Reminder for Today"
+            : "No Reminders"
     }
 }
 
 #Preview {
     UpcomingRemindersView()
         .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
+        .tint(.brown)
 }

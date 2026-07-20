@@ -90,6 +90,33 @@ struct ReminderFormViewModelTests {
         #expect(names == ["Rex", "Luna"])
     }
 
+    @Test("A past date is fine when the reminder repeats")
+    func saveEnabledForPastDateWhenRepeating() throws {
+        let (service, _) = makeService()
+        let viewModel = ReminderFormViewModel(notificationService: service)
+        viewModel.title = "Vitamin"
+        viewModel.dueDate = try #require(Calendar.current.date(byAdding: .hour, value: -1, to: .now))
+        viewModel.repeatDays = [5]
+
+        #expect(viewModel.isSaveEnabled)
+    }
+
+    @Test("Repeat days are persisted sorted and schedule one notification each")
+    func savePersistsRepeatDays() async throws {
+        let context = try TestSupport.makeContext()
+        let (service, spy) = makeService()
+        let viewModel = ReminderFormViewModel(notificationService: service)
+        viewModel.title = "Vitamin"
+        viewModel.dueDate = futureDate()
+        viewModel.repeatDays = [6, 2]
+
+        await viewModel.save(in: context)
+
+        let reminder = try #require(try context.fetch(FetchDescriptor<Reminder>()).first)
+        #expect(reminder.repeatDays == [2, 6])
+        #expect(spy.added.count == 2)
+    }
+
     @Test("Editing pre-fills the form from the existing reminder")
     func editPreFillsForm() async throws {
         let context = try TestSupport.makeContext()
@@ -117,7 +144,7 @@ struct ReminderFormViewModelTests {
 
         await viewModel.save(in: context)
 
-        #expect(spy.removedIdentifiers == [reminder.id.uuidString])
+        #expect(spy.removedIdentifiers.contains(reminder.id.uuidString))
         #expect(spy.added.count == 1)
         #expect(spy.added.first?.content.title == "Edited")
         // No duplicate row — still editing the same reminder.

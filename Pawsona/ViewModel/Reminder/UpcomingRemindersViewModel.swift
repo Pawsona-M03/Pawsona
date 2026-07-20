@@ -9,46 +9,50 @@ import Foundation
 import Observation
 import SwiftData
 
-/// Groups upcoming reminders for the home list and handles deletion (which also
-/// cancels the pending notification).
+/// Backs the reminder home screen: tracks the selected day of the week strip,
+/// filters reminders down to that day, and handles deletion (which also
+/// cancels the pending notifications).
 @Observable
 final class UpcomingRemindersViewModel {
-    /// One rendered section: a group and its reminders, soonest first.
-    struct Section: Identifiable {
-        let group: ReminderGroup
-        let reminders: [Reminder]
-        var id: ReminderGroup { group }
-    }
+    var selectedDate: Date
 
     private let notificationService: NotificationService
+    private let calendar: Calendar
 
-    init(notificationService: NotificationService = NotificationService()) {
+    init(
+        notificationService: NotificationService = NotificationService(),
+        calendar: Calendar = .current,
+        today: Date = .now
+    ) {
         self.notificationService = notificationService
+        self.calendar = calendar
+        self.selectedDate = calendar.startOfDay(for: today)
     }
 
-    /// Sorts reminders soonest-first and buckets them into non-empty sections in
-    /// display order (overdue → today → this week → later).
-    func sections(for reminders: [Reminder], now: Date = .now) -> [Section] {
-        let sorted = reminders.sorted { $0.dueDate < $1.dueDate }
-        var buckets: [ReminderGroup: [Reminder]] = [:]
-        for reminder in sorted {
-            buckets[group(for: reminder.dueDate, now: now), default: []].append(reminder)
-        }
-        return ReminderGroup.allCases.compactMap { group in
-            guard let reminders = buckets[group], !reminders.isEmpty else { return nil }
-            return Section(group: group, reminders: reminders)
-        }
+    /// The seven days of the week containing `date`, in calendar order.
+    func weekDays(containing date: Date = .now) -> [Date] {
+        guard let start = calendar.dateInterval(of: .weekOfYear, for: date)?.start else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
     }
 
-    func group(for dueDate: Date, now: Date, calendar: Calendar = .current) -> ReminderGroup {
-        if dueDate < now { return .overdue }
+    /// Reminders occurring on the given day, sorted by time of day: one-shots
+    /// due that day, plus repeating reminders whose weekday matches once their
+    /// start date has arrived.
+    func reminders(from reminders: [Reminder], on day: Date) -> [Reminder] {
+        let weekday = calendar.component(.weekday, from: day)
+        return reminders.filter { reminder in
+            if reminder.isRepeating {
+                return reminder.repeatDays.contains(weekday)
+                    && calendar.startOfDay(for: reminder.dueDate) <= day
+            }
+            return calendar.isDate(reminder.dueDate, inSameDayAs: day)
+        }
+        .sorted { minutesIntoDay($0.dueDate) < minutesIntoDay($1.dueDate) }
+    }
 
-        let startOfTomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))
-        let endOfWeek = calendar.dateInterval(of: .weekOfYear, for: now)?.end
-
-        if let startOfTomorrow, dueDate < startOfTomorrow { return .today }
-        if let endOfWeek, dueDate < endOfWeek { return .thisWeek }
-        return .later
+    private func minutesIntoDay(_ date: Date) -> Int {
+        let components = calendar.dateComponents([.hour, .minute], from: date)
+        return (components.hour ?? 0) * 60 + (components.minute ?? 0)
     }
 
     func delete(_ reminder: Reminder, in modelContext: ModelContext) {

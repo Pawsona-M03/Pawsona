@@ -23,6 +23,7 @@ xcuserdata/
 # --------------------------------------------------
 build/
 DerivedData/
+.derivedData/
 
 # --------------------------------------------------
 # App archives and debug symbol artifacts
@@ -50,6 +51,7 @@ fastlane/test_output/
 # --------------------------------------------------
 *.swp
 *.lock
+docs/
 
 # --------------------------------------------------
 # AI agent tooling
@@ -64,3 +66,5 @@ fastlane/test_output/
 .cursor/
 .gemini/
 .mcp.json
+.gemini-swarm/
+skills-lock.json

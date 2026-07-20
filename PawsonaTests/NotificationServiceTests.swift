@@ -105,7 +105,56 @@ struct NotificationServiceTests {
 
         let pending = await spy.pendingNotificationRequests()
         #expect(pending.isEmpty)
-        #expect(spy.removedIdentifiers == [reminder.id.uuidString])
+        #expect(spy.removedIdentifiers.contains(reminder.id.uuidString))
+    }
+
+    @Test("A repeating reminder registers one weekly trigger per selected day")
+    func scheduleRepeatingReminder() async throws {
+        let spy = SpyNotificationCenter()
+        let service = NotificationService(center: spy)
+        let due = try #require(
+            Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: .now)
+        )
+        let reminder = Reminder(title: "Vitamin", dueDate: due, repeatDays: [2, 5])
+
+        await service.schedule(reminder)
+
+        let pending = await spy.pendingNotificationRequests()
+        #expect(pending.count == 2)
+        for request in pending {
+            let trigger = try #require(request.trigger as? UNCalendarNotificationTrigger)
+            #expect(trigger.repeats)
+            #expect(trigger.dateComponents.hour == 10)
+            #expect(trigger.dateComponents.minute == 30)
+        }
+        #expect(Set(pending.compactMap(\.trigger).compactMap {
+            ($0 as? UNCalendarNotificationTrigger)?.dateComponents.weekday
+        }) == [2, 5])
+    }
+
+    @Test("A repeating reminder schedules even when its start date is past")
+    func scheduleRepeatingPastStartDate() async throws {
+        let spy = SpyNotificationCenter()
+        let service = NotificationService(center: spy)
+        let due = try #require(Calendar.current.date(byAdding: .day, value: -3, to: .now))
+
+        await service.schedule(Reminder(title: "Vitamin", dueDate: due, repeatDays: [3]))
+
+        let pending = await spy.pendingNotificationRequests()
+        #expect(pending.count == 1)
+    }
+
+    @Test("Cancelling a repeating reminder removes every weekday request")
+    func cancelRemovesRepeatingRequests() async throws {
+        let spy = SpyNotificationCenter()
+        let service = NotificationService(center: spy)
+        let reminder = Reminder(title: "Vitamin", dueDate: .now, repeatDays: [1, 4, 7])
+        await service.schedule(reminder)
+
+        service.cancel(reminder)
+
+        let pending = await spy.pendingNotificationRequests()
+        #expect(pending.isEmpty)
     }
 
     @Test("Granted authorization sets a visible granted state")
