@@ -13,7 +13,7 @@ final class Reminder {
     var id: UUID = UUID()
     var title: String = ""
     var notes: String?
-    @Relationship(inverse: \Dog.reminders) var dogList: [Dog]? = nil
+    @Relationship(inverse: \Dog.reminders) var dogList: [Dog]?
     var dueDate: Date = Date.now
     var repeatRule: RepeatRule?
     var category: ReminderType = ReminderType.others

@@ -13,7 +13,7 @@ struct DogFormView: View {
     @Environment(\.dismiss) private var dismiss
 
     let title: String
-    let onSave: (String, String, Date, ColorType, Data?) -> Void
+    let onSave: (DogDraft) -> Void
 
     @State private var name: String
     @State private var breed: String
@@ -24,20 +24,16 @@ struct DogFormView: View {
 
     init(
         title: String = "Add Dog",
-        name: String = "",
-        breed: String = "",
-        dateOfBirth: Date = Date.now,
-        backgroundColor: ColorType = .blue,
-        photoData: Data? = nil,
-        onSave: @escaping (String, String, Date, ColorType, Data?) -> Void
+        draft: DogDraft = DogDraft(),
+        onSave: @escaping (DogDraft) -> Void
     ) {
         self.title = title
         self.onSave = onSave
-        self._name = State(initialValue: name)
-        self._breed = State(initialValue: breed)
-        self._dateOfBirth = State(initialValue: dateOfBirth)
-        self._backgroundColor = State(initialValue: backgroundColor)
-        self._photoData = State(initialValue: photoData)
+        self._name = State(initialValue: draft.name)
+        self._breed = State(initialValue: draft.breed)
+        self._dateOfBirth = State(initialValue: draft.dateOfBirth)
+        self._backgroundColor = State(initialValue: draft.backgroundColor)
+        self._photoData = State(initialValue: draft.photoData)
     }
 
     var body: some View {
@@ -122,18 +118,19 @@ struct DogFormView: View {
     }
 
     private func saveDog() {
-        onSave(trimmedName, trimmedBreed, dateOfBirth, backgroundColor, photoData)
+        onSave(
+            DogDraft(
+                name: trimmedName,
+                breed: trimmedBreed,
+                dateOfBirth: dateOfBirth,
+                backgroundColor: backgroundColor,
+                photoData: photoData
+            )
+        )
         dismiss()
     }
 }
 
-private extension Image {
-    init?(data: Data) {
-        guard let uiImage = UIImage(data: data) else { return nil }
-        self.init(uiImage: uiImage)
-    }
-}
-
 #Preview {
-    DogFormView { _, _, _, _, _ in }
+    DogFormView { _ in }
 }

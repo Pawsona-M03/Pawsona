@@ -10,30 +10,30 @@ import Observation
 import SwiftData
 
 @Observable
-final class VaccineViewModel{
+final class VaccineViewModel {
     var vaccines: [VaccineRecord] = []
     var errorMessage: String?
-    // buat variable model context yg bs di panggil dmn2
+
     func createRecord(
         vaccines: [VaccineType],
         dateGiven: Date,
         notes: String?,
         dogList: [Dog],
         in modelContext: ModelContext
-    ){
+    ) {
         let vaccineRecord = VaccineRecord(
             vaccines: vaccines,
             dateGiven: dateGiven,
             notes: notes,
             dogList: dogList
         )
-        
+
         modelContext.insert(vaccineRecord)
         saveChanges(in: modelContext)
         getAllRecord(in: modelContext)
     }
-    
-    func getAllRecord(in modelContext: ModelContext){
+
+    func getAllRecord(in modelContext: ModelContext) {
         let descriptor = FetchDescriptor<VaccineRecord>(
             sortBy: [SortDescriptor(\VaccineRecord.dateGiven)]
         )
@@ -45,8 +45,8 @@ final class VaccineViewModel{
             errorMessage = error.localizedDescription
         }
     }
-    
-    func getRecordById(id: UUID,in modelContext: ModelContext) -> VaccineRecord? {
+
+    func getRecordById(id: UUID, in modelContext: ModelContext) -> VaccineRecord? {
         let descriptor = FetchDescriptor<VaccineRecord>(
             predicate: #Predicate { vaccine in
                 vaccine.id == id
@@ -60,7 +60,7 @@ final class VaccineViewModel{
             return nil
         }
     }
-    
+
     func editRecord(
         _ vaccineRecord: VaccineRecord,
         vaccines: [VaccineType],
@@ -77,8 +77,8 @@ final class VaccineViewModel{
         saveChanges(in: modelContext)
         getAllRecord(in: modelContext)
     }
-    
-    func deleteRecord(id: UUID, in modelContext: ModelContext){
+
+    func deleteRecord(id: UUID, in modelContext: ModelContext) {
         guard let vaccineRecord = getRecordById(id: id, in: modelContext) else {
             return
         }
@@ -87,7 +87,7 @@ final class VaccineViewModel{
         saveChanges(in: modelContext)
         getAllRecord(in: modelContext)
     }
-    
+
     private func saveChanges(in modelContext: ModelContext) {
         do {
             try modelContext.save()

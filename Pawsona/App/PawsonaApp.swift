@@ -14,8 +14,7 @@ struct PawsonaApp: App {
         let schema = Schema([
             Dog.self,
             Reminder.self,
-            VaccineRecord.self,
-            Item.self,
+            VaccineRecord.self
         ])
         let modelConfiguration = ModelConfiguration(
             schema: schema,
