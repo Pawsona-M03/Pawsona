@@ -24,7 +24,7 @@ struct DogDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             DogPhotoView(dog: dog, placeholderIconHeight: heroHeight * 0.6)
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: 410)
                 .frame(height: heroHeight)
                 .background(dog.backgroundColor.color.opacity(0.3))
                 .clipped()
@@ -53,7 +53,7 @@ struct DogDetailView: View {
                 Button("Edit", action: showEditDogForm)
                     .accessibilityShowsLargeContentViewer()
             }
-
+            
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
 
             ToolbarItem(placement: .topBarTrailing) {
