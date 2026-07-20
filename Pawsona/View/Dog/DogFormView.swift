@@ -43,18 +43,23 @@ struct DogFormView: View {
                     PhotosPicker(selection: $photoSelection, matching: .images) {
                         photoPickerLabel
                     }
+                    .accessibilityLabel(photoData == nil ? "Add dog photo" : "Change dog photo")
+                    .accessibilityValue(photoData == nil ? "No photo selected" : "Photo selected")
 
                     TextField("Name", text: $name)
                         .textInputAutocapitalization(.words)
+                        .accessibilityLabel("Dog name")
 
                     TextField("Breed", text: $breed)
                         .textInputAutocapitalization(.words)
+                        .accessibilityLabel("Dog breed")
 
                     DatePicker(
                         "Birthday",
                         selection: $dateOfBirth,
                         displayedComponents: .date
                     )
+                    .accessibilityLabel("Dog birthday")
                 }
 
                 Section("Card Color") {
@@ -64,6 +69,7 @@ struct DogFormView: View {
                                 .tag(color)
                         }
                     }
+                    .accessibilityLabel("Card color")
                 }
             }
             .navigationTitle(title)
@@ -71,11 +77,17 @@ struct DogFormView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", action: dismiss.callAsFunction)
+                        .accessibilityLabel("Cancel")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save", action: saveDog)
                         .disabled(trimmedBreed.isEmpty)
+                        .accessibilityLabel("Save dog")
+                        .accessibilityHint(
+                            "Enter a breed before saving",
+                            isEnabled: trimmedBreed.isEmpty
+                        )
                 }
             }
             .onChange(of: photoSelection) { _, newSelection in
@@ -95,7 +107,7 @@ struct DogFormView: View {
                     .clipShape(.circle)
             } else {
                 Image(systemName: "photo.circle.fill")
-                    .font(.system(size: 44))
+                    .font(.largeTitle)
                     .foregroundStyle(.secondary)
             }
 
@@ -112,8 +124,22 @@ struct DogFormView: View {
     }
 
     private func loadPhoto(from selection: PhotosPickerItem?) {
+        guard let selection else {
+            return
+        }
+
         Task {
-            photoData = try? await selection?.loadTransferable(type: Data.self)
+            do {
+                guard let loadedPhotoData = try await selection.loadTransferable(type: Data.self) else {
+                    AccessibilityNotification.Announcement("Unable to load dog photo").post()
+                    return
+                }
+
+                photoData = loadedPhotoData
+                AccessibilityNotification.Announcement("Dog photo selected").post()
+            } catch {
+                AccessibilityNotification.Announcement("Unable to load dog photo").post()
+            }
         }
     }
 
