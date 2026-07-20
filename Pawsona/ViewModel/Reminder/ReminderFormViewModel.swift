@@ -17,6 +17,7 @@ final class ReminderFormViewModel {
     var category: ReminderType
     var dueDate: Date
     var notes: String
+    var repeatDays: Set<Int>
     var selectedDogs: [Dog]
     var errorMessage: String?
 
@@ -30,6 +31,7 @@ final class ReminderFormViewModel {
         self.category = .others
         self.dueDate = Date.now.addingTimeInterval(3600)
         self.notes = ""
+        self.repeatDays = []
         self.selectedDogs = []
         self.editingReminder = nil
         self.notificationService = notificationService
@@ -41,13 +43,22 @@ final class ReminderFormViewModel {
         self.category = reminder.category
         self.dueDate = reminder.dueDate
         self.notes = reminder.notes ?? ""
+        self.repeatDays = Set(reminder.repeatDays)
         self.selectedDogs = reminder.dogList ?? []
         self.editingReminder = reminder
         self.notificationService = notificationService
     }
 
+    /// A repeating reminder fires weekly regardless of its start date, so only
+    /// one-shots require a future due date.
     var isSaveEnabled: Bool {
-        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && dueDate > .now
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && (!repeatDays.isEmpty || dueDate > .now)
+    }
+
+    /// What the form's Repeat row shows next to the label.
+    var repeatSummary: String {
+        Reminder.repeatSummary(for: repeatDays) ?? "Never"
     }
 
     func toggleDog(_ dog: Dog) {
@@ -78,6 +89,7 @@ final class ReminderFormViewModel {
             editingReminder.category = category
             editingReminder.dueDate = dueDate
             editingReminder.notes = trimmedNotes.isEmpty ? nil : trimmedNotes
+            editingReminder.repeatDays = repeatDays.sorted()
             editingReminder.dogList = selectedDogs
             reminder = editingReminder
         } else {
@@ -86,6 +98,7 @@ final class ReminderFormViewModel {
                 notes: trimmedNotes.isEmpty ? nil : trimmedNotes,
                 dogList: selectedDogs,
                 dueDate: dueDate,
+                repeatDays: repeatDays.sorted(),
                 category: category
             )
             modelContext.insert(reminder)

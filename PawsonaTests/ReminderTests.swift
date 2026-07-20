@@ -23,6 +23,20 @@ struct ReminderTests {
         #expect(reminder.title == "Checkup")
     }
 
+    @Test("Repeat days round-trip and drive the repeat summary")
+    func repeatDaysRoundTrip() throws {
+        let context = try TestSupport.makeContext()
+        context.insert(Reminder(title: "Vitamin", repeatDays: [5], category: .vitamin))
+        try context.save()
+
+        let reminder = try #require(try context.fetch(FetchDescriptor<Reminder>()).first)
+        #expect(reminder.repeatDays == [5])
+        #expect(reminder.isRepeating)
+        #expect(reminder.repeatSummary == "Every \(Calendar.current.weekdaySymbols[4])")
+        #expect(Reminder.repeatSummary(for: []) == nil)
+        #expect(Reminder.repeatSummary(for: Set(1...7)) == "Every Day")
+    }
+
     @Test("Reminder with no linked dogs is valid")
     func noLinkedDogsIsValid() throws {
         let context = try TestSupport.makeContext()

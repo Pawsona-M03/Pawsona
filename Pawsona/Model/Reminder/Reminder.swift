@@ -15,7 +15,9 @@ final class Reminder {
     var notes: String?
     @Relationship(inverse: \Dog.reminders) var dogList: [Dog]?
     var dueDate: Date = Date.now
-    var repeatRule: RepeatRule?
+    /// `Calendar` weekday numbers (1 = Sunday … 7 = Saturday) the reminder
+    /// repeats on, Clock-alarm style. Empty means it fires once.
+    var repeatDays: [Int] = []
     var category: ReminderType = ReminderType.others
 
     init(
@@ -24,7 +26,7 @@ final class Reminder {
         notes: String? = nil,
         dogList: [Dog]? = nil,
         dueDate: Date = .now,
-        repeatRule: RepeatRule? = nil,
+        repeatDays: [Int] = [],
         category: ReminderType = .others
     ) {
         self.id = id
@@ -32,7 +34,25 @@ final class Reminder {
         self.notes = notes
         self.dogList = dogList
         self.dueDate = dueDate
-        self.repeatRule = repeatRule
+        self.repeatDays = repeatDays
         self.category = category
+    }
+}
+
+extension Reminder {
+    var isRepeating: Bool { !repeatDays.isEmpty }
+
+    /// "Every Day", "Every Thursday", or "Every Mon, Tue" — nil when not repeating.
+    var repeatSummary: String? { Self.repeatSummary(for: Set(repeatDays)) }
+
+    static func repeatSummary(for days: Set<Int>, calendar: Calendar = .current) -> String? {
+        guard !days.isEmpty else { return nil }
+        if days.count == 7 { return "Every Day" }
+        let sorted = days.sorted()
+        if let only = sorted.first, sorted.count == 1 {
+            return "Every \(calendar.weekdaySymbols[only - 1])"
+        }
+        let names = sorted.map { calendar.shortWeekdaySymbols[$0 - 1] }
+        return "Every \(names.joined(separator: ", "))"
     }
 }
