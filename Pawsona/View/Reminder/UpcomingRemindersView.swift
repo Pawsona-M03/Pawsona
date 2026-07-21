@@ -92,10 +92,10 @@ struct UpcomingRemindersView: View {
                 }
             }
             .sheet(isPresented: $isShowingNewReminderForm) {
-                ReminderFormView()
+                ReminderFormView(notificationService: notificationService)
             }
             .sheet(item: $editingReminder) { reminder in
-                ReminderFormView(editing: reminder)
+                ReminderFormView(editing: reminder, notificationService: notificationService)
             }
         }
     }

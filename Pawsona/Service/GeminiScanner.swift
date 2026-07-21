@@ -150,9 +150,8 @@ struct GeminiScanner {
             let key = Bundle.main.object(forInfoDictionaryKey: "GeminiAPIKey") as? String,
             !key.isEmpty
         else { throw ScanError.missingKey }
-        guard let jpeg = downscale(image).jpegData(compressionQuality: 0.75) else {
-            throw ScanError.badImage
-        }
+
+        let jpeg = try await encodeForUpload(image)
 
         let body: [String: Any] = [
             "contents": [[
@@ -213,7 +212,7 @@ struct GeminiScanner {
     /// body is logged rather than surfaced, so it stays available for debugging.
     static func scanError(forStatus status: Int, body: Data) -> ScanError {
         let message = String(data: body, encoding: .utf8) ?? "no body"
-        logger.error("Gemini returned HTTP \(status, privacy: .public): \(message, privacy: .public)")
+        logger.error("Gemini returned HTTP \(status, privacy: .public): \(message)")
 
         switch status {
         case 429:
@@ -241,7 +240,7 @@ struct GeminiScanner {
             let text = parts.compactMap({ $0["text"] as? String }).last,
             let textData = text.data(using: .utf8)
         else {
-            logger.error("Unrecognised Gemini envelope: \(String(data: data, encoding: .utf8) ?? "", privacy: .public)")
+            logger.error("Unrecognised Gemini envelope: \(String(data: data, encoding: .utf8) ?? "")")
             throw ScanError.unreadableResponse
         }
 
@@ -262,8 +261,22 @@ struct GeminiScanner {
         }
     }
 
+    /// Resizes and JPEG-encodes the photo away from the main actor.
+    ///
+    /// The project builds with `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, so
+    /// this type is main-actor isolated and all of this ran on the main thread —
+    /// a full redraw plus a JPEG encode of a 12MP camera image, right as the
+    /// scanning spinner appeared. `nonisolated async` puts it on the cooperative
+    /// pool instead.
+    private nonisolated static func encodeForUpload(_ image: UIImage) async throws -> Data {
+        guard let jpeg = downscale(image).jpegData(compressionQuality: 0.75) else {
+            throw ScanError.badImage
+        }
+        return jpeg
+    }
+
     // Cap the longest side to keep upload size and token cost down.
-    private static func downscale(_ image: UIImage, maxDimension: CGFloat = 1568) -> UIImage {
+    private nonisolated static func downscale(_ image: UIImage, maxDimension: CGFloat = 1568) -> UIImage {
         let largest = max(image.size.width, image.size.height)
         guard largest > maxDimension else { return image }
         let scale = maxDimension / largest
