@@ -17,54 +17,17 @@ struct DogColorPickerRow: View {
             .frame(width: isSelected ? 28 : 16, height: isSelected ? 28 : 16)
             .overlay {
                 if isSelected {
+                    // Size alone shouldn't carry the selection: a ring gives it
+                    // a cue that survives when the swatch colour is hard to
+                    // tell apart from its neighbours.
                     Circle()
-                        .stroke(.primary, lineWidth: 0)
+                        .strokeBorder(.primary, lineWidth: 2)
                 }
             }
             .animation(.snappy, value: isSelected)
     }
 
-    private var title: String {
-        switch color {
-        case .red:
-            "Red"
-        case .orange:
-            "Orange"
-        case .yellow:
-            "Yellow"
-        case .green:
-            "Green"
-        case .blue:
-            "Blue"
-        case .purple:
-            "Purple"
-        case .pink:
-            "Pink"
-        case .gray:
-            "Gray"
-        }
-    }
-
-    private var swatchColor: Color {
-        switch color {
-        case .red:
-            .red
-        case .orange:
-            .orange
-        case .yellow:
-            .yellow
-        case .green:
-            .green
-        case .blue:
-            .blue
-        case .purple:
-            .purple
-        case .pink:
-            .pink
-        case .gray:
-            .gray
-        }
-    }
+    private var swatchColor: Color { color.color }
 }
 
 #Preview {

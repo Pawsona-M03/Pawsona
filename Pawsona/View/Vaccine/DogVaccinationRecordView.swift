@@ -39,7 +39,7 @@ struct DogVaccinationRecordView: View {
                                 VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: false)
                             }
                             .buttonStyle(.plain)
-                            // Long-press untuk menghapus
+                            // Long-press to delete.
                             .contextMenu {
                                 Button(role: .destructive) {
                                     deleteSingleVaccineRecord(vaccineRecord)
@@ -130,9 +130,7 @@ struct DogVaccinationRecordView: View {
     }
 
     private func deleteSingleVaccineRecord(_ record: VaccineRecord) {
-        Task {
-            vaccineViewModel.deleteRecord(id: record.id, in: modelContext)
-        }
+        vaccineViewModel.deleteRecord(id: record.id, in: modelContext)
     }
 }
 
