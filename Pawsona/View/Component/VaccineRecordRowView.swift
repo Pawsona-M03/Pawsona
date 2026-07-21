@@ -31,9 +31,15 @@ struct VaccineRecordRowView: View {
                 }
 
                 if showsDogName {
-                    HStack(alignment: .top, spacing: 14) {
-                        ForEach(vaccineRecord.dogList ?? [], id: \.id) { dog in
-                            VaccineRecordDogBadge(dog: dog)
+                    if isUnassigned {
+                        Label("No dog assigned", systemImage: "exclamationmark.triangle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.orange)
+                    } else {
+                        HStack(alignment: .top, spacing: 14) {
+                            ForEach(vaccineRecord.dogList ?? [], id: \.id) { dog in
+                                VaccineRecordDogBadge(dog: dog)
+                            }
                         }
                     }
                 }
@@ -60,12 +66,20 @@ struct VaccineRecordRowView: View {
         return "\(date) - \(time)"
     }
 
+    private var isUnassigned: Bool {
+        vaccineRecord.dogList?.isEmpty ?? true
+    }
+
     private var accessibilityLabel: String {
-        if showsDogName {
-            return "\(vaccineRecord.vaccineNames) for \(vaccineRecord.dogNames), given \(dateText)"
+        guard showsDogName else {
+            return "\(vaccineRecord.vaccineNames), given \(dateText)"
         }
 
-        return "\(vaccineRecord.vaccineNames), given \(dateText)"
+        if isUnassigned {
+            return "\(vaccineRecord.vaccineNames), given \(dateText). No dog assigned"
+        }
+
+        return "\(vaccineRecord.vaccineNames) for \(vaccineRecord.dogNames), given \(dateText)"
     }
 }
 

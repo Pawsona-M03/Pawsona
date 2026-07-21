@@ -108,15 +108,24 @@ struct VaccineRecordFormView: View {
     
     private var dogSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Dog")
-                .font(.title3.bold())
-                .foregroundStyle(.primary)
-            
+            HStack(spacing: 6) {
+                Text("Dog")
+                    .font(.title3.bold())
+                    .foregroundStyle(.primary)
+
+                if selectedDogIDs.isEmpty {
+                    Label("Not assigned yet", systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                        .labelStyle(.titleAndIcon)
+                }
+            }
+
             if dogs.isEmpty {
                 ContentUnavailableView(
                     "No Dogs Yet",
                     systemImage: "pawprint",
-                    description: Text("Add a dog before saving a vaccination record.")
+                    description: Text("You can save this record now and assign a dog once you add one.")
                 )
             } else {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 58), spacing: 5)], alignment: .leading, spacing: 8) {
@@ -131,9 +140,11 @@ struct VaccineRecordFormView: View {
             }
         }
     }
-    
+
+    // A dog is deliberately not required: a scan produces records before the user
+    // has said which dog they belong to, and the record card flags the gap.
     private var isSaveEnabled: Bool {
-        !vaccines.isEmpty && !selectedDogIDs.isEmpty
+        !vaccines.isEmpty
     }
     
     private var selectedDogs: [Dog] {
@@ -165,9 +176,6 @@ struct VaccineRecordFormView: View {
             trimmedNotes.isEmpty ? nil : trimmedNotes
         )
         dismiss()
-    }
-    
-    private func scanVaccineBook() {
     }
 }
 
