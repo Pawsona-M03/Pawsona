@@ -153,12 +153,13 @@ struct DogDetailView: View {
             minHeight: max(0, containerHeight - (sheetCornerRadius)),
             alignment: .top
         )
-        .background {
-            Image(.pawsBg)
-                .resizable()
-                .scaledToFill()
-                .accessibilityHidden(true)
-        }
+//        .background {
+//            Image(.pawsBg)
+//                .resizable()
+//                .scaledToFill()
+//                .opacity(0.5)
+//                .accessibilityHidden(true)
+//        }
         .background(.background)
         .clipShape(.rect(topLeadingRadius: sheetCornerRadius, topTrailingRadius: sheetCornerRadius))
     }

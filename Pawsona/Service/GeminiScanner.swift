@@ -22,7 +22,7 @@ import OSLog
 import UIKit
 
 struct GeminiScanner {
-    static let model = "gemini-3.5-flash"
+    static let model = "gemini-3.6-flash"
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "Pawsona",

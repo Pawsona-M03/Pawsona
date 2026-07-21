@@ -24,7 +24,7 @@ struct ContentView: View {
             }
 
         }
-        .tint(.brown)
+        .tint(Color(.primaryBrown))
     }
 }
 #Preview {

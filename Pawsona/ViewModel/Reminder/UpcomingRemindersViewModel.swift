@@ -16,6 +16,10 @@ import SwiftData
 final class UpcomingRemindersViewModel {
     var selectedDate: Date
 
+    /// A year either side of today, for the horizontal day strip. Built once so
+    /// scrolling doesn't rebuild ~700 dates on every redraw.
+    let stripDays: [Date]
+
     private let notificationService: NotificationService
     private let calendar: Calendar
 
@@ -26,13 +30,12 @@ final class UpcomingRemindersViewModel {
     ) {
         self.notificationService = notificationService
         self.calendar = calendar
-        self.selectedDate = calendar.startOfDay(for: today)
-    }
 
-    /// The seven days of the week containing `date`, in calendar order.
-    func weekDays(containing date: Date = .now) -> [Date] {
-        guard let start = calendar.dateInterval(of: .weekOfYear, for: date)?.start else { return [] }
-        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
+        let startOfToday = calendar.startOfDay(for: today)
+        self.selectedDate = startOfToday
+        self.stripDays = (-365...365).compactMap {
+            calendar.date(byAdding: .day, value: $0, to: startOfToday)
+        }
     }
 
     /// Reminders occurring on the given day, sorted by time of day: one-shots

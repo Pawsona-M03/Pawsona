@@ -41,14 +41,14 @@ struct DogListContentView: View {
                 }
             }
         }
-        .background {
-            Image(.pawsBg)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .opacity(0.8)
-                .accessibilityHidden(true)
-        }
+//        .background {
+//            Image(.pawsBg)
+//                .resizable()
+//                .scaledToFill()
+//                .ignoresSafeArea()
+//                .opacity(0.5)
+//                .accessibilityHidden(true)
+//        }
     }
 
     private func accessibilityName(for dog: Dog) -> String {

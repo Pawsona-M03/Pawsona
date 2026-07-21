@@ -65,7 +65,7 @@ struct VaccineListView: View {
                     } label: {
                         Label("New Vaccination Record", systemImage: "plus")
                     }
-                    .tint(.brown)
+                    .tint(Color(.primaryBrown))
                     .disabled(scanViewModel.isScanning)
                     .accessibilityShowsLargeContentViewer()
                 }

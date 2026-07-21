@@ -63,7 +63,7 @@ struct DogListView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Dog", systemImage: "plus", action: showAddDogForm)
                         .buttonStyle(.glassProminent)
-                        .tint(Color(.brown))
+                        .tint(Color(.primaryBrown))
                         .accessibilityLabel("Add dog")
                 }
             }
