@@ -22,6 +22,8 @@ struct DogEditView: View {
                 breed: dog.breed,
                 dateOfBirth: dog.dateOfBirth ?? .now,
                 backgroundColor: dog.backgroundColor,
+                weightKg: dog.weight,
+                sex: dog.sex,
                 photoData: dog.photoData
             ),
             onSave: editDog

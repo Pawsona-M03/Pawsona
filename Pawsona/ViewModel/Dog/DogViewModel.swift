@@ -22,6 +22,8 @@ final class DogViewModel {
             breed: draft.breed,
             backgroundColor: draft.backgroundColor,
             dateOfBirth: draft.dateOfBirth,
+            weight: draft.weightKg,
+            sex: draft.sex,
             photoData: draft.photoData
         )
 
@@ -64,6 +66,8 @@ final class DogViewModel {
         dog.breed = draft.breed
         dog.dateOfBirth = draft.dateOfBirth
         dog.backgroundColor = draft.backgroundColor
+        dog.weight = draft.weightKg
+        dog.sex = draft.sex
         dog.photoData = draft.photoData
 
         saveChanges(in: modelContext)
