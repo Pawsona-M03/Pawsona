@@ -47,18 +47,7 @@ struct VaccineRecordFormView: View {
                 }
                 .padding(.horizontal, 30)
                 .padding(.top, 18)
-                .padding(.bottom, 120)
-            }
-            .safeAreaInset(edge: .bottom) {
-                Button("Scan Vaccine Book", action: scanVaccineBook)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, minHeight: 52)
-                    .background(.brown)
-                    .clipShape(.rect(cornerRadius: 26))
-                    .padding(.horizontal, 30)
-                    .padding(.bottom, 18)
-                    .background(.background)
+                .padding(.bottom, 24)
             }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
@@ -119,15 +108,24 @@ struct VaccineRecordFormView: View {
 
     private var dogSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Dog")
-                .font(.title3.bold())
-                .foregroundStyle(.primary)
+            HStack(spacing: 6) {
+                Text("Dog")
+                    .font(.title3.bold())
+                    .foregroundStyle(.primary)
+
+                if selectedDogIDs.isEmpty {
+                    Label("Not assigned yet", systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                        .labelStyle(.titleAndIcon)
+                }
+            }
 
             if dogs.isEmpty {
                 ContentUnavailableView(
                     "No Dogs Yet",
                     systemImage: "pawprint",
-                    description: Text("Add a dog before saving a vaccination record.")
+                    description: Text("You can save this record now and assign a dog once you add one.")
                 )
             } else {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 58), spacing: 14)], alignment: .leading, spacing: 14) {
@@ -143,8 +141,10 @@ struct VaccineRecordFormView: View {
         }
     }
 
+    // A dog is deliberately not required: a scan produces records before the user
+    // has said which dog they belong to, and the record card flags the gap.
     private var isSaveEnabled: Bool {
-        !vaccines.isEmpty && !selectedDogIDs.isEmpty
+        !vaccines.isEmpty
     }
 
     private var selectedDogs: [Dog] {
@@ -178,8 +178,6 @@ struct VaccineRecordFormView: View {
         dismiss()
     }
 
-    private func scanVaccineBook() {
-    }
 }
 
 private struct VaccineSelectionButton: View {

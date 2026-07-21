@@ -1,0 +1,13 @@
+//
+//  Shared.xcconfig
+//  Pawsona
+//
+//  Base build configuration for the app target. Local secrets are layered
+//  on top via an optional include, so a fresh checkout still builds and
+//  runs (Gemini scanning just reports a missing key at runtime) without
+//  requiring every developer to have one before they can compile.
+//
+
+GEMINI_API_KEY =
+
+#include? "Secrets.xcconfig"

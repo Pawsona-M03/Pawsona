@@ -17,6 +17,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1BD1B0E9BE234FF9DAC9F17A /* Secrets.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig.example; sourceTree = "<group>"; };
+		934A01F299CB816BD2F03C3A /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
 		D819FD113001F219007D79F8 /* Pawsona.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pawsona.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA19FD0130020001007D79F8 /* PawsonaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PawsonaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -68,6 +70,7 @@
 		D819FD083001F219007D79F8 = {
 			isa = PBXGroup;
 			children = (
+				F20E98A1CA0A5F8ACE695463 /* Config */,
 				D819FD133001F219007D79F8 /* Pawsona */,
 				DA19FD0230020002007D79F8 /* PawsonaTests */,
 				D819FD123001F219007D79F8 /* Products */,
@@ -81,6 +84,15 @@
 				DA19FD0130020001007D79F8 /* PawsonaTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F20E98A1CA0A5F8ACE695463 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				934A01F299CB816BD2F03C3A /* Shared.xcconfig */,
+				1BD1B0E9BE234FF9DAC9F17A /* Secrets.xcconfig.example */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -114,6 +126,7 @@
 			buildPhases = (
 				DA19FD0430020004007D79F8 /* Sources */,
 				DA19FD0530020005007D79F8 /* Frameworks */,
+				DA19FD1030020010007D79F8 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -177,6 +190,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DA19FD1030020010007D79F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -207,6 +227,7 @@
 /* Begin XCBuildConfiguration section */
 		D819FD203001F21A007D79F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 934A01F299CB816BD2F03C3A /* Shared.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -217,6 +238,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pawsona uses the microphone so you can dictate search terms instead of typing.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pawsona uses speech recognition to turn your dictated search into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -241,6 +266,7 @@
 		};
 		D819FD213001F21A007D79F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 934A01F299CB816BD2F03C3A /* Shared.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -251,6 +277,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pawsona uses the microphone so you can dictate search terms instead of typing.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pawsona uses speech recognition to turn your dictated search into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
