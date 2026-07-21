@@ -17,13 +17,15 @@ enum ReminderType: String, Codable, CaseIterable {
 extension ReminderType {
     var displayName: String { rawValue.capitalized }
 
-    /// Accent used for the type's dot, icon, and card title (per the hifi).
+    /// Accent used for the type's dot and icon (per the hifi). Deliberately not
+    /// used for title text: these tints sit at roughly 2:1 against a card, well
+    /// under the 4.5:1 text minimum, so titles stay on `.primary`.
     var color: Color {
         switch self {
-        case .vitamin: .orange
-        case .medicine: .cyan
-        case .vaccine: .green
-        case .others: .purple
+        case .vitamin: Color(.vitamin)
+        case .medicine: Color(.medicine)
+        case .vaccine: Color(.vaccine)
+        case .others: Color(.others)
         }
     }
 

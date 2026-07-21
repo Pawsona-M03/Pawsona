@@ -81,18 +81,15 @@ struct WeekStripView: View {
                 Text(day.formatted(.dateTime.day()))
                     .font(isSelected ? .title2 : .body)
                     .bold(isSelected)
-                    .foregroundStyle(isSelected ? Color(.primaryBrown) : .primary)
+                    .foregroundStyle(isSelected ? Color(.primaryBrown) : Color.primary)
                     .frame(
                         width: isSelected ? selectedDaySize : daySize,
                         height: isSelected ? selectedDaySize : daySize
                     )
                     .background(
-                        isSelected
-                            ? AnyShapeStyle(Color(.secondaryBrown))
-                            : AnyShapeStyle(.background),
+                        isSelected ? Color(.secondaryBrown) : Color(.cardSurface),
                         in: .circle
                     )
-                    .shadow(color: .black.opacity(0.12), radius: 3, y: 2)
                     // Fixed box so the larger selected circle doesn't shift the
                     // strip's height or its neighbours.
                     .frame(height: selectedDaySize)

@@ -16,7 +16,7 @@ struct VaccineRecordRowView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "syringe")
                 .font(.title3)
-                .foregroundStyle(Color("vaccine"))
+                .foregroundStyle(Color(.vaccine))
                 .frame(width: 24, height: 24)
                 .accessibilityHidden(true)
 
@@ -24,10 +24,10 @@ struct VaccineRecordRowView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(vaccineRecord.vaccineNames)
                         .font(.headline)
-                        .foregroundStyle(Color("vaccine"))
+                        .foregroundStyle(.primary)
                     Text(dateText)
                         .font(.subheadline)
-                        .foregroundStyle(Color("textSecondary"))
+                        .foregroundStyle(.secondary)
                 }
 
                 if showsDogName {
@@ -47,15 +47,13 @@ struct VaccineRecordRowView: View {
                 if let notes = vaccineRecord.notes, !notes.isEmpty {
                     Text(notes)
                         .font(.caption)
-                        .foregroundStyle(Color("textSecondary"))
+                        .foregroundStyle(.secondary)
                 }
             }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.cardSurface))
-        .clipShape(.rect(cornerRadius: 8))
-        .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+        .cardBackground()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }
@@ -92,7 +90,7 @@ private struct VaccineRecordDogBadge: View {
 
             Text(displayName)
                 .font(.caption2.bold())
-                .foregroundStyle(Color("textPrimary"))
+                .foregroundStyle(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .frame(width: 52)
@@ -114,7 +112,7 @@ private struct VaccineRecordDogBadge: View {
                 .overlay {
                     Image(systemName: "pawprint.fill")
                         .font(.title3)
-                        .foregroundStyle(Color("textSecondary").opacity(0.35))
+                        .foregroundStyle(Color.secondary.opacity(0.35))
                 }
         }
     }

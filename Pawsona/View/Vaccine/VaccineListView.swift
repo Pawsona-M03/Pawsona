@@ -29,7 +29,7 @@ struct VaccineListView: View {
 
                         Text("Tap '+' to add Vaccination Record")
                             .font(.headline)
-                            .foregroundStyle(Color("textSecondary"))
+                            .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity)
 
                         Spacer()

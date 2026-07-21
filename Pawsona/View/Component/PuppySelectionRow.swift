@@ -24,7 +24,7 @@ struct PuppySelectionRow: View {
                     .clipShape(.circle)
                     .overlay {
                         if isSelected {
-                            Circle().strokeBorder(.orange, lineWidth: 3)
+                            Circle().strokeBorder(Color(.primaryBrown), lineWidth: 3)
                         }
                     }
 

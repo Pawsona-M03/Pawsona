@@ -28,14 +28,13 @@ struct RepeatDayPicker: View {
                 } label: {
                     Text(calendar.veryShortWeekdaySymbols[weekday - 1])
                         .font(.body)
-                        .foregroundStyle(isSelected ? .white : .primary)
+                        .bold(isSelected)
+                        // Matches the week strip's day picker, so the two
+                        // day-selection controls read as the same control.
+                        .foregroundStyle(isSelected ? Color(.primaryBrown) : Color.primary)
                         .frame(minWidth: 44, minHeight: 44)
                         .background(
-                            // Explicit light grey: the hierarchical styles all
-                            // resolve too dark against the form's white card.
-                            isSelected
-                                ? AnyShapeStyle(.tint)
-                                : AnyShapeStyle(Color.primary.opacity(0.08)),
+                            isSelected ? Color(.secondaryBrown) : Color(.appBackground),
                             in: .circle
                         )
                 }

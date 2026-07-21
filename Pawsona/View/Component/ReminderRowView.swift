@@ -25,7 +25,7 @@ struct ReminderRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(reminder.title)
                     .font(.headline)
-                    .foregroundStyle(reminder.category.color)
+                    .foregroundStyle(.primary)
 
                 if let repeatSummary = reminder.repeatSummary {
                     Text(repeatSummary)

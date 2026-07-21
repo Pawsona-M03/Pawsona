@@ -218,7 +218,7 @@ private struct VaccineDogSelectionButton: View {
                 avatar
                     .overlay {
                         Circle()
-                            .stroke(isSelected ? Color.orange : Color.clear, lineWidth: 3)
+                            .stroke(isSelected ? Color(.primaryBrown) : Color.clear, lineWidth: 3)
                     }
 
                 Text(displayName)
