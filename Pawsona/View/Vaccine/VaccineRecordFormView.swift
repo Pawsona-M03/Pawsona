@@ -195,7 +195,7 @@ private struct VaccineSelectionButton: View {
                 
                 Image(systemName: isSelected ? "circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(isSelected ? Color.brown : Color.secondary)
+                    .foregroundStyle(isSelected ? Color("ActionBrown") : Color.secondary)
             }
             .contentShape(.rect)
         }

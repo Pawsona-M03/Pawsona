@@ -140,12 +140,14 @@ struct DogFormView: View {
                         .frame(height: 60)
                 }
                 .padding(.horizontal, 14)
-                .background(.background, in: .rect(cornerRadius: 32))
+                .background(BackgroundStyle(), in: .rect(cornerRadius: 32))
                 .padding(.horizontal, 30)
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .background(.gray.opacity(0.08))
+            .background {
+                Color.gray.opacity(0.08)
+            }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
