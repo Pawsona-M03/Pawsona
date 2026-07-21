@@ -99,7 +99,7 @@ private struct VaccineRecordDogBadge: View {
 
     @ViewBuilder
     private var avatar: some View {
-        if let photoData = dog.photoData, let image = UIImage(data: photoData) {
+        if let image = DogPhotoCache.image(for: dog) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()

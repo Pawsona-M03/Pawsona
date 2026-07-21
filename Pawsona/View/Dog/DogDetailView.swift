@@ -160,7 +160,12 @@ struct DogDetailView: View {
 
     private var displayName: String { dog.displayName }
 
-    private var displayedHeroHeight: CGFloat { heroHeight }
+    /// The hero grows with Dynamic Type but stops short of swallowing the
+    /// screen. It was previously capped at its own base value, which made the
+    /// ScaledMetric a no-op at every size at or above default.
+    private var displayedHeroHeight: CGFloat {
+        min(heroHeight, 520)
+    }
 
     private var statLayout: AnyLayout {
         if dynamicTypeSize.isAccessibilitySize {

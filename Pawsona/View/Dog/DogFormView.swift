@@ -194,8 +194,8 @@ struct DogFormView: View {
     @ViewBuilder
     private var photoPickerLabel: some View {
         Group {
-            if let photoData, let image = Image(data: photoData) {
-                image
+            if let photoData, let uiImage = UIImage(data: photoData) {
+                Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 160, height: 160)
