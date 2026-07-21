@@ -4,6 +4,14 @@
 
 **Compiler ground truth:** clean `xcodebuild` Debug build for `generic/platform=iOS Simulator`, **zero Swift warnings, zero errors**. The only build output was `appintentsmetadataprocessor` noting no AppIntents dependency, which is expected. Every concurrency and deprecation finding below therefore comes from reading, not from a warning list — there is no warning list.
 
+> **Remediation status (2026-07-22, branch `bugfix/code-audit-remediation`).** The Critical
+> finding and all eight High findings are fixed, along with most Medium and Low items, across
+> nine commits. Test count went from 48 to 71; the build and SwiftLint are both clean.
+> **Still open, deliberately:** §5.9 (nil-name sort order — needs a schema decision), §4.2
+> (VisionKit document camera — a feature change, not a defect), and §10.6 (localization — the
+> largest remaining item, worth planning on its own). Section numbers below are unchanged so
+> existing references still resolve.
+
 **Overall:** this is a well-kept codebase. Secrets are handled correctly, models are CloudKit-legal, accessibility has clearly been built in rather than retrofitted, and the vaccine-scan subsystem is genuinely well-tested. The findings concentrate in three places: a **locale-dependent data-loss bug in the dog form**, **eager PDF/JSON generation on the main actor whose output is partly thrown away**, and **shipping push-notification configuration for a feature the app does not have**.
 
 ---
