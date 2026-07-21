@@ -24,11 +24,7 @@ struct DogStatBox: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(.background, in: .rect(cornerRadius: 8))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-        }
+        .cardBackground()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(title), \(value)")
     }

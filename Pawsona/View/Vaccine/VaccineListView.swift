@@ -18,12 +18,13 @@ struct VaccineListView: View {
     @State private var isShowingNewVaccineForm = false
     @State private var isShowingCamera = false
     @State private var capturedImage: UIImage?
+    @State private var isShowingAddOptions = false
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                VStack(alignment: .leading, spacing: 24) {
-                    if vaccineRecords.isEmpty {
+            Group {
+                if vaccineRecords.isEmpty {
+                    VStack {
                         Spacer()
 
                         Text("Tap '+' to add Vaccination Record")
@@ -32,25 +33,27 @@ struct VaccineListView: View {
                             .frame(maxWidth: .infinity)
 
                         Spacer()
-                    } else {
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                ForEach(vaccineRecords, id: \.id) { vaccineRecord in
-                                    Button {
-                                        editingVaccineRecord = vaccineRecord
-                                    } label: {
-                                        VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: true)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.vertical, 8)
-                        }
-                        .scrollIndicators(.hidden)
                     }
+                    .padding(.horizontal, 26)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(vaccineRecords, id: \.id) { vaccineRecord in
+                                Button {
+                                    editingVaccineRecord = vaccineRecord
+                                } label: {
+                                    VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: true)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 26)
+                    }
+                    .scrollIndicators(.hidden)
                 }
-                .padding(.horizontal, 26)
             }
+            .background(Color(.appBackground).ignoresSafeArea())
             .overlay {
                 if scanViewModel.isScanning {
                     ScanProgressOverlay()
@@ -59,15 +62,25 @@ struct VaccineListView: View {
             .navigationTitle("Vaccination Record")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button("Add Manually", systemImage: "square.and.pencil", action: showNewVaccineForm)
-                        Button("Scan Vaccine Book", systemImage: "camera", action: startScan)
+                    Button {
+                        isShowingAddOptions = true
                     } label: {
-                        Label("New Vaccination Record", systemImage: "plus")
+                        Image(systemName: "plus")
+                            .foregroundStyle(.white)
+                            .accessibilityLabel("Add Vaccination Record")
                     }
+                    .buttonStyle(.glassProminent)
                     .tint(Color(.primaryBrown))
                     .disabled(scanViewModel.isScanning)
                     .accessibilityShowsLargeContentViewer()
+                    .confirmationDialog(
+                        "Add Vaccination Record",
+                        isPresented: $isShowingAddOptions,
+                        titleVisibility: .hidden
+                    ) {
+                        Button("Scan Vaccine Book", systemImage: "camera.viewfinder", action: scanVaccineBook)
+                        Button("Input Manually", systemImage: "square.and.pencil", action: inputManually)
+                    }
                 }
             }
             .fullScreenCover(isPresented: $isShowingCamera) {
@@ -116,11 +129,11 @@ struct VaccineListView: View {
         }
     }
 
-    private func showNewVaccineForm() {
+    private func inputManually() {
         isShowingNewVaccineForm = true
     }
 
-    private func startScan() {
+    private func scanVaccineBook() {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             scanViewModel.report(.cameraUnavailable)
             return
@@ -164,7 +177,7 @@ struct VaccineListView: View {
 private struct ScanProgressOverlay: View {
     var body: some View {
         ZStack {
-            Color(.systemBackground).opacity(0.85)
+            Color(.appBackground).opacity(0.85)
 
             VStack(spacing: 12) {
                 ProgressView()
@@ -179,27 +192,6 @@ private struct ScanProgressOverlay: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Reading vaccine book")
         .accessibilityAddTraits(.updatesFrequently)
-    }
-}
-
-private struct PawPrintBackground: View {
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 28), count: 4)
-
-    var body: some View {
-        Color(.systemBackground)
-            .overlay {
-                LazyVGrid(columns: columns, spacing: 34) {
-                    ForEach(0..<56, id: \.self) { index in
-                        Image(systemName: "pawprint.fill")
-                            .font(.system(size: index.isMultiple(of: 3) ? 32 : 26))
-                            .foregroundStyle(.secondary.opacity(0.12))
-                            .rotationEffect(.degrees(index.isMultiple(of: 2) ? -18 : 16))
-                    }
-                }
-                .padding(18)
-            }
-            .ignoresSafeArea()
-            .accessibilityHidden(true)
     }
 }
 

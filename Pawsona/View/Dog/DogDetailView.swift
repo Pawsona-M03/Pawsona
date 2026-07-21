@@ -136,8 +136,7 @@ struct DogDetailView: View {
                         .accessibilityHidden(true)
                 }
                 .padding()
-                .background(.quinary, in: .rect(cornerRadius: 14))
-                .background(.background, in: .rect(cornerRadius: 14))
+                .cardBackground()
             }
             .buttonStyle(.plain)
             .padding(.horizontal)
@@ -153,14 +152,7 @@ struct DogDetailView: View {
             minHeight: max(0, containerHeight - (sheetCornerRadius)),
             alignment: .top
         )
-//        .background {
-//            Image(.pawsBg)
-//                .resizable()
-//                .scaledToFill()
-//                .opacity(0.5)
-//                .accessibilityHidden(true)
-//        }
-        .background(.background)
+        .background(Color(.appBackground))
         .clipShape(.rect(topLeadingRadius: sheetCornerRadius, topTrailingRadius: sheetCornerRadius))
     }
 

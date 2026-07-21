@@ -18,26 +18,44 @@ struct DogVaccinationRecordView: View {
     let dog: Dog
 
     var body: some View {
-        List {
+        Group {
             if sortedVaccineRecords.isEmpty {
-                ContentUnavailableView(
-                    "No Vaccine Records",
-                    systemImage: "syringe",
-                    description: Text("Add a record to start tracking \(displayName)'s vaccines.")
-                )
-            } else {
-                ForEach(sortedVaccineRecords, id: \.id) { vaccineRecord in
-                    Button {
-                        editingVaccineRecord = vaccineRecord
-                        isShowingEditVaccineForm = true
-                    } label: {
-                        VaccineRecordRowView(vaccineRecord: vaccineRecord)
-                    }
-                    .buttonStyle(.plain)
+                VStack {
+                    Spacer()
+                    ContentUnavailableView(
+                        "No Vaccine Records",
+                        systemImage: "syringe",
+                        description: Text("Add a record to start tracking \(displayName)'s vaccines.")
+                    )
+                    Spacer()
                 }
-                .onDelete(perform: deleteVaccineRecords)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(sortedVaccineRecords, id: \.id) { vaccineRecord in
+                            Button {
+                                editingVaccineRecord = vaccineRecord
+                            } label: {
+                                VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: false)
+                            }
+                            .buttonStyle(.plain)
+                            // Long-press untuk menghapus
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    deleteSingleVaccineRecord(vaccineRecord)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 26)
+                }
+                .scrollIndicators(.hidden)
             }
         }
+        .background(Color(.appBackground).ignoresSafeArea())
         .navigationTitle("Vaccination Record")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -51,19 +69,23 @@ struct DogVaccinationRecordView: View {
                 onSave: createVaccineRecord
             )
         }
-        .sheet(isPresented: $isShowingEditVaccineForm) {
-            if let vaccineRecord = editingVaccineRecord {
-                VaccineRecordFormView(
-                    title: "Edit Vaccine Record",
-                    vaccines: vaccineRecord.vaccines,
-                    dateGiven: vaccineRecord.dateGiven,
-                    selectedDogs: vaccineRecord.dogList ?? [dog],
-                    notes: vaccineRecord.notes ?? "",
-                    onSave: { vaccines, dateGiven, dogList, notes in
-                        editVaccineRecord(vaccineRecord, vaccines: vaccines, dateGiven: dateGiven, dogList: dogList, notes: notes)
-                    }
-                )
-            }
+        .sheet(item: $editingVaccineRecord) { vaccineRecord in
+            VaccineRecordFormView(
+                title: "Edit Vaccine Record",
+                vaccines: vaccineRecord.vaccines,
+                dateGiven: vaccineRecord.dateGiven,
+                selectedDogs: vaccineRecord.dogList ?? [dog],
+                notes: vaccineRecord.notes ?? "",
+                onSave: { vaccines, dateGiven, dogList, notes in
+                    editVaccineRecord(
+                        vaccineRecord,
+                        vaccines: vaccines,
+                        dateGiven: dateGiven,
+                        dogList: dogList,
+                        notes: notes
+                    )
+                }
+            )
         }
     }
 
@@ -107,13 +129,9 @@ struct DogVaccinationRecordView: View {
         )
     }
 
-    private func deleteVaccineRecords(at offsets: IndexSet) {
-        let idsToDelete = offsets.map { sortedVaccineRecords[$0].id }
-
+    private func deleteSingleVaccineRecord(_ record: VaccineRecord) {
         Task {
-            for id in idsToDelete {
-                vaccineViewModel.deleteRecord(id: id, in: modelContext)
-            }
+            vaccineViewModel.deleteRecord(id: record.id, in: modelContext)
         }
     }
 }

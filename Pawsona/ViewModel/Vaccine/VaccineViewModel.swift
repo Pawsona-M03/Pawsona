@@ -68,7 +68,7 @@ final class VaccineViewModel {
         notes: String?,
         dogList: [Dog],
         in modelContext: ModelContext
-    ){
+    ) {
         vaccineRecord.vaccines = vaccines
         vaccineRecord.dateGiven = dateGiven
         vaccineRecord.notes = notes

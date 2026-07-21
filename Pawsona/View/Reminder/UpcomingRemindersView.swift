@@ -69,20 +69,15 @@ struct UpcomingRemindersView: View {
                                 }
                             }
                         }
+                        .listRowBackground(Color(.cardSurface))
                     }
                 }
             }
-            // Restore this alongside the paw backdrop below — without a backdrop
-            // to show through, hiding the list background leaves the reminder
-            // cards white-on-white.
-//            .scrollContentBackground(.hidden)
-//            .background {
-//                Image(.pawsBg)
-//                    .resizable()
-//                    .scaledToFill()
-//                    .opacity(0.5)
-//                    .ignoresSafeArea()
-//            }
+            // Drive the list from the app's own two surfaces rather than the
+            // system's, so a reminder row and a vaccine card are the same colour
+            // in both appearances.
+            .scrollContentBackground(.hidden)
+            .background(Color(.appBackground).ignoresSafeArea())
             .navigationTitle("Reminder")
             .task {
                 await notificationService.requestPermission()

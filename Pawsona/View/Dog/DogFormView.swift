@@ -140,12 +140,14 @@ struct DogFormView: View {
                         .frame(height: 60)
                 }
                 .padding(.horizontal, 14)
-                .background(.background, in: .rect(cornerRadius: 32))
+                .cardBackground(cornerRadius: 32)
                 .padding(.horizontal, 30)
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .background(.gray.opacity(0.08))
+            .background {
+                Color(.appBackground)
+            }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -197,7 +199,7 @@ struct DogFormView: View {
             }
         }
         .frame(width: 160, height: 160)
-        .clipShape(.rect(cornerRadius: 8))
+        .clipShape(.rect(cornerRadius: 16))
         .overlay(alignment: .bottomTrailing) {
             Image(systemName: "pencil")
                 .font(.body.bold())

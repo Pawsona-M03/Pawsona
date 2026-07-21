@@ -47,17 +47,19 @@ struct VaccineRecordFormView: View {
                 }
                 .padding(.horizontal, 30)
                 .padding(.top, 18)
-                .padding(.bottom, 24)
+                .padding(.bottom, 40)
             }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", action: dismiss.callAsFunction)
+                    Button("Close", systemImage: "xmark", action: dismiss.callAsFunction)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save", action: saveVaccineRecord)
+                    Button("Save", systemImage: "checkmark", action: saveVaccineRecord)
+                        .buttonStyle(.glassProminent)
+                        .tint(Color(.primaryBrown))
                         .disabled(!isSaveEnabled)
                 }
             }
@@ -70,7 +72,7 @@ struct VaccineRecordFormView: View {
                 .font(.title3.bold())
                 .foregroundStyle(.primary)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 2) {
                 ForEach(VaccineType.allCases, id: \.self) { vaccine in
                     VaccineSelectionButton(
                         vaccine: vaccine,
@@ -128,7 +130,7 @@ struct VaccineRecordFormView: View {
                     description: Text("You can save this record now and assign a dog once you add one.")
                 )
             } else {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 58), spacing: 14)], alignment: .leading, spacing: 14) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 58), spacing: 5)], alignment: .leading, spacing: 8) {
                     ForEach(dogs, id: \.id) { dog in
                         VaccineDogSelectionButton(
                             dog: dog,
@@ -177,7 +179,6 @@ struct VaccineRecordFormView: View {
         )
         dismiss()
     }
-
 }
 
 private struct VaccineSelectionButton: View {
@@ -203,7 +204,6 @@ private struct VaccineSelectionButton: View {
         .buttonStyle(.plain)
         .frame(minHeight: 44)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 }
 
@@ -218,7 +218,7 @@ private struct VaccineDogSelectionButton: View {
                 avatar
                     .overlay {
                         Circle()
-                            .stroke(isSelected ? Color.orange : Color.clear, lineWidth: 3)
+                            .stroke(isSelected ? Color(.primaryBrown) : Color.clear, lineWidth: 3)
                     }
 
                 Text(displayName)
@@ -232,7 +232,6 @@ private struct VaccineDogSelectionButton: View {
         .buttonStyle(.plain)
         .frame(minWidth: 58, minHeight: 78)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 
     @ViewBuilder
