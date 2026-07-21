@@ -14,7 +14,7 @@ struct VaccineRecordFormView: View {
     @Query(sort: \Dog.name) private var dogs: [Dog]
 
     let title: String
-    let onSave: ([VaccineType], Date, [Dog], String?) -> Void
+    let onSave: (VaccineRecordDraft) -> Void
 
     @State private var vaccines: [VaccineType]
     @State private var selectedDogIDs: Set<UUID>
@@ -23,18 +23,15 @@ struct VaccineRecordFormView: View {
 
     init(
         title: String = "New Vaccination Record",
-        vaccines: [VaccineType] = [],
-        dateGiven: Date = Date.now,
-        selectedDogs: [Dog] = [],
-        notes: String = "",
-        onSave: @escaping ([VaccineType], Date, [Dog], String?) -> Void
+        draft: VaccineRecordDraft = VaccineRecordDraft(),
+        onSave: @escaping (VaccineRecordDraft) -> Void
     ) {
         self.title = title
         self.onSave = onSave
-        self._vaccines = State(initialValue: vaccines)
-        self._selectedDogIDs = State(initialValue: Set(selectedDogs.map(\.id)))
-        self._dateGiven = State(initialValue: dateGiven)
-        self._notes = State(initialValue: notes)
+        self._vaccines = State(initialValue: draft.vaccines)
+        self._selectedDogIDs = State(initialValue: Set(draft.dogs.map(\.id)))
+        self._dateGiven = State(initialValue: draft.dateGiven)
+        self._notes = State(initialValue: draft.notes ?? "")
     }
 
     var body: some View {
@@ -80,10 +77,12 @@ struct VaccineRecordFormView: View {
     private func saveVaccineRecord() {
         let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
         onSave(
-            vaccines,
-            dateGiven,
-            selectedDogs,
-            trimmedNotes.isEmpty ? nil : trimmedNotes
+            VaccineRecordDraft(
+                vaccines: vaccines,
+                dateGiven: dateGiven,
+                dogs: selectedDogs,
+                notes: trimmedNotes.isEmpty ? nil : trimmedNotes
+            )
         )
         dismiss()
     }
@@ -276,7 +275,7 @@ private struct VaccineDogSelectionButton: View {
 
     @ViewBuilder
     private var avatar: some View {
-        if let photoData = dog.photoData, let image = UIImage(data: photoData) {
+        if let image = DogPhotoCache.image(for: dog) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
@@ -296,6 +295,6 @@ private struct VaccineDogSelectionButton: View {
 }
 
 #Preview {
-    VaccineRecordFormView { _, _, _, _ in }
+    VaccineRecordFormView { _ in }
         .modelContainer(for: [Dog.self, VaccineRecord.self], inMemory: true)
 }

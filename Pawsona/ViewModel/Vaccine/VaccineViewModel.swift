@@ -22,18 +22,12 @@ final class VaccineViewModel {
     }
 
     @discardableResult
-    func createRecord(
-        vaccines: [VaccineType],
-        dateGiven: Date,
-        notes: String?,
-        dogList: [Dog],
-        in modelContext: ModelContext
-    ) -> VaccineRecord {
+    func createRecord(from draft: VaccineRecordDraft, in modelContext: ModelContext) -> VaccineRecord {
         let vaccineRecord = VaccineRecord(
-            vaccines: vaccines,
-            dateGiven: dateGiven,
-            notes: notes,
-            dogList: dogList
+            vaccines: draft.vaccines,
+            dateGiven: draft.dateGiven,
+            notes: draft.notes,
+            dogList: draft.dogs
         )
 
         modelContext.insert(vaccineRecord)
@@ -43,16 +37,13 @@ final class VaccineViewModel {
 
     func editRecord(
         _ vaccineRecord: VaccineRecord,
-        vaccines: [VaccineType],
-        dateGiven: Date,
-        notes: String?,
-        dogList: [Dog],
+        from draft: VaccineRecordDraft,
         in modelContext: ModelContext
     ) {
-        vaccineRecord.vaccines = vaccines
-        vaccineRecord.dateGiven = dateGiven
-        vaccineRecord.notes = notes
-        vaccineRecord.dogList = dogList
+        vaccineRecord.vaccines = draft.vaccines
+        vaccineRecord.dateGiven = draft.dateGiven
+        vaccineRecord.notes = draft.notes
+        vaccineRecord.dogList = draft.dogs
 
         saveChanges(in: modelContext)
     }

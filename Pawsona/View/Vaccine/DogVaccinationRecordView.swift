@@ -65,25 +65,26 @@ struct DogVaccinationRecordView: View {
         }
         .sheet(isPresented: $isShowingAddVaccineForm) {
             VaccineRecordFormView(
-                selectedDogs: [dog],
+                draft: VaccineRecordDraft(dogs: [dog]),
                 onSave: createVaccineRecord
             )
+        }
+        .alert("Something went wrong", isPresented: $vaccineViewModel.isShowingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(vaccineViewModel.errorMessage ?? "")
         }
         .sheet(item: $editingVaccineRecord) { vaccineRecord in
             VaccineRecordFormView(
                 title: "Edit Vaccine Record",
-                vaccines: vaccineRecord.vaccines,
-                dateGiven: vaccineRecord.dateGiven,
-                selectedDogs: vaccineRecord.dogList ?? [dog],
-                notes: vaccineRecord.notes ?? "",
-                onSave: { vaccines, dateGiven, dogList, notes in
-                    editVaccineRecord(
-                        vaccineRecord,
-                        vaccines: vaccines,
-                        dateGiven: dateGiven,
-                        dogList: dogList,
-                        notes: notes
-                    )
+                draft: VaccineRecordDraft(
+                    vaccines: vaccineRecord.vaccines,
+                    dateGiven: vaccineRecord.dateGiven,
+                    dogs: vaccineRecord.dogList ?? [dog],
+                    notes: vaccineRecord.notes
+                ),
+                onSave: { draft in
+                    vaccineViewModel.editRecord(vaccineRecord, from: draft, in: modelContext)
                 }
             )
         }
@@ -97,31 +98,8 @@ struct DogVaccinationRecordView: View {
         isShowingAddVaccineForm = true
     }
 
-    private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, dogList: [Dog], notes: String?) {
-        vaccineViewModel.createRecord(
-            vaccines: vaccines,
-            dateGiven: dateGiven,
-            notes: notes,
-            dogList: dogList,
-            in: modelContext
-        )
-    }
-
-    private func editVaccineRecord(
-        _ vaccineRecord: VaccineRecord,
-        vaccines: [VaccineType],
-        dateGiven: Date,
-        dogList: [Dog],
-        notes: String?
-    ) {
-        vaccineViewModel.editRecord(
-            vaccineRecord,
-            vaccines: vaccines,
-            dateGiven: dateGiven,
-            notes: notes,
-            dogList: dogList,
-            in: modelContext
-        )
+    private func createVaccineRecord(_ draft: VaccineRecordDraft) {
+        vaccineViewModel.createRecord(from: draft, in: modelContext)
     }
 
     private func deleteSingleVaccineRecord(_ record: VaccineRecord) {
