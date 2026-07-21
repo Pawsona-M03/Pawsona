@@ -56,10 +56,10 @@ final class VaccineScanViewModel {
     ) {
         for visit in visits {
             viewModel.createRecord(
-                vaccines: visit.vaccines,
-                dateGiven: visit.dateGiven ?? .now,
-                notes: nil,
-                dogList: [],
+                from: VaccineRecordDraft(
+                    vaccines: visit.vaccines,
+                    dateGiven: visit.dateGiven ?? .now
+                ),
                 in: modelContext
             )
         }

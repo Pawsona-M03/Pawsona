@@ -20,9 +20,12 @@ struct ReminderFormView: View {
     @State private var isShowingDeleteConfirmation = false
     private let navigationTitle: String
 
+    /// The service is required rather than defaulted: a default here quietly
+    /// built a second instance, so the form's permission state could never
+    /// match the one the reminders screen was showing a banner for.
     init(
         editing reminder: Reminder? = nil,
-        notificationService: NotificationService = NotificationService()
+        notificationService: NotificationService
     ) {
         if let reminder {
             _viewModel = State(
@@ -141,7 +144,7 @@ struct ReminderFormView: View {
 }
 
 #Preview("Add") {
-    ReminderFormView()
+    ReminderFormView(notificationService: NotificationService())
         .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
         .tint(Color(.primaryBrown))
 }
@@ -154,7 +157,8 @@ struct ReminderFormView: View {
             dueDate: .now,
             repeatDays: [2, 4, 6],
             category: .vitamin
-        )
+        ),
+        notificationService: NotificationService()
     )
     .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
     .tint(Color(.primaryBrown))

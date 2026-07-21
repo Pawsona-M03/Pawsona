@@ -13,8 +13,8 @@ struct DogPhotoView: View {
     var placeholderIconHeight: CGFloat = 128
 
     var body: some View {
-        if let photoData = dog.photoData, let image = Image(data: photoData) {
-            image
+        if let uiImage = DogPhotoCache.image(for: dog) {
+            Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFill()
         } else {
@@ -27,13 +27,6 @@ struct DogPhotoView: View {
                         .frame(height: placeholderIconHeight)
                 }
         }
-    }
-}
-
-extension Image {
-    init?(data: Data) {
-        guard let uiImage = UIImage(data: data) else { return nil }
-        self.init(uiImage: uiImage)
     }
 }
 

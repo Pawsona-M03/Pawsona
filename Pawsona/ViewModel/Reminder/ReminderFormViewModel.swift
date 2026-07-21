@@ -127,7 +127,10 @@ final class ReminderFormViewModel {
             try modelContext.save()
             errorMessage = nil
         } catch {
-            errorMessage = error.localizedDescription
+            // Scheduling a notification for a reminder that failed to persist
+            // would fire later pointing at nothing.
+            errorMessage = "That reminder couldn't be saved. Try again."
+            return nil
         }
 
         await notificationService.schedule(reminder)

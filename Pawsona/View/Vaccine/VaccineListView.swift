@@ -24,17 +24,11 @@ struct VaccineListView: View {
         NavigationStack {
             Group {
                 if vaccineRecords.isEmpty {
-                    VStack {
-                        Spacer()
-
-                        Text("Tap '+' to add Vaccination Record")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity)
-
-                        Spacer()
-                    }
-                    .padding(.horizontal, 26)
+                    ContentUnavailableView(
+                        "No Vaccine Records",
+                        systemImage: "syringe",
+                        description: Text("Scan a vaccine book or add a record by hand to start tracking.")
+                    )
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 16) {
@@ -62,12 +56,8 @@ struct VaccineListView: View {
             .navigationTitle("Vaccination Record")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
+                    Button("Add Vaccination Record", systemImage: "plus") {
                         isShowingAddOptions = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .foregroundStyle(.white)
-                            .accessibilityLabel("Add Vaccination Record")
                     }
                     .buttonStyle(.glassProminent)
                     .tint(Color(.primaryBrown))
@@ -102,6 +92,11 @@ struct VaccineListView: View {
             } message: {
                 Text(scanViewModel.errorMessage ?? "")
             }
+            .alert("Something went wrong", isPresented: $viewModel.isShowingError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(viewModel.errorMessage ?? "")
+            }
             .sheet(isPresented: $isShowingNewVaccineForm) {
                 VaccineRecordFormView(
                     title: "New Vaccination Record",
@@ -111,18 +106,14 @@ struct VaccineListView: View {
             .sheet(item: $editingVaccineRecord) { vaccineRecord in
                 VaccineRecordFormView(
                     title: "Edit Vaccination Record",
-                    vaccines: vaccineRecord.vaccines,
-                    dateGiven: vaccineRecord.dateGiven,
-                    selectedDogs: vaccineRecord.dogList ?? [],
-                    notes: vaccineRecord.notes ?? "",
-                    onSave: { vaccines, dateGiven, dogList, notes in
-                        editVaccineRecord(
-                            vaccineRecord,
-                            dogList: dogList,
-                            vaccines: vaccines,
-                            dateGiven: dateGiven,
-                            notes: notes
-                        )
+                    draft: VaccineRecordDraft(
+                        vaccines: vaccineRecord.vaccines,
+                        dateGiven: vaccineRecord.dateGiven,
+                        dogs: vaccineRecord.dogList ?? [],
+                        notes: vaccineRecord.notes
+                    ),
+                    onSave: { draft in
+                        viewModel.editRecord(vaccineRecord, from: draft, in: modelContext)
                     }
                 )
             }
@@ -146,31 +137,8 @@ struct VaccineListView: View {
         scanViewModel.saveScannedVisits(visits, using: viewModel, in: modelContext)
     }
 
-    private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, dogList: [Dog], notes: String?) {
-        viewModel.createRecord(
-            vaccines: vaccines,
-            dateGiven: dateGiven,
-            notes: notes,
-            dogList: dogList,
-            in: modelContext
-        )
-    }
-
-    private func editVaccineRecord(
-        _ vaccineRecord: VaccineRecord,
-        dogList: [Dog],
-        vaccines: [VaccineType],
-        dateGiven: Date,
-        notes: String?
-    ) {
-        viewModel.editRecord(
-            vaccineRecord,
-            vaccines: vaccines,
-            dateGiven: dateGiven,
-            notes: notes,
-            dogList: dogList,
-            in: modelContext
-        )
+    private func createVaccineRecord(_ draft: VaccineRecordDraft) {
+        viewModel.createRecord(from: draft, in: modelContext)
     }
 }
 

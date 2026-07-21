@@ -75,3 +75,9 @@ skills-lock.json
 Secrets.swift
 .env
 Config/Secrets.xcconfig
+
+# --------------------------------------------------
+# Agent-generated reports
+# Local working documents, not part of the codebase.
+# --------------------------------------------------
+CODE_AUDIT.md

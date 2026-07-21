@@ -24,7 +24,7 @@ final class UpcomingRemindersViewModel {
     private let calendar: Calendar
 
     init(
-        notificationService: NotificationService = NotificationService(),
+        notificationService: NotificationService,
         calendar: Calendar = .current,
         today: Date = .now
     ) {

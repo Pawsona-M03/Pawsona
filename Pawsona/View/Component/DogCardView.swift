@@ -25,11 +25,11 @@ struct DogCardView: View {
                 .clipped()
 
             VStack(alignment: .center, spacing: 4) {
-                Text("\(displayName)")
+                Text(dog.displayName)
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                Text(breedText)
+                Text(dog.breedText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary).lineLimit(1)
             }
@@ -44,23 +44,9 @@ struct DogCardView: View {
         .accessibilityLabel(accessibilityLabel)
     }
 
-    private var displayName: String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Dog" : trimmedName
-    }
-
-    private var breedText: String {
-        dog.breed.isEmpty ? "Breed not set" : dog.breed
-    }
-
-    private var ageText: String? {
-        guard let age = dog.age else { return nil }
-        return age == 1 ? "1 year old" : "\(age) years old"
-    }
-
     private var accessibilityLabel: String {
-        var label = "\(displayName), \(breedText)"
-        if let ageText {
+        var label = "\(dog.displayName), \(dog.breedText)"
+        if let ageText = dog.ageText {
             label += ", \(ageText)"
         }
         return label

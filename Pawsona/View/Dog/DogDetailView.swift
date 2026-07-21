@@ -12,8 +12,7 @@ struct DogDetailView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var dogViewModel = DogViewModel()
     @State private var isShowingEditDogForm = false
-    @State private var exportedPDFURL: URL?
-    @State private var exportedDataURL: URL?
+    @State private var sharedFile: SharedFile?
 
     let dog: Dog
 
@@ -62,30 +61,33 @@ struct DogDetailView: View {
 
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    if let exportedDataURL {
-                        ShareLink(item: exportedDataURL, preview: SharePreview(displayName)) {
-                            Label("Share via AirDrop", systemImage: "wifi")
-                        }
+                    Button("Share via AirDrop", systemImage: "wifi") {
+                        share(dogViewModel.shareDogData(dog))
                     }
 
-                    if let exportedPDFURL {
-                        ShareLink(item: exportedPDFURL, preview: SharePreview(displayName)) {
-                            Label("Export as PDF", systemImage: "doc.richtext")
-                        }
+                    Button("Export as PDF", systemImage: "doc.richtext") {
+                        share(dogViewModel.exportDogToPDF(dog))
                     }
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
-                .disabled(exportedDataURL == nil && exportedPDFURL == nil)
                 .accessibilityLabel("Share \(displayName)")
             }
         }
         .sheet(isPresented: $isShowingEditDogForm) {
             DogEditView(dog: dog)
         }
-        .task(id: isShowingEditDogForm) {
-            exportedPDFURL = dogViewModel.exportDogToPDF(dog)
-            exportedDataURL = dogViewModel.shareDogData(dog)
+        // Both exports are generated on tap. They used to run on every
+        // appearance and every edit-sheet toggle, rendering the dog's photo
+        // through ImageRenderer and base64-ing it into JSON for the large
+        // majority of visits that never shared anything.
+        .sheet(item: $sharedFile) { sharedFile in
+            ShareSheet(fileURL: sharedFile.url, previewTitle: displayName)
+        }
+        .alert("Something went wrong", isPresented: $dogViewModel.isShowingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(dogViewModel.errorMessage ?? "")
         }
     }
 
@@ -156,13 +158,13 @@ struct DogDetailView: View {
         .clipShape(.rect(topLeadingRadius: sheetCornerRadius, topTrailingRadius: sheetCornerRadius))
     }
 
-    private var displayName: String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Dog" : trimmedName
-    }
+    private var displayName: String { dog.displayName }
 
+    /// The hero grows with Dynamic Type but stops short of swallowing the
+    /// screen. It was previously capped at its own base value, which made the
+    /// ScaledMetric a no-op at every size at or above default.
     private var displayedHeroHeight: CGFloat {
-        min(heroHeight, 380)
+        min(heroHeight, 520)
     }
 
     private var statLayout: AnyLayout {
@@ -173,8 +175,13 @@ struct DogDetailView: View {
         }
     }
 
-    private var breedText: String {
-        dog.breed.isEmpty ? "Breed not set" : dog.breed
+    private var breedText: String { dog.breedText }
+
+    /// Presents a freshly generated export, unless generating it failed — in
+    /// which case the view model has already set the message the alert shows.
+    private func share(_ fileURL: URL?) {
+        guard let fileURL else { return }
+        sharedFile = SharedFile(url: fileURL)
     }
 
     private var ageText: String {

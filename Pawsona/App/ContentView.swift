@@ -9,25 +9,42 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    @State private var viewModel = DogViewModel()
+    @State private var selectedTab = AppTab.puppy
+
     var body: some View {
-        TabView {
-            Tab("Puppy", systemImage: "dog") {
+        TabView(selection: $selectedTab) {
+            Tab("Puppy", systemImage: "dog", value: .puppy) {
                 DogListView()
             }
 
-            Tab("Reminder", systemImage: "bell") {
+            Tab("Reminder", systemImage: "bell", value: .reminder) {
                 UpcomingRemindersView()
             }
 
-            Tab("Vaccine", systemImage: "syringe") {
+            Tab("Vaccine", systemImage: "syringe", value: .vaccine) {
                 VaccineListView()
             }
-
         }
         .tint(Color(.primaryBrown))
+        // Handled here rather than inside DogListView: a TabView does not keep
+        // unselected tabs alive, so an AirDropped .pawsonadog arriving while the
+        // Reminder or Vaccine tab was showing used to be dropped silently.
+        .onOpenURL { url in
+            guard viewModel.importDogData(from: url, in: modelContext) != nil else { return }
+            selectedTab = .puppy
+            AccessibilityNotification.Announcement("Dog imported").post()
+        }
+        .alert("Import failed", isPresented: $viewModel.isShowingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "")
+        }
     }
 }
+
 #Preview {
     ContentView()
-        .modelContainer(for: Dog.self, inMemory: true)
+        .modelContainer(for: [Dog.self, Reminder.self, VaccineRecord.self], inMemory: true)
 }

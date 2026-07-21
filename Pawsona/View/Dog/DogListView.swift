@@ -13,19 +13,8 @@ struct DogListView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var viewModel = DogViewModel()
     @State private var isShowingAddDogForm = false
-    @State private var exportedPDFURL: URL?
     @State private var searchText = ""
-
-    private var filteredDogs: [Dog] {
-        guard !searchText.isEmpty else {
-            return viewModel.dogs
-        }
-
-        return viewModel.dogs.filter { dog in
-            dog.name?.localizedStandardContains(searchText) == true
-            || dog.breed.localizedStandardContains(searchText) == true
-        }
-    }
+    @State private var sortOption: DogSortOption = .dateAdded
 
     private var columns: [GridItem] {
         if dynamicTypeSize.isAccessibilitySize {
@@ -37,61 +26,83 @@ struct DogListView: View {
 
     var body: some View {
         NavigationStack {
-            DogListContentView(filteredDogs: filteredDogs, searchText: searchText, columns: columns)
+            // The sort lives in a child so `@Query` can be rebuilt with a new
+            // sort descriptor when it changes — a Query's sort is fixed at init.
+            SortedDogListView(sortOption: sortOption, searchText: searchText, columns: columns)
                 .navigationTitle("Puppy")
-            .navigationDestination(for: UUID.self) { dogID in
-                if let dog = viewModel.getDog(id: dogID, in: modelContext) {
+                .navigationDestination(for: Dog.self) { dog in
                     DogDetailView(dog: dog)
                 }
-            }
-            .searchable(
-                text: $searchText,
-                placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "Search dogs by name or breed"
-            )
-            .searchDictationBehavior(.inline(activation: .onSelect))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu("Sort", systemImage: "arrow.up.arrow.down") {
-                        SortOrderPicker(selection: $viewModel.sortOption)
+                .searchable(
+                    text: $searchText,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: "Search dogs by name or breed"
+                )
+                .searchDictationBehavior(.inline(activation: .onSelect))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu("Sort", systemImage: "arrow.up.arrow.down") {
+                            SortOrderPicker(selection: $sortOption)
+                        }
+                        .accessibilityLabel("Sort dogs")
+                        .accessibilityValue(sortOption.title)
                     }
-                    .tint(Color(.black))
-                    .accessibilityLabel("Sort dogs")
-                    .accessibilityValue(viewModel.sortOption.title)
-                }
 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add Dog", systemImage: "plus", action: showAddDogForm)
-                        .buttonStyle(.glassProminent)
-                        .tint(Color(.primaryBrown))
-                        .accessibilityLabel("Add dog")
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Add Dog", systemImage: "plus", action: showAddDogForm)
+                            .buttonStyle(.glassProminent)
+                            .tint(Color(.primaryBrown))
+                            .accessibilityLabel("Add dog")
+                    }
                 }
-            }
-            .sheet(isPresented: $isShowingAddDogForm) {
-                DogFormView { draft in
-                    viewModel.createDog(from: draft, in: modelContext)
+                .sheet(isPresented: $isShowingAddDogForm) {
+                    DogFormView { draft in
+                        viewModel.createDog(from: draft, in: modelContext)
+                    }
                 }
-            }
-            .task {
-                viewModel.getDogLists(in: modelContext)
-            }
-            .task(id: viewModel.dogs.map(\.id)) {
-                exportedPDFURL = viewModel.exportDogsToPDF()
-            }
-            .task(id: searchText) {
-                await announceSearchResults()
-            }
-            .onChange(of: viewModel.sortOption) { _, _ in
-                viewModel.getDogLists(in: modelContext)
-            }
-            .onOpenURL { url in
-                viewModel.importDogData(from: url, in: modelContext)
-            }
+                .alert("Something went wrong", isPresented: $viewModel.isShowingError) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text(viewModel.errorMessage ?? "")
+                }
         }
     }
 
     private func showAddDogForm() {
         isShowingAddDogForm = true
+    }
+}
+
+/// Owns the `@Query` for one sort order. `DogListView` swaps this view out when
+/// the sort changes, which is what re-runs the query.
+private struct SortedDogListView: View {
+    @Query private var dogs: [Dog]
+
+    let searchText: String
+    let columns: [GridItem]
+
+    init(sortOption: DogSortOption, searchText: String, columns: [GridItem]) {
+        _dogs = Query(sort: [sortOption.sortDescriptor])
+        self.searchText = searchText
+        self.columns = columns
+    }
+
+    private var filteredDogs: [Dog] {
+        guard !searchText.isEmpty else {
+            return dogs
+        }
+
+        return dogs.filter { dog in
+            dog.name?.localizedStandardContains(searchText) == true
+                || dog.breed.localizedStandardContains(searchText)
+        }
+    }
+
+    var body: some View {
+        DogListContentView(filteredDogs: filteredDogs, searchText: searchText, columns: columns)
+            .task(id: searchText) {
+                await announceSearchResults()
+            }
     }
 
     private func announceSearchResults() async {

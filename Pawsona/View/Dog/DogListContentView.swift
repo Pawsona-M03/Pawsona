@@ -36,18 +36,13 @@ struct DogListContentView: View {
                 .accessibilityElement(children: .contain)
                 .accessibilityRotor("Dogs") {
                     ForEach(filteredDogs, id: \.id) { dog in
-                        AccessibilityRotorEntry(accessibilityName(for: dog), id: dog.id)
+                        AccessibilityRotorEntry(dog.displayName, id: dog.id)
                     }
                 }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.appBackground).ignoresSafeArea())
-    }
-
-    private func accessibilityName(for dog: Dog) -> String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Dog" : trimmedName
     }
 }
 

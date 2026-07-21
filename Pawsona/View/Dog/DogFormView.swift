@@ -13,7 +13,11 @@ struct DogFormView: View {
     @Environment(\.dismiss) private var dismiss
 
     let title: String
+    let saveTitle: String
     let onSave: (DogDraft) -> Void
+
+    /// Form rows grow with Dynamic Type rather than clipping at a fixed 60pt.
+    @ScaledMetric(relativeTo: .body) private var rowHeight = 60
 
     @State private var name: String
     @State private var breed: String
@@ -26,18 +30,18 @@ struct DogFormView: View {
 
     init(
         title: String = "Add Dog",
+        saveTitle: String = "Add Dog",
         draft: DogDraft = DogDraft(),
         onSave: @escaping (DogDraft) -> Void
     ) {
         self.title = title
+        self.saveTitle = saveTitle
         self.onSave = onSave
         self._name = State(initialValue: draft.name)
         self._breed = State(initialValue: draft.breed)
         self._dateOfBirth = State(initialValue: draft.dateOfBirth)
         self._backgroundColor = State(initialValue: draft.backgroundColor)
-        self._weightText = State(
-            initialValue: draft.weightKg?.formatted(.number.precision(.fractionLength(1))) ?? ""
-        )
+        self._weightText = State(initialValue: DogDraft.weightText(for: draft.weightKg))
         self._sex = State(initialValue: draft.sex)
         self._photoData = State(initialValue: draft.photoData)
     }
@@ -56,7 +60,10 @@ struct DogFormView: View {
                     photoData == nil ? "No photo selected" : "Photo selected"
                 )
 
-                HStack(spacing: 10) {
+                // No explicit spacing: each button spreads to an equal share of
+                // the width instead, which is what buys the 44pt hit target
+                // without eight fixed 44pt boxes overflowing the screen.
+                HStack(spacing: 0) {
                     ForEach(ColorType.allCases, id: \.self) { color in
                         Button {
                             backgroundColor = color
@@ -66,6 +73,10 @@ struct DogFormView: View {
                                 isSelected: backgroundColor == color
                             )
                             .frame(width: 17, height: 17)
+                            // The swatch stays 17pt to match the hifi; the
+                            // button around it is what has to clear 44x44pt.
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .contentShape(.rect)
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(color.accessibilityName)
@@ -73,7 +84,9 @@ struct DogFormView: View {
                             backgroundColor == color ? .isSelected : []
                         )
                     }
-                }.padding(.bottom, 16)
+                }
+                .padding(.horizontal, 30)
+                .padding(.bottom, 16)
                 VStack(spacing: 0) {
                     ZStack(alignment: .leading) {
                         if breed.isEmpty {
@@ -90,14 +103,14 @@ struct DogFormView: View {
                             .textInputAutocapitalization(.words)
                             .accessibilityLabel("Dog breed")
                     }
-                    .frame(height: 60)
+                    .frame(minHeight: rowHeight)
 
                     Divider()
 
                     TextField("Name", text: $name)
                         .textInputAutocapitalization(.words)
                         .accessibilityLabel("Dog name")
-                        .frame(height: 60)
+                        .frame(minHeight: rowHeight)
 
                     Divider()
 
@@ -116,10 +129,11 @@ struct DogFormView: View {
                     } label: {
                         HStack {
                             Text(sex.displayName)
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.primary)
                             Spacer()
                         }
-                        .frame(height: 60)
+                        .frame(minHeight: rowHeight)
+                        .contentShape(.rect)
                     }
                     .accessibilityLabel("Dog gender")
 
@@ -130,14 +144,14 @@ struct DogFormView: View {
                         selection: $dateOfBirth,
                         displayedComponents: .date
                     )
-                    .frame(height: 60)
+                    .frame(minHeight: rowHeight)
 
                     Divider()
 
                     TextField("Weight (kg)", text: $weightText)
                         .keyboardType(.decimalPad)
                         .accessibilityLabel("Dog weight")
-                        .frame(height: 60)
+                        .frame(minHeight: rowHeight)
                 }
                 .padding(.horizontal, 14)
                 .cardBackground(cornerRadius: 32)
@@ -161,11 +175,10 @@ struct DogFormView: View {
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add Dog", systemImage: "checkmark", action: saveDog)
+                    Button(saveTitle, systemImage: "checkmark", action: saveDog)
                         .buttonStyle(.glassProminent)
                         .tint(Color(.primaryBrown))
                         .disabled(trimmedBreed.isEmpty)
-                        .accessibilityLabel("Save dog")
                         .accessibilityHint(
                             "Enter a breed before saving",
                             isEnabled: trimmedBreed.isEmpty
@@ -181,8 +194,8 @@ struct DogFormView: View {
     @ViewBuilder
     private var photoPickerLabel: some View {
         Group {
-            if let photoData, let image = Image(data: photoData) {
-                image
+            if let photoData, let uiImage = UIImage(data: photoData) {
+                Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 160, height: 160)
@@ -220,8 +233,7 @@ struct DogFormView: View {
     }
 
     private var parsedWeightKg: Double? {
-        let trimmedWeight = weightText.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedWeight.isEmpty ? nil : Double(trimmedWeight)
+        DogDraft.weightKg(fromText: weightText)
     }
 
     private func loadPhoto(from selection: PhotosPickerItem?) {
@@ -278,29 +290,6 @@ private extension Optional where Wrapped == Sex {
             "Female"
         case nil:
             "Gender"
-        }
-    }
-}
-
-extension ColorType {
-    fileprivate var accessibilityName: String {
-        switch self {
-        case .red:
-            "Red"
-        case .orange:
-            "Orange"
-        case .yellow:
-            "Yellow"
-        case .green:
-            "Green"
-        case .blue:
-            "Blue"
-        case .purple:
-            "Purple"
-        case .pink:
-            "Pink"
-        case .gray:
-            "Gray"
         }
     }
 }

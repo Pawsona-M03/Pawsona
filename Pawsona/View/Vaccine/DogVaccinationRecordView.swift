@@ -25,7 +25,7 @@ struct DogVaccinationRecordView: View {
                     ContentUnavailableView(
                         "No Vaccine Records",
                         systemImage: "syringe",
-                        description: Text("Add a record to start tracking \(displayName)'s vaccines.")
+                        description: Text("Add a record to start tracking \(dog.displayName)'s vaccines.")
                     )
                     Spacer()
                 }
@@ -39,7 +39,7 @@ struct DogVaccinationRecordView: View {
                                 VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: false)
                             }
                             .buttonStyle(.plain)
-                            // Long-press untuk menghapus
+                            // Long-press to delete.
                             .contextMenu {
                                 Button(role: .destructive) {
                                     deleteSingleVaccineRecord(vaccineRecord)
@@ -65,33 +65,29 @@ struct DogVaccinationRecordView: View {
         }
         .sheet(isPresented: $isShowingAddVaccineForm) {
             VaccineRecordFormView(
-                selectedDogs: [dog],
+                draft: VaccineRecordDraft(dogs: [dog]),
                 onSave: createVaccineRecord
             )
+        }
+        .alert("Something went wrong", isPresented: $vaccineViewModel.isShowingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(vaccineViewModel.errorMessage ?? "")
         }
         .sheet(item: $editingVaccineRecord) { vaccineRecord in
             VaccineRecordFormView(
                 title: "Edit Vaccine Record",
-                vaccines: vaccineRecord.vaccines,
-                dateGiven: vaccineRecord.dateGiven,
-                selectedDogs: vaccineRecord.dogList ?? [dog],
-                notes: vaccineRecord.notes ?? "",
-                onSave: { vaccines, dateGiven, dogList, notes in
-                    editVaccineRecord(
-                        vaccineRecord,
-                        vaccines: vaccines,
-                        dateGiven: dateGiven,
-                        dogList: dogList,
-                        notes: notes
-                    )
+                draft: VaccineRecordDraft(
+                    vaccines: vaccineRecord.vaccines,
+                    dateGiven: vaccineRecord.dateGiven,
+                    dogs: vaccineRecord.dogList ?? [dog],
+                    notes: vaccineRecord.notes
+                ),
+                onSave: { draft in
+                    vaccineViewModel.editRecord(vaccineRecord, from: draft, in: modelContext)
                 }
             )
         }
-    }
-
-    private var displayName: String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Dog" : trimmedName
     }
 
     private var sortedVaccineRecords: [VaccineRecord] {
@@ -102,37 +98,12 @@ struct DogVaccinationRecordView: View {
         isShowingAddVaccineForm = true
     }
 
-    private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, dogList: [Dog], notes: String?) {
-        vaccineViewModel.createRecord(
-            vaccines: vaccines,
-            dateGiven: dateGiven,
-            notes: notes,
-            dogList: dogList,
-            in: modelContext
-        )
-    }
-
-    private func editVaccineRecord(
-        _ vaccineRecord: VaccineRecord,
-        vaccines: [VaccineType],
-        dateGiven: Date,
-        dogList: [Dog],
-        notes: String?
-    ) {
-        vaccineViewModel.editRecord(
-            vaccineRecord,
-            vaccines: vaccines,
-            dateGiven: dateGiven,
-            notes: notes,
-            dogList: dogList,
-            in: modelContext
-        )
+    private func createVaccineRecord(_ draft: VaccineRecordDraft) {
+        vaccineViewModel.createRecord(from: draft, in: modelContext)
     }
 
     private func deleteSingleVaccineRecord(_ record: VaccineRecord) {
-        Task {
-            vaccineViewModel.deleteRecord(id: record.id, in: modelContext)
-        }
+        vaccineViewModel.deleteRecord(record, in: modelContext)
     }
 }
 
