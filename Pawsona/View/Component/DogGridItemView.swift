@@ -11,7 +11,11 @@ struct DogGridItemView: View {
     let dog: Dog
 
     var body: some View {
-        NavigationLink(value: dog.id) {
+        // Routing by the model rather than its UUID: the destination used to
+        // re-fetch the dog by id inside the navigationDestination closure, which
+        // both ran a store fetch and mutated observable state during view-body
+        // evaluation.
+        NavigationLink(value: dog) {
             DogCardView(dog: dog)
         }
         .buttonStyle(.plain)
@@ -19,23 +23,9 @@ struct DogGridItemView: View {
         .accessibilityHint("Shows dog details")
     }
 
-    private var displayName: String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Dog" : trimmedName
-    }
-
-    private var breedText: String {
-        dog.breed.isEmpty ? "Breed not set" : dog.breed
-    }
-
-    private var ageText: String? {
-        guard let age = dog.age else { return nil }
-        return age == 1 ? "1 year old" : "\(age) years old"
-    }
-
     private var accessibilityLabel: String {
-        var label = "\(displayName), \(breedText)"
-        if let ageText {
+        var label = "\(dog.displayName), \(dog.breedText)"
+        if let ageText = dog.ageText {
             label += ", \(ageText)"
         }
         return label

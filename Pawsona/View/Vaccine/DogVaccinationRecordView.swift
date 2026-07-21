@@ -25,7 +25,7 @@ struct DogVaccinationRecordView: View {
                     ContentUnavailableView(
                         "No Vaccine Records",
                         systemImage: "syringe",
-                        description: Text("Add a record to start tracking \(displayName)'s vaccines.")
+                        description: Text("Add a record to start tracking \(dog.displayName)'s vaccines.")
                     )
                     Spacer()
                 }
@@ -89,11 +89,6 @@ struct DogVaccinationRecordView: View {
         }
     }
 
-    private var displayName: String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Dog" : trimmedName
-    }
-
     private var sortedVaccineRecords: [VaccineRecord] {
         (dog.vaccineRecords ?? []).sorted { $0.dateGiven > $1.dateGiven }
     }
@@ -130,7 +125,7 @@ struct DogVaccinationRecordView: View {
     }
 
     private func deleteSingleVaccineRecord(_ record: VaccineRecord) {
-        vaccineViewModel.deleteRecord(id: record.id, in: modelContext)
+        vaccineViewModel.deleteRecord(record, in: modelContext)
     }
 }
 

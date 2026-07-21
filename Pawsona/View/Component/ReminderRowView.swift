@@ -50,7 +50,7 @@ struct ReminderRowView: View {
                                 DogPhotoView(dog: dog, placeholderIconHeight: avatarSize / 2)
                                     .frame(width: avatarSize, height: avatarSize)
                                     .clipShape(.circle)
-                                Text(dog.name ?? "Puppy")
+                                Text(dog.displayName)
                                     .font(.caption)
                                     .foregroundStyle(.primary)
                             }

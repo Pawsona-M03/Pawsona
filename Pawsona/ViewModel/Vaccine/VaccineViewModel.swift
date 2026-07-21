@@ -9,18 +9,26 @@ import Foundation
 import Observation
 import SwiftData
 
+/// Writes for vaccine records. Like `DogViewModel` this holds no record array:
+/// both screens that use it read through `@Query` or the dog's own
+/// relationship, so a cached copy here would only be a second, staler truth.
 @Observable
 final class VaccineViewModel {
-    var vaccines: [VaccineRecord] = []
     var errorMessage: String?
 
+    var isShowingError: Bool {
+        get { errorMessage != nil }
+        set { if !newValue { errorMessage = nil } }
+    }
+
+    @discardableResult
     func createRecord(
         vaccines: [VaccineType],
         dateGiven: Date,
         notes: String?,
         dogList: [Dog],
         in modelContext: ModelContext
-    ) {
+    ) -> VaccineRecord {
         let vaccineRecord = VaccineRecord(
             vaccines: vaccines,
             dateGiven: dateGiven,
@@ -30,35 +38,7 @@ final class VaccineViewModel {
 
         modelContext.insert(vaccineRecord)
         saveChanges(in: modelContext)
-        getAllRecord(in: modelContext)
-    }
-
-    func getAllRecord(in modelContext: ModelContext) {
-        let descriptor = FetchDescriptor<VaccineRecord>(
-            sortBy: [SortDescriptor(\VaccineRecord.dateGiven)]
-        )
-
-        do {
-            vaccines = try modelContext.fetch(descriptor)
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    func getRecordById(id: UUID, in modelContext: ModelContext) -> VaccineRecord? {
-        let descriptor = FetchDescriptor<VaccineRecord>(
-            predicate: #Predicate { vaccine in
-                vaccine.id == id
-            }
-        )
-        do {
-            errorMessage = nil
-            return try modelContext.fetch(descriptor).first
-        } catch {
-            errorMessage = error.localizedDescription
-            return nil
-        }
+        return vaccineRecord
     }
 
     func editRecord(
@@ -75,17 +55,11 @@ final class VaccineViewModel {
         vaccineRecord.dogList = dogList
 
         saveChanges(in: modelContext)
-        getAllRecord(in: modelContext)
     }
 
-    func deleteRecord(id: UUID, in modelContext: ModelContext) {
-        guard let vaccineRecord = getRecordById(id: id, in: modelContext) else {
-            return
-        }
-
+    func deleteRecord(_ vaccineRecord: VaccineRecord, in modelContext: ModelContext) {
         modelContext.delete(vaccineRecord)
         saveChanges(in: modelContext)
-        getAllRecord(in: modelContext)
     }
 
     private func saveChanges(in modelContext: ModelContext) {
@@ -93,7 +67,7 @@ final class VaccineViewModel {
             try modelContext.save()
             errorMessage = nil
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "That change couldn't be saved. Try again."
         }
     }
 }

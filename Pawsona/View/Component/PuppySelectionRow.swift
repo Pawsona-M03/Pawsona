@@ -28,7 +28,7 @@ struct PuppySelectionRow: View {
                         }
                     }
 
-                Text(dog.name ?? "Puppy")
+                Text(dog.displayName)
                     .font(.caption)
                     .bold()
                     .foregroundStyle(.primary)
@@ -36,7 +36,7 @@ struct PuppySelectionRow: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(dog.name ?? "Puppy")
+        .accessibilityLabel(dog.displayName)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

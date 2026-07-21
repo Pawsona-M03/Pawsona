@@ -7,16 +7,30 @@
 
 import Foundation
 import Observation
-import SwiftData
 import PDFKit
+import SwiftData
 
+/// Writes and exports for dogs. Reading is `@Query`'s job — this deliberately
+/// keeps no dog array of its own, so there is one source of truth and no manual
+/// cache to go stale when CloudKit syncs a change in from another device.
 @Observable
 final class DogViewModel {
-    var dogs: [Dog] = []
     var errorMessage: String?
-    var sortOption: DogSortOption = .dateAdded
 
-    func createDog(from draft: DogDraft, in modelContext: ModelContext) {
+    /// Largest `.pawsonadog` we will even try to decode. A package is a little
+    /// JSON plus base64 photos, so anything past this is not one of ours and
+    /// reading it would only risk a memory-pressure kill.
+    private static let maximumImportBytes = 50 * 1_024 * 1_024
+
+    var isShowingError: Bool {
+        get { errorMessage != nil }
+        set { if !newValue { errorMessage = nil } }
+    }
+
+    // MARK: - Writes
+
+    @discardableResult
+    func createDog(from draft: DogDraft, in modelContext: ModelContext) -> Dog {
         let dog = Dog(
             name: resolvedDogName(from: draft.name, in: modelContext),
             breed: draft.breed,
@@ -29,36 +43,7 @@ final class DogViewModel {
 
         modelContext.insert(dog)
         saveChanges(in: modelContext)
-        getDogLists(in: modelContext)
-    }
-
-    func getDogLists(in modelContext: ModelContext) {
-        let descriptor = FetchDescriptor<Dog>(
-            sortBy: [sortOption.sortDescriptor]
-        )
-
-        do {
-            dogs = try modelContext.fetch(descriptor)
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    func getDog(id: UUID, in modelContext: ModelContext) -> Dog? {
-        let descriptor = FetchDescriptor<Dog>(
-            predicate: #Predicate { dog in
-                dog.id == id
-            }
-        )
-
-        do {
-            errorMessage = nil
-            return try modelContext.fetch(descriptor).first
-        } catch {
-            errorMessage = error.localizedDescription
-            return nil
-        }
+        return dog
     }
 
     func editDog(_ dog: Dog, from draft: DogDraft, in modelContext: ModelContext) {
@@ -71,76 +56,76 @@ final class DogViewModel {
         dog.photoData = draft.photoData
 
         saveChanges(in: modelContext)
-        getDogLists(in: modelContext)
     }
 
-    func deleteDog(id: UUID, in modelContext: ModelContext) {
-        guard let dog = getDog(id: id, in: modelContext) else {
-            return
-        }
-
+    func deleteDog(_ dog: Dog, in modelContext: ModelContext) {
         modelContext.delete(dog)
         saveChanges(in: modelContext)
-        getDogLists(in: modelContext)
     }
 
-    @discardableResult
-    func exportDogsToPDF() -> URL? {
+    // MARK: - Exports
+
+    /// Renders the dogs to a PDF on disk. Call this only when the user actually
+    /// asks to share: it walks every photo through `ImageRenderer` on the main
+    /// actor, which is far too expensive to run speculatively.
+    func exportDogsToPDF(_ dogs: [Dog], named fileName: String = "Pawsona-Dogs") -> URL? {
         guard let pdfData = PDFGenerator.generate(from: dogs), PDFDocument(data: pdfData) != nil else {
-            errorMessage = "Unable to generate PDF."
+            errorMessage = "That report couldn't be created. Try again."
             return nil
         }
 
-        let fileURL = URL.temporaryDirectory.appending(path: "Pawsona-Dogs.pdf")
-
-        do {
-            try pdfData.write(to: fileURL)
-            errorMessage = nil
-            return fileURL
-        } catch {
-            errorMessage = error.localizedDescription
-            return nil
-        }
+        return write(pdfData, to: "\(fileName).pdf")
     }
 
-    @discardableResult
     func exportDogToPDF(_ dog: Dog) -> URL? {
-        guard let pdfData = PDFGenerator.generate(from: [dog]), PDFDocument(data: pdfData) != nil else {
-            errorMessage = "Unable to generate PDF."
-            return nil
-        }
-
-        let fileURL = URL.temporaryDirectory.appending(path: "\(sanitizedFileName(for: dog))-data.pdf")
-
-        do {
-            try pdfData.write(to: fileURL)
-            errorMessage = nil
-            return fileURL
-        } catch {
-            errorMessage = error.localizedDescription
-            return nil
-        }
+        exportDogsToPDF([dog], named: "\(sanitizedFileName(for: dog))-data")
     }
 
-    @discardableResult
+    /// Packages the dog and its vaccine history for AirDrop.
     func shareDogData(_ dog: Dog) -> URL? {
         do {
             let data = try JSONEncoder().encode(DogTransferPackage(dog: dog))
-            let fileURL = URL.temporaryDirectory.appending(path: "\(sanitizedFileName(for: dog)).pawsonadog")
-
-            try data.write(to: fileURL)
-            errorMessage = nil
-            return fileURL
+            return write(data, to: "\(sanitizedFileName(for: dog)).pawsonadog")
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "That dog couldn't be prepared for sharing. Try again."
             return nil
         }
     }
 
+    private func write(_ data: Data, to fileName: String) -> URL? {
+        let fileURL = URL.temporaryDirectory.appending(path: fileName)
+
+        do {
+            // The file carries a pet's health history and photos, so it gets
+            // file protection rather than the temp directory's default.
+            try data.write(to: fileURL, options: [.atomic, .completeFileProtection])
+            errorMessage = nil
+            return fileURL
+        } catch {
+            errorMessage = "That file couldn't be saved. Check your available storage."
+            return nil
+        }
+    }
+
+    // MARK: - Import
+
     @discardableResult
     func importDogData(from url: URL, in modelContext: ModelContext) -> Dog? {
+        // A file handed over from outside our sandbox — Files, iCloud Drive,
+        // another app's share sheet — arrives security-scoped and cannot be
+        // read until the scope is claimed. AirDrop's own Inbox copy is already
+        // readable, so a false here is not an error.
+        let hasScopedAccess = url.startAccessingSecurityScopedResource()
+        defer { if hasScopedAccess { url.stopAccessingSecurityScopedResource() } }
+
         do {
             let data = try Data(contentsOf: url)
+
+            guard data.count <= Self.maximumImportBytes else {
+                errorMessage = "That file is too big to be a Pawsona dog."
+                return nil
+            }
+
             let package = try JSONDecoder().decode(DogTransferPackage.self, from: data)
             let dog = package.makeDog()
 
@@ -150,20 +135,39 @@ final class DogViewModel {
             }
 
             saveChanges(in: modelContext)
-            getDogLists(in: modelContext)
-            try? FileManager.default.removeItem(at: url)
+            discardIfTemporaryCopy(url)
 
             return dog
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "That file couldn't be read as a Pawsona dog."
             return nil
         }
     }
 
+    /// Deletes only the throwaway copy iOS made for us. Pawsona is registered as
+    /// Editor and Owner for `.pawsonadog`, so this same path also receives files
+    /// the user opened from Files or iCloud Drive — reading one of those is no
+    /// reason to destroy it.
+    private func discardIfTemporaryCopy(_ url: URL) {
+        let disposableRoots = [
+            URL.temporaryDirectory,
+            URL.documentsDirectory.appending(path: "Inbox")
+        ]
+        let filePath = url.resolvingSymlinksInPath().path
+
+        let isDisposable = disposableRoots.contains { root in
+            filePath.hasPrefix(root.resolvingSymlinksInPath().path)
+        }
+
+        guard isDisposable else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    // MARK: - Naming
+
     private func sanitizedFileName(for dog: Dog) -> String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let name = trimmedName.isEmpty ? "Dog" : trimmedName
-        return name.components(separatedBy: CharacterSet.alphanumerics.inverted).joined()
+        let name = dog.displayName.components(separatedBy: CharacterSet.alphanumerics.inverted).joined()
+        return name.isEmpty ? "Dog" : name
     }
 
     private func resolvedDogName(
@@ -200,7 +204,7 @@ final class DogViewModel {
 
             return "Puppy \(number)"
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "Couldn't check existing names, so this puppy was numbered from the start."
             return "Puppy 1"
         }
     }
@@ -210,7 +214,7 @@ final class DogViewModel {
             try modelContext.save()
             errorMessage = nil
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "That change couldn't be saved. Try again."
         }
     }
 }
