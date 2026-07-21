@@ -38,113 +38,62 @@ struct ReminderFormView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    VStack {
-                        TextField("Title", text: $viewModel.title)
-                            .font(.title3)
-                        Divider()
-                        TextField("Notes", text: $viewModel.notes, axis: .vertical)
-                            .font(.title3)
-                        Divider()
-                    }
+            Form {
+                Section {
+                    TextField("Title", text: $viewModel.title)
+                    TextField("Notes", text: $viewModel.notes, axis: .vertical)
+                }
 
-                    HStack {
-                        Text("Date")
-                            .font(.title3)
-                            .bold()
-                        Spacer()
-                        DatePicker(
-                            "Date",
-                            selection: $viewModel.dueDate,
-                            in: Date.now...,
-                            displayedComponents: .date
-                        )
-                        .labelsHidden()
-                        DatePicker(
-                            "Time",
-                            selection: $viewModel.dueDate,
-                            displayedComponents: .hourAndMinute
-                        )
-                        .labelsHidden()
-                    }
+                Section {
+                    DatePicker(
+                        "Date",
+                        selection: $viewModel.dueDate,
+                        in: Date.now...,
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                }
 
-                    VStack(spacing: 12) {
-                        HStack {
-                            Text("Repeat")
-                                .font(.title3)
-                                .bold()
-                            Spacer()
-                            Text(viewModel.repeatSummary)
-                                .font(.title3)
-                                .foregroundStyle(.secondary)
-                        }
-                        Divider()
-                        RepeatDayPicker(selectedDays: $viewModel.repeatDays)
-                    }
+                Section {
+                    LabeledContent("Repeat", value: viewModel.repeatSummary)
+                    RepeatDayPicker(selectedDays: $viewModel.repeatDays)
+                }
 
-                    HStack {
-                        Text("Type")
-                            .font(.title3)
-                            .bold()
-                        Spacer()
-                        typeMenu
+                Section {
+                    LabeledContent("Type") {
+                        ReminderTypePicker(selection: $viewModel.category)
                     }
+                }
 
-                    if !dogs.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Dog")
-                                .font(.title3)
-                                .bold()
-                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 72))], alignment: .leading) {
-                                ForEach(dogs) { dog in
-                                    PuppySelectionRow(dog: dog, isSelected: viewModel.isSelected(dog)) {
-                                        viewModel.toggleDog(dog)
-                                    }
+                if !dogs.isEmpty {
+                    Section("Dog") {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 72))], alignment: .leading) {
+                            ForEach(dogs) { dog in
+                                PuppySelectionRow(dog: dog, isSelected: viewModel.isSelected(dog)) {
+                                    viewModel.toggleDog(dog)
                                 }
                             }
                         }
                     }
                 }
-                .padding()
+
             }
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close", systemImage: "xmark", action: dismiss.callAsFunction)
+                        .buttonStyle(.glassProminent)
+                        .tint(.gray)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save", systemImage: "checkmark", action: save)
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.glassProminent)
+                        .tint(Color(.primaryBrown))
                         .disabled(!viewModel.isSaveEnabled)
                 }
             }
         }
-    }
-
-    private var typeMenu: some View {
-        Menu {
-            Picker("Type", selection: $viewModel.category) {
-                ForEach(ReminderType.allCases, id: \.self) { type in
-                    Label(type.displayName, systemImage: "circle.fill")
-                        .tag(type)
-                }
-            }
-        } label: {
-            HStack {
-                Circle()
-                    .fill(viewModel.category.color)
-                    .frame(width: 10, height: 10)
-                Text(viewModel.category.displayName)
-                    .font(.title3)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.footnote)
-            }
-            .foregroundStyle(.secondary)
-        }
-        .accessibilityLabel("Type, \(viewModel.category.displayName)")
     }
 
     private func save() {
@@ -155,8 +104,22 @@ struct ReminderFormView: View {
     }
 }
 
-#Preview {
+#Preview("Add") {
     ReminderFormView()
         .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
-        .tint(.brown)
+        .tint(Color(.primaryBrown))
+}
+
+#Preview("Edit") {
+    ReminderFormView(
+        editing: Reminder(
+            title: "Vitamin A",
+            notes: "1 sendok makan, 2 kali sehari",
+            dueDate: .now,
+            repeatDays: [2, 4, 6],
+            category: .vitamin
+        )
+    )
+    .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
+    .tint(Color(.primaryBrown))
 }
