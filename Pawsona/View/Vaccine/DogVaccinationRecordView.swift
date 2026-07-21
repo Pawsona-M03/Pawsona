@@ -55,17 +55,7 @@ struct DogVaccinationRecordView: View {
                 .scrollIndicators(.hidden)
             }
         }
-        .background {
-            ZStack {
-                Color(.appBackground)
-
-                Image("paws_bg")
-                    .resizable()
-                    .scaledToFill()
-                    .opacity(0.3)
-            }
-            .ignoresSafeArea()
-        }
+        .background(Color(.appBackground).ignoresSafeArea())
         .navigationTitle("Vaccination Record")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

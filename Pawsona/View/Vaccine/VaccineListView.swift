@@ -53,17 +53,7 @@ struct VaccineListView: View {
                     .scrollIndicators(.hidden)
                 }
             }
-            .background {
-                ZStack {
-                    Color(.appBackground)
-
-                    Image("paws_bg")
-                        .resizable()
-                        .scaledToFill()
-                        .opacity(0.3)
-                }
-                .ignoresSafeArea()
-            }
+            .background(Color(.appBackground).ignoresSafeArea())
             .overlay {
                 if scanViewModel.isScanning {
                     ScanProgressOverlay()
@@ -187,7 +177,7 @@ struct VaccineListView: View {
 private struct ScanProgressOverlay: View {
     var body: some View {
         ZStack {
-            Color(.systemBackground).opacity(0.85)
+            Color(.appBackground).opacity(0.85)
 
             VStack(spacing: 12) {
                 ProgressView()

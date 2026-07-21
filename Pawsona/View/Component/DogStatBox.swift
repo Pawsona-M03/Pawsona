@@ -24,7 +24,7 @@ struct DogStatBox: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(Color(uiColor: .systemBackground), in: .rect(cornerRadius: 8))
+        .background(Color(.cardSurface), in: .rect(cornerRadius: 8))
         .overlay {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 1)

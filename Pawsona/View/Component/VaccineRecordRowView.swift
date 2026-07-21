@@ -53,7 +53,7 @@ struct VaccineRecordRowView: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("cardColor"))
+        .background(Color(.cardSurface))
         .clipShape(.rect(cornerRadius: 8))
         .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
         .accessibilityElement(children: .ignore)

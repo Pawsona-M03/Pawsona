@@ -41,14 +41,8 @@ struct DogListContentView: View {
                 }
             }
         }
-//        .background {
-//            Image(.pawsBg)
-//                .resizable()
-//                .scaledToFill()
-//                .ignoresSafeArea()
-//                .opacity(0.5)
-//                .accessibilityHidden(true)
-//        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.appBackground).ignoresSafeArea())
     }
 
     private func accessibilityName(for dog: Dog) -> String {

@@ -38,7 +38,7 @@ struct DogCardView: View {
         }
         .frame(width: dynamicTypeSize.isAccessibilitySize ? nil : 162)
         .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil)
-        .background(Color(uiColor: .systemBackground))
+        .background(Color(.cardSurface))
         .clipShape(.rect(cornerRadius: 10))
         .shadow(radius: 2)
         .accessibilityElement(children: .ignore)
