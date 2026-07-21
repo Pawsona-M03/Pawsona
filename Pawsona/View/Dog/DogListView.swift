@@ -55,7 +55,6 @@ struct DogListView: View {
                     Menu("Sort", systemImage: "arrow.up.arrow.down") {
                         SortOrderPicker(selection: $viewModel.sortOption)
                     }
-                    .tint(Color(.black))
                     .accessibilityLabel("Sort dogs")
                     .accessibilityValue(viewModel.sortOption.title)
                 }

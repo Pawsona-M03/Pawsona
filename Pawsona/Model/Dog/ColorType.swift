@@ -29,4 +29,19 @@ enum ColorType: String, Codable, CaseIterable {
         case .gray: .gray
         }
     }
+
+    /// Spoken name for the swatch — colour is the only thing distinguishing
+    /// these buttons, so VoiceOver has nothing else to go on.
+    var accessibilityName: String {
+        switch self {
+        case .red: "Red"
+        case .orange: "Orange"
+        case .yellow: "Yellow"
+        case .green: "Green"
+        case .blue: "Blue"
+        case .purple: "Purple"
+        case .pink: "Pink"
+        case .gray: "Gray"
+        }
+    }
 }

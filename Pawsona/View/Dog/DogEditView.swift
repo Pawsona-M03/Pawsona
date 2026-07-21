@@ -17,6 +17,7 @@ struct DogEditView: View {
     var body: some View {
         DogFormView(
             title: "Edit Dog",
+            saveTitle: "Save",
             draft: DogDraft(
                 name: dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
                 breed: dog.breed,
