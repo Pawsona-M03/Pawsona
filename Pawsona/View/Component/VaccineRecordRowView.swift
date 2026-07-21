@@ -16,7 +16,7 @@ struct VaccineRecordRowView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "syringe")
                 .font(.title3)
-                .foregroundStyle(.green)
+                .foregroundStyle(Color("vaccine"))
                 .frame(width: 24, height: 24)
                 .accessibilityHidden(true)
 
@@ -24,11 +24,10 @@ struct VaccineRecordRowView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(vaccineRecord.vaccineNames)
                         .font(.headline)
-                        .foregroundStyle(.green)
-
+                        .foregroundStyle(Color("vaccine"))
                     Text(dateText)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("textSecondary"))
                 }
 
                 if showsDogName {
@@ -42,13 +41,13 @@ struct VaccineRecordRowView: View {
                 if let notes = vaccineRecord.notes, !notes.isEmpty {
                     Text(notes)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("textSecondary"))
                 }
             }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial)
+        .background(Color("cardColor"))
         .clipShape(.rect(cornerRadius: 8))
         .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
         .accessibilityElement(children: .ignore)
@@ -79,7 +78,7 @@ private struct VaccineRecordDogBadge: View {
 
             Text(displayName)
                 .font(.caption2.bold())
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color("textPrimary"))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .frame(width: 52)
@@ -101,7 +100,7 @@ private struct VaccineRecordDogBadge: View {
                 .overlay {
                     Image(systemName: "pawprint.fill")
                         .font(.title3)
-                        .foregroundStyle(.secondary.opacity(0.35))
+                        .foregroundStyle(Color("textSecondary").opacity(0.35))
                 }
         }
     }

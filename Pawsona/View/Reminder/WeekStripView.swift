@@ -35,8 +35,8 @@ struct WeekStripView: View {
                             .foregroundStyle(isSelected ? .white : .primary)
                             .frame(minWidth: 44, minHeight: 44)
                             .background(
-                                isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.background),
-                                in: .circle
+                                isSelected ? Color.accentColor : Color.clear,
+                                    in: Circle()
                             )
                     }
                 }

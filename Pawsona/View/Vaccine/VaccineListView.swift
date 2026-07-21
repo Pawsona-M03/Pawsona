@@ -14,45 +14,75 @@ struct VaccineListView: View {
     @State private var viewModel = VaccineViewModel()
     @State private var editingVaccineRecord: VaccineRecord?
     @State private var isShowingNewVaccineForm = false
-
+    
     var body: some View {
         NavigationStack {
-            ZStack {
-                VStack(alignment: .leading, spacing: 24) {
-                    if vaccineRecords.isEmpty {
+            Group {
+                if vaccineRecords.isEmpty {
+                    VStack {
                         Spacer()
-
+                        
                         Text("Tap '+' to add Vaccination Record")
                             .font(.headline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color("textSecondary"))
                             .frame(maxWidth: .infinity)
-
+                        
                         Spacer()
-                    } else {
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                ForEach(vaccineRecords, id: \.id) { vaccineRecord in
-                                    Button {
-                                        editingVaccineRecord = vaccineRecord
-                                    } label: {
-                                        VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: true)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.vertical, 8)
-                        }
-                        .scrollIndicators(.hidden)
                     }
+                    .padding(.horizontal, 26)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(vaccineRecords, id: \.id) { vaccineRecord in
+                                Button {
+                                    editingVaccineRecord = vaccineRecord
+                                } label: {
+                                    VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: true)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 26)
+                    }
+                    .scrollIndicators(.hidden)
                 }
-                .padding(.horizontal, 26)
+            }
+            .background {
+                ZStack {
+                    Color("backgroundColor")
+                    
+                    Image("paws_bg")
+                        .resizable()
+                        .scaledToFill()
+                        .opacity(0.3)
+                }
+                .ignoresSafeArea()
             }
             .navigationTitle("Vaccination Record")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("New Vaccination Record", systemImage: "plus", action: showNewVaccineForm)
-                        .tint(.brown)
-                        .accessibilityShowsLargeContentViewer()
+                    Menu {
+                        Button {
+                            scanVaccineBook()
+                        } label: {
+                            Label("Scan Vaccine Book", systemImage: "camera.viewfinder")
+                        }
+                        
+                        Button {
+                            inputManually()
+                        } label: {
+                            Label("Input Manually", systemImage: "square.and.pencil")
+                        }
+                    } label: {
+                        Image(systemName: "plus")
+                            .foregroundStyle(Color("textPrimary"))
+        
+                            .accessibilityLabel("Add Vaccination Record")
+                        
+                    }
+                    .tint(Color("ActionBrown"))
+                    .accessibilityShowsLargeContentViewer()
                 }
             }
             .sheet(isPresented: $isShowingNewVaccineForm) {
@@ -80,12 +110,16 @@ struct VaccineListView: View {
                 )
             }
         }
+        .preferredColorScheme(.dark)
     }
-
-    private func showNewVaccineForm() {
+    private func inputManually() {
         isShowingNewVaccineForm = true
     }
-
+    
+    private func scanVaccineBook() {
+        
+    }
+    
     private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, dogList: [Dog], notes: String?) {
         viewModel.createRecord(
             vaccines: vaccines,
@@ -95,7 +129,7 @@ struct VaccineListView: View {
             in: modelContext
         )
     }
-
+    
     private func editVaccineRecord(
         _ vaccineRecord: VaccineRecord,
         dogList: [Dog],
@@ -111,27 +145,6 @@ struct VaccineListView: View {
             dogList: dogList,
             in: modelContext
         )
-    }
-}
-
-private struct PawPrintBackground: View {
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 28), count: 4)
-
-    var body: some View {
-        Color(.systemBackground)
-            .overlay {
-                LazyVGrid(columns: columns, spacing: 34) {
-                    ForEach(0..<56, id: \.self) { index in
-                        Image(systemName: "pawprint.fill")
-                            .font(.system(size: index.isMultiple(of: 3) ? 32 : 26))
-                            .foregroundStyle(.secondary.opacity(0.12))
-                            .rotationEffect(.degrees(index.isMultiple(of: 2) ? -18 : 16))
-                    }
-                }
-                .padding(18)
-            }
-            .ignoresSafeArea()
-            .accessibilityHidden(true)
     }
 }
 
