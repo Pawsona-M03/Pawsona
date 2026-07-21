@@ -137,12 +137,12 @@ struct DogDetailView: View {
                 }
                 .padding()
                 .background(.quinary, in: .rect(cornerRadius: 14))
-                .background(Color(uiColor: .systemBackground), in: .rect(cornerRadius: 14))
+                .background(.background, in: .rect(cornerRadius: 14))
             }
             .buttonStyle(.plain)
             .padding(.horizontal)
             .accessibilityLabel("Vaccination record")
-//            .accessibilityValue(Text(vaccineRecordAccessibilityValue))
+            .accessibilityValue(vaccineRecordAccessibilityValue)
             .accessibilityHint("Shows vaccination records")
 
             Spacer(minLength: 40)
@@ -153,13 +153,14 @@ struct DogDetailView: View {
             minHeight: max(0, containerHeight - (sheetCornerRadius)),
             alignment: .top
         )
-        .background {
-            Image(.pawsBg)
-                .resizable()
-                .scaledToFill()
-                .accessibilityHidden(true)
-        }
-        .background(Color(uiColor: .systemBackground))
+//        .background {
+//            Image(.pawsBg)
+//                .resizable()
+//                .scaledToFill()
+//                .opacity(0.5)
+//                .accessibilityHidden(true)
+//        }
+        .background(.background)
         .clipShape(.rect(topLeadingRadius: sheetCornerRadius, topTrailingRadius: sheetCornerRadius))
     }
 

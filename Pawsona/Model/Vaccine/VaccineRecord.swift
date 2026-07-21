@@ -14,7 +14,7 @@ final class VaccineRecord {
     var vaccines: [VaccineType] = []
     var dateGiven: Date = Date.now
     var notes: String?
-    @Relationship(inverse: \Dog.vaccineRecords) var dogList: [Dog]? = nil
+    @Relationship(inverse: \Dog.vaccineRecords) var dogList: [Dog]?
 
     var vaccineNames: String {
         guard !vaccines.isEmpty else {

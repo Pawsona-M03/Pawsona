@@ -25,18 +25,17 @@ struct UpcomingRemindersViewModelTests {
         return try #require(calendar.date(byAdding: .day, value: offset, to: base))
     }
 
-    @Test("The week strip has seven consecutive days containing the given date")
-    func weekDaysAreSevenConsecutive() throws {
+    @Test("The day strip is consecutive days centred on today")
+    func stripDaysAreConsecutiveAroundToday() throws {
         let (viewModel, _) = makeViewModel()
 
-        let days = viewModel.weekDays(containing: .now)
+        let days = viewModel.stripDays
 
-        #expect(days.count == 7)
-        #expect(days.contains { calendar.isDateInToday($0) })
+        #expect(days.count == 731)
+        #expect(calendar.isDateInToday(days[365]))
         for (earlier, later) in zip(days, days.dropFirst()) {
             #expect(calendar.dateComponents([.day], from: earlier, to: later).day == 1)
         }
-        #expect(calendar.component(.weekday, from: try #require(days.first)) == calendar.firstWeekday)
     }
 
     @Test("A one-shot reminder appears only on its due day")

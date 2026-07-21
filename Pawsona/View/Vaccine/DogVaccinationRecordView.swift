@@ -14,9 +14,9 @@ struct DogVaccinationRecordView: View {
     @State private var isShowingAddVaccineForm = false
     @State private var isShowingEditVaccineForm = false
     @State private var editingVaccineRecord: VaccineRecord?
-    
+
     let dog: Dog
-    
+
     var body: some View {
         Group {
             if sortedVaccineRecords.isEmpty {
@@ -57,8 +57,8 @@ struct DogVaccinationRecordView: View {
         }
         .background {
             ZStack {
-                Color("backgroundColor")
-                
+                Color(.appBackground)
+
                 Image("paws_bg")
                     .resizable()
                     .scaledToFill()
@@ -87,25 +87,31 @@ struct DogVaccinationRecordView: View {
                 selectedDogs: vaccineRecord.dogList ?? [dog],
                 notes: vaccineRecord.notes ?? "",
                 onSave: { vaccines, dateGiven, dogList, notes in
-                    editVaccineRecord(vaccineRecord, vaccines: vaccines, dateGiven: dateGiven, dogList: dogList, notes: notes)
+                    editVaccineRecord(
+                        vaccineRecord,
+                        vaccines: vaccines,
+                        dateGiven: dateGiven,
+                        dogList: dogList,
+                        notes: notes
+                    )
                 }
             )
         }
     }
-    
+
     private var displayName: String {
         let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return trimmedName.isEmpty ? "Dog" : trimmedName
     }
-    
+
     private var sortedVaccineRecords: [VaccineRecord] {
         (dog.vaccineRecords ?? []).sorted { $0.dateGiven > $1.dateGiven }
     }
-    
+
     private func showAddVaccineForm() {
         isShowingAddVaccineForm = true
     }
-    
+
     private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, dogList: [Dog], notes: String?) {
         vaccineViewModel.createRecord(
             vaccines: vaccines,
@@ -115,7 +121,7 @@ struct DogVaccinationRecordView: View {
             in: modelContext
         )
     }
-    
+
     private func editVaccineRecord(
         _ vaccineRecord: VaccineRecord,
         vaccines: [VaccineType],
@@ -132,7 +138,7 @@ struct DogVaccinationRecordView: View {
             in: modelContext
         )
     }
-    
+
     private func deleteSingleVaccineRecord(_ record: VaccineRecord) {
         Task {
             vaccineViewModel.deleteRecord(id: record.id, in: modelContext)

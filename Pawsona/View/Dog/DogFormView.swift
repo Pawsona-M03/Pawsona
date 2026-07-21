@@ -163,7 +163,7 @@ struct DogFormView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add Dog", systemImage: "checkmark", action: saveDog)
                         .buttonStyle(.glassProminent)
-                        .tint(Color(.brown))
+                        .tint(Color(.primaryBrown))
                         .disabled(trimmedBreed.isEmpty)
                         .accessibilityLabel("Save dog")
                         .accessibilityHint(
@@ -205,7 +205,7 @@ struct DogFormView: View {
                 .font(.body.bold())
                 .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
-                .background(.brown, in: .circle)
+                .background(Color(.primaryBrown), in: .circle)
                 .padding(.bottom, 6)
                 .accessibilityHidden(true)
         }

@@ -30,7 +30,7 @@ struct DogTransferPackage: Codable {
         photoData = dog.photoData
         vaccineRecords = (dog.vaccineRecords ?? []).map(VaccineRecordTransferPackage.init)
     }
-    
+
     @MainActor
     func makeDog() -> Dog {
         let dog = Dog(

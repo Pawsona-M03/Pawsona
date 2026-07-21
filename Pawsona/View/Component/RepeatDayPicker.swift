@@ -31,7 +31,11 @@ struct RepeatDayPicker: View {
                         .foregroundStyle(isSelected ? .white : .primary)
                         .frame(minWidth: 44, minHeight: 44)
                         .background(
-                            isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.quaternary),
+                            // Explicit light grey: the hierarchical styles all
+                            // resolve too dark against the form's white card.
+                            isSelected
+                                ? AnyShapeStyle(.tint)
+                                : AnyShapeStyle(Color.primary.opacity(0.08)),
                             in: .circle
                         )
                 }

@@ -77,7 +77,7 @@ private struct ScannedVisitRow: View {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: isIncluded ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(isIncluded ? Color.brown : Color.secondary)
+                    .foregroundStyle(isIncluded ? Color(.primaryBrown) : Color.secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(dateText)

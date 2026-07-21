@@ -26,12 +26,12 @@ struct VaccineListView: View {
                 if vaccineRecords.isEmpty {
                     VStack {
                         Spacer()
-                        
+
                         Text("Tap '+' to add Vaccination Record")
                             .font(.headline)
                             .foregroundStyle(Color("textSecondary"))
                             .frame(maxWidth: .infinity)
-                        
+
                         Spacer()
                     }
                     .padding(.horizontal, 26)
@@ -55,8 +55,8 @@ struct VaccineListView: View {
             }
             .background {
                 ZStack {
-                    Color("backgroundColor")
-                    
+                    Color(.appBackground)
+
                     Image("paws_bg")
                         .resizable()
                         .scaledToFill()
@@ -80,7 +80,7 @@ struct VaccineListView: View {
                             .accessibilityLabel("Add Vaccination Record")
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(Color("ActionBrown"))
+                    .tint(Color(.primaryBrown))
                     .disabled(scanViewModel.isScanning)
                     .accessibilityShowsLargeContentViewer()
                     .confirmationDialog(
@@ -137,8 +137,8 @@ struct VaccineListView: View {
                 )
             }
         }
-        .preferredColorScheme(.dark)
     }
+
     private func inputManually() {
         isShowingNewVaccineForm = true
     }
@@ -165,7 +165,7 @@ struct VaccineListView: View {
             in: modelContext
         )
     }
-    
+
     private func editVaccineRecord(
         _ vaccineRecord: VaccineRecord,
         dogList: [Dog],
