@@ -9,15 +9,19 @@ import SwiftUI
 
 struct DogColorPickerRow: View {
     let color: ColorType
+    var isSelected = false
 
     var body: some View {
-        Label {
-            Text(title)
-        } icon: {
-            Circle()
-                .fill(swatchColor)
-                .frame(width: 16, height: 16)
-        }
+        Circle()
+            .fill(swatchColor)
+            .frame(width: isSelected ? 28 : 16, height: isSelected ? 28 : 16)
+            .overlay {
+                if isSelected {
+                    Circle()
+                        .stroke(.primary, lineWidth: 0)
+                }
+            }
+            .animation(.snappy, value: isSelected)
     }
 
     private var title: String {

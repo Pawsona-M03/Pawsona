@@ -12,5 +12,7 @@ struct DogDraft {
     var breed = ""
     var dateOfBirth = Date.now
     var backgroundColor = ColorType.blue
+    var weightKg: Double?
+    var sex: Sex?
     var photoData: Data?
 }
