@@ -68,4 +68,10 @@ docs/
 .mcp.json
 .gemini-swarm/
 skills-lock.json
+
+# --------------------------------------------------
+# Secrets files
+# --------------------------------------------------
 Secrets.swift
+.env
+Config/Secrets.xcconfig

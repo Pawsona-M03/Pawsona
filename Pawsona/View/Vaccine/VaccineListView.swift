@@ -7,13 +7,17 @@
 
 import SwiftData
 import SwiftUI
+import UIKit
 
 struct VaccineListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \VaccineRecord.dateGiven, order: .reverse) private var vaccineRecords: [VaccineRecord]
     @State private var viewModel = VaccineViewModel()
+    @State private var scanViewModel = VaccineScanViewModel()
     @State private var editingVaccineRecord: VaccineRecord?
     @State private var isShowingNewVaccineForm = false
+    @State private var isShowingCamera = false
+    @State private var capturedImage: UIImage?
 
     var body: some View {
         NavigationStack {
@@ -47,13 +51,43 @@ struct VaccineListView: View {
                 }
                 .padding(.horizontal, 26)
             }
+            .overlay {
+                if scanViewModel.isScanning {
+                    ScanProgressOverlay()
+                }
+            }
             .navigationTitle("Vaccination Record")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("New Vaccination Record", systemImage: "plus", action: showNewVaccineForm)
-                        .tint(.brown)
-                        .accessibilityShowsLargeContentViewer()
+                    Menu {
+                        Button("Add Manually", systemImage: "square.and.pencil", action: showNewVaccineForm)
+                        Button("Scan Vaccine Book", systemImage: "camera", action: startScan)
+                    } label: {
+                        Label("New Vaccination Record", systemImage: "plus")
+                    }
+                    .tint(.brown)
+                    .disabled(scanViewModel.isScanning)
+                    .accessibilityShowsLargeContentViewer()
                 }
+            }
+            .fullScreenCover(isPresented: $isShowingCamera) {
+                CameraPicker(image: $capturedImage)
+                    .ignoresSafeArea()
+            }
+            .onChange(of: capturedImage) {
+                guard let image = capturedImage else { return }
+                capturedImage = nil
+                Task { await scanViewModel.scan(image) }
+            }
+            .sheet(isPresented: $scanViewModel.isShowingReview) {
+                if let visits = scanViewModel.reviewedVisits {
+                    VaccineScanReviewView(visits: visits, onConfirm: saveScannedVisits)
+                }
+            }
+            .alert("Scan Failed", isPresented: $scanViewModel.isShowingError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(scanViewModel.errorMessage ?? "")
             }
             .sheet(isPresented: $isShowingNewVaccineForm) {
                 VaccineRecordFormView(
@@ -86,6 +120,19 @@ struct VaccineListView: View {
         isShowingNewVaccineForm = true
     }
 
+    private func startScan() {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            scanViewModel.report(.cameraUnavailable)
+            return
+        }
+
+        isShowingCamera = true
+    }
+
+    private func saveScannedVisits(_ visits: [ScannedVisit]) {
+        scanViewModel.saveScannedVisits(visits, using: viewModel, in: modelContext)
+    }
+
     private func createVaccineRecord(vaccines: [VaccineType], dateGiven: Date, dogList: [Dog], notes: String?) {
         viewModel.createRecord(
             vaccines: vaccines,
@@ -111,6 +158,27 @@ struct VaccineListView: View {
             dogList: dogList,
             in: modelContext
         )
+    }
+}
+
+private struct ScanProgressOverlay: View {
+    var body: some View {
+        ZStack {
+            Color(.systemBackground).opacity(0.85)
+
+            VStack(spacing: 12) {
+                ProgressView()
+                    .controlSize(.large)
+
+                Text("Reading vaccine book…")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .ignoresSafeArea()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Reading vaccine book")
+        .accessibilityAddTraits(.updatesFrequently)
     }
 }
 

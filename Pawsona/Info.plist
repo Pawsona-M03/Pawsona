@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>GeminiAPIKey</key>
+	<string>$(GEMINI_API_KEY)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Pawsona uses the camera to photograph your dog's vaccine book so it can be scanned automatically.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
