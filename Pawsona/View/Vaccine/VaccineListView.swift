@@ -18,6 +18,7 @@ struct VaccineListView: View {
     @State private var isShowingNewVaccineForm = false
     @State private var isShowingCamera = false
     @State private var capturedImage: UIImage?
+    @State private var isShowingAddOptions = false
 
     var body: some View {
         NavigationStack {
@@ -71,28 +72,25 @@ struct VaccineListView: View {
             .navigationTitle("Vaccination Record")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button {
-                            scanVaccineBook()
-                        } label: {
-                            Label("Scan Vaccine Book", systemImage: "camera.viewfinder")
-                        }
-
-                        Button {
-                            inputManually()
-                        } label: {
-                            Label("Input Manually", systemImage: "square.and.pencil")
-                        }
+                    Button {
+                        isShowingAddOptions = true
                     } label: {
                         Image(systemName: "plus")
-                            .foregroundStyle(Color("textPrimary"))
-
+                            .foregroundStyle(.white)
                             .accessibilityLabel("Add Vaccination Record")
-
                     }
+                    .buttonStyle(.glassProminent)
                     .tint(Color("ActionBrown"))
                     .disabled(scanViewModel.isScanning)
                     .accessibilityShowsLargeContentViewer()
+                    .confirmationDialog(
+                        "Add Vaccination Record",
+                        isPresented: $isShowingAddOptions,
+                        titleVisibility: .hidden
+                    ) {
+                        Button("Scan Vaccine Book", systemImage: "camera.viewfinder", action: scanVaccineBook)
+                        Button("Input Manually", systemImage: "square.and.pencil", action: inputManually)
+                    }
                 }
             }
             .fullScreenCover(isPresented: $isShowingCamera) {

@@ -58,6 +58,8 @@ struct VaccineRecordFormView: View {
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save", systemImage: "checkmark", action: saveVaccineRecord)
+                        .buttonStyle(.glassProminent)
+                        .tint(Color("ActionBrown"))
                         .disabled(!isSaveEnabled)
                 }
             }
