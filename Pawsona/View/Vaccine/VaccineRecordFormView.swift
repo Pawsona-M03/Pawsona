@@ -41,9 +41,10 @@ struct VaccineRecordFormView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    vaccineSection
-                    dateSection
-                    dogSection
+                    VaccineTypeSection(selected: $vaccines)
+                    VaccineDateSection(dateGiven: $dateGiven)
+                    VaccineDogSection(dogs: dogs, selectedDogIDs: $selectedDogIDs)
+                    VaccineNotesSection(notes: $notes)
                 }
                 .padding(.horizontal, 30)
                 .padding(.top, 18)
@@ -66,7 +67,32 @@ struct VaccineRecordFormView: View {
         }
     }
 
-    private var vaccineSection: some View {
+    // A dog is deliberately not required: a scan produces records before the user
+    // has said which dog they belong to, and the record card flags the gap.
+    private var isSaveEnabled: Bool {
+        !vaccines.isEmpty
+    }
+
+    private var selectedDogs: [Dog] {
+        dogs.filter { selectedDogIDs.contains($0.id) }
+    }
+
+    private func saveVaccineRecord() {
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        onSave(
+            vaccines,
+            dateGiven,
+            selectedDogs,
+            trimmedNotes.isEmpty ? nil : trimmedNotes
+        )
+        dismiss()
+    }
+}
+
+private struct VaccineTypeSection: View {
+    @Binding var selected: [VaccineType]
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Vaccine")
                 .font(.title3.bold())
@@ -76,15 +102,27 @@ struct VaccineRecordFormView: View {
                 ForEach(VaccineType.allCases, id: \.self) { vaccine in
                     VaccineSelectionButton(
                         vaccine: vaccine,
-                        isSelected: vaccines.contains(vaccine),
-                        action: { toggleVaccine(vaccine) }
+                        isSelected: selected.contains(vaccine),
+                        action: { toggle(vaccine) }
                     )
                 }
             }
         }
     }
 
-    private var dateSection: some View {
+    private func toggle(_ vaccine: VaccineType) {
+        if let index = selected.firstIndex(of: vaccine) {
+            selected.remove(at: index)
+        } else {
+            selected.append(vaccine)
+        }
+    }
+}
+
+private struct VaccineDateSection: View {
+    @Binding var dateGiven: Date
+
+    var body: some View {
         HStack(alignment: .center, spacing: 12) {
             Text("Date")
                 .font(.title3.bold())
@@ -107,8 +145,13 @@ struct VaccineRecordFormView: View {
             .labelsHidden()
         }
     }
+}
 
-    private var dogSection: some View {
+private struct VaccineDogSection: View {
+    let dogs: [Dog]
+    @Binding var selectedDogIDs: Set<UUID>
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
                 Text("Dog")
@@ -135,7 +178,7 @@ struct VaccineRecordFormView: View {
                         VaccineDogSelectionButton(
                             dog: dog,
                             isSelected: selectedDogIDs.contains(dog.id),
-                            action: { toggleDog(dog) }
+                            action: { toggle(dog) }
                         )
                     }
                 }
@@ -143,41 +186,38 @@ struct VaccineRecordFormView: View {
         }
     }
 
-    // A dog is deliberately not required: a scan produces records before the user
-    // has said which dog they belong to, and the record card flags the gap.
-    private var isSaveEnabled: Bool {
-        !vaccines.isEmpty
-    }
-
-    private var selectedDogs: [Dog] {
-        dogs.filter { selectedDogIDs.contains($0.id) }
-    }
-
-    private func toggleVaccine(_ vaccine: VaccineType) {
-        if let index = vaccines.firstIndex(of: vaccine) {
-            vaccines.remove(at: index)
-        } else {
-            vaccines.append(vaccine)
-        }
-    }
-
-    private func toggleDog(_ dog: Dog) {
+    private func toggle(_ dog: Dog) {
         if selectedDogIDs.contains(dog.id) {
             selectedDogIDs.remove(dog.id)
         } else {
             selectedDogIDs.insert(dog.id)
         }
     }
+}
 
-    private func saveVaccineRecord() {
-        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
-        onSave(
-            vaccines,
-            dateGiven,
-            selectedDogs,
-            trimmedNotes.isEmpty ? nil : trimmedNotes
-        )
-        dismiss()
+/// The form carried a `notes` value through save from the beginning, but had no
+/// field for it — so a record's notes could round-trip on edit yet never be
+/// written in the first place.
+private struct VaccineNotesSection: View {
+    @Binding var notes: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Notes")
+                .font(.title3.bold())
+                .foregroundStyle(.primary)
+
+            TextField(
+                "Vet, batch number, how they reacted…",
+                text: $notes,
+                axis: .vertical
+            )
+            .lineLimit(3...6)
+            .textInputAutocapitalization(.sentences)
+            .padding()
+            .cardBackground()
+            .accessibilityLabel("Notes")
+        }
     }
 }
 
@@ -221,7 +261,7 @@ private struct VaccineDogSelectionButton: View {
                             .stroke(isSelected ? Color(.primaryBrown) : Color.clear, lineWidth: 3)
                     }
 
-                Text(displayName)
+                Text(dog.displayName)
                     .font(.caption2.bold())
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -252,11 +292,6 @@ private struct VaccineDogSelectionButton: View {
                         .foregroundStyle(.secondary.opacity(0.28))
                 }
         }
-    }
-
-    private var displayName: String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Puppy" : trimmedName
     }
 }
 
