@@ -30,7 +30,12 @@ struct UpcomingRemindersView: View {
         NavigationStack {
             List {
                 Group {
-                    WeekStripView(days: viewModel.weekDays(), selectedDate: $viewModel.selectedDate)
+                    if notificationService.permissionState == .denied {
+                        NotificationPermissionBanner()
+                    }
+
+                    WeekStripView(days: viewModel.stripDays, selectedDate: $viewModel.selectedDate)
+                        .listRowInsets(EdgeInsets())
 
                     Text(viewModel.selectedDate.formatted(
                         .dateTime.weekday(.wide).day().month(.wide).year()
@@ -67,20 +72,18 @@ struct UpcomingRemindersView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
-            .background {
-                Image(.pawsBg)
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-            }
+            // Restore this alongside the paw backdrop below — without a backdrop
+            // to show through, hiding the list background leaves the reminder
+            // cards white-on-white.
+//            .scrollContentBackground(.hidden)
+//            .background {
+//                Image(.pawsBg)
+//                    .resizable()
+//                    .scaledToFill()
+//                    .opacity(0.5)
+//                    .ignoresSafeArea()
+//            }
             .navigationTitle("Reminder")
-            .safeAreaInset(edge: .top) {
-                if notificationService.permissionState == .denied {
-                    NotificationPermissionBanner()
-                        .padding(.horizontal)
-                }
-            }
             .task {
                 await notificationService.requestPermission()
             }
@@ -89,6 +92,8 @@ struct UpcomingRemindersView: View {
                     Button("New Reminder", systemImage: "plus") {
                         isShowingNewReminderForm = true
                     }
+                    .buttonStyle(.glassProminent)
+                    .tint(Color(.primaryBrown))
                 }
             }
             .sheet(isPresented: $isShowingNewReminderForm) {
@@ -114,5 +119,5 @@ struct UpcomingRemindersView: View {
 #Preview {
     UpcomingRemindersView()
         .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
-        .tint(.brown)
+        .tint(Color(.primaryBrown))
 }
