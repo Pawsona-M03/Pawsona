@@ -34,7 +34,7 @@ struct ReminderRowView: View {
                 } else {
                     Text(reminder.dueDate.formatted(date: .abbreviated, time: .shortened))
                         .font(.subheadline)
-                        .foregroundStyle(reminder.category.color)
+                        .foregroundStyle(.secondary)
                 }
 
                 if let notes = reminder.notes, !notes.isEmpty {
