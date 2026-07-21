@@ -56,6 +56,9 @@ final class ReminderFormViewModel {
             && (!repeatDays.isEmpty || dueDate > .now)
     }
 
+    /// Deleting only makes sense for a reminder that already exists.
+    var isEditing: Bool { editingReminder != nil }
+
     /// What the form's Repeat row shows next to the label.
     var repeatSummary: String {
         Reminder.repeatSummary(for: repeatDays) ?? "Never"
@@ -71,6 +74,22 @@ final class ReminderFormViewModel {
 
     func isSelected(_ dog: Dog) -> Bool {
         selectedDogs.contains { $0.id == dog.id }
+    }
+
+    /// Removes the reminder being edited, cancelling its pending notification
+    /// first so nothing fires for a reminder that no longer exists.
+    func delete(in modelContext: ModelContext) {
+        guard let editingReminder else { return }
+
+        notificationService.cancel(editingReminder)
+        modelContext.delete(editingReminder)
+
+        do {
+            try modelContext.save()
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     /// Persists the reminder and (re)schedules its notification. Editing cancels
@@ -115,3 +134,5 @@ final class ReminderFormViewModel {
         return reminder
     }
 }
+
+

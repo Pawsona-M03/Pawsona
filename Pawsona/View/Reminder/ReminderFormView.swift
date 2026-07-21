@@ -17,6 +17,7 @@ struct ReminderFormView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Dog.name) private var dogs: [Dog]
     @State private var viewModel: ReminderFormViewModel
+    @State private var isShowingDeleteConfirmation = false
     private let navigationTitle: String
 
     init(
@@ -76,6 +77,36 @@ struct ReminderFormView: View {
                     }
                 }
 
+                if viewModel.isEditing {
+                    Section {
+                        Button("Delete Reminder", role: .destructive) {
+                            isShowingDeleteConfirmation = true
+                        }
+                        .frame(maxWidth: .infinity)
+                        // A popover anchors the confirmation to the button
+                        // itself; a confirmationDialog would slide up from the
+                        // bottom of the screen instead.
+                        .popover(
+                            isPresented: $isShowingDeleteConfirmation,
+                            arrowEdge: .bottom
+                        ) {
+                            VStack(spacing: 16) {
+                                Text("This also cancels its notification. You can't undo this.")
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.center)
+
+                                Button("Delete Reminder", role: .destructive, action: delete)
+                                    .buttonStyle(.borderedProminent)
+                                    // Otherwise it inherits the app's brown tint
+                                    // and stops reading as destructive.
+                                    .tint(.red)
+                            }
+                            .padding()
+                            .frame(idealWidth: 260)
+                            .presentationCompactAdaptation(.popover)
+                        }
+                    }
+                }
             }
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
@@ -94,6 +125,11 @@ struct ReminderFormView: View {
                 }
             }
         }
+    }
+
+    private func delete() {
+        viewModel.delete(in: modelContext)
+        dismiss()
     }
 
     private func save() {
