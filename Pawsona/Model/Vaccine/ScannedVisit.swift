@@ -55,7 +55,14 @@ struct ScannedVisit: Decodable, Identifiable {
     /// The prompt pins dates to `YYYY-MM-DD`; anything else is treated as unread.
     static func date(from string: String?) -> Date? {
         guard let string, !string.isEmpty else { return nil }
-        return try? Date(string, strategy: dateStrategy)
+        
+        // coba format utama YYYY-MM-DD
+        if let parsedDate = try? Date(string, strategy: dateStrategy) {
+                    return parsedDate
+                }
+        
+        // jika gagal, gunakan fallback formatter (DD/MM/YYYY)
+        return fallbackDateFormatter.date(from: string)
     }
 
     private static let dateStrategy = Date.ISO8601FormatStyle(
@@ -65,4 +72,12 @@ struct ScannedVisit: Decodable, Identifiable {
     .year()
     .month()
     .day()
+    
+    // DateFormatter cadangan khusus untuk membaca format DD/MM/YYYY (common Indonesian date format)
+        private static let fallbackDateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd/MM/yyyy"
+            formatter.timeZone = .autoupdatingCurrent
+            return formatter
+        }()
 }
