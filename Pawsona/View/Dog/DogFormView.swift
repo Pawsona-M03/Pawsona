@@ -5,15 +5,16 @@
 //  Created by Christianto Elvern Haryanto on 14/07/26.
 //
 
-import PhotosUI
 import SwiftUI
-import UIKit
 
 struct DogFormView: View {
     @Environment(\.dismiss) private var dismiss
 
     let title: String
     let saveTitle: String
+    /// Supplied only when editing. Its presence is what puts the delete button
+    /// on screen, so the add form stays exactly as it was.
+    let onDelete: (() -> Void)?
     let onSave: (DogDraft) -> Void
 
     /// Form rows grow with Dynamic Type rather than clipping at a fixed 60pt.
@@ -26,16 +27,19 @@ struct DogFormView: View {
     @State private var weightText: String
     @State private var sex: Sex?
     @State private var photoData: Data?
-    @State private var photoSelection: PhotosPickerItem?
 
+    /// `onDelete` sits ahead of `onSave` so the add form's trailing-closure call
+    /// still binds to `onSave`.
     init(
         title: String = "Add Dog",
         saveTitle: String = "Add Dog",
         draft: DogDraft = DogDraft(),
+        onDelete: (() -> Void)? = nil,
         onSave: @escaping (DogDraft) -> Void
     ) {
         self.title = title
         self.saveTitle = saveTitle
+        self.onDelete = onDelete
         self.onSave = onSave
         self._name = State(initialValue: draft.name)
         self._breed = State(initialValue: draft.breed)
@@ -49,16 +53,11 @@ struct DogFormView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                PhotosPicker(selection: $photoSelection, matching: .images) {
-                    photoPickerLabel
-                }
+                DogPhotoPickerButton(
+                    photoData: $photoData,
+                    backgroundColor: backgroundColor
+                )
                 .padding(.bottom, 30)
-                .accessibilityLabel(
-                    photoData == nil ? "Add dog photo" : "Change dog photo"
-                )
-                .accessibilityValue(
-                    photoData == nil ? "No photo selected" : "Photo selected"
-                )
 
                 // No explicit spacing: each button spreads to an equal share of
                 // the width instead, which is what buys the 44pt hit target
@@ -156,6 +155,26 @@ struct DogFormView: View {
                 .padding(.horizontal, 14)
                 .cardBackground(cornerRadius: 32)
                 .padding(.horizontal, 30)
+
+                if let onDelete {
+                    DeleteConfirmationButton(
+                        title: "Delete Dog",
+                        message: """
+                            This doesn't delete their vaccination records or \
+                            reminders — those stay, unassigned. You can't undo \
+                            this.
+                            """
+                    ) {
+                        onDelete()
+                        dismiss()
+                    }
+                    // Matches the form card above it rather than the reminder
+                    // sheet's tighter radius: within one screen the corners
+                    // agreeing matters more than they do across screens.
+                    .cardBackground(cornerRadius: 32)
+                    .padding(.horizontal, 30)
+                    .padding(.top, 16)
+                }
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -167,11 +186,12 @@ struct DogFormView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(
-                        "Cancel",
+                        "Close",
                         systemImage: "xmark",
                         action: dismiss.callAsFunction
                     )
-                    .accessibilityLabel("Cancel")
+                    .buttonStyle(.glassProminent)
+                    .tint(.gray)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -185,42 +205,6 @@ struct DogFormView: View {
                         )
                 }
             }
-            .onChange(of: photoSelection) { _, newSelection in
-                loadPhoto(from: newSelection)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var photoPickerLabel: some View {
-        Group {
-            if let photoData, let uiImage = UIImage(data: photoData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 160, height: 160)
-            } else {
-                Rectangle()
-                    .fill(backgroundColor.color.opacity(0.2))
-                    .frame(width: 160, height: 160)
-                    .overlay(alignment: .bottom) {
-                        Image(.dogPlaceholder)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 120)
-                    }
-            }
-        }
-        .frame(width: 160, height: 160)
-        .clipShape(.rect(cornerRadius: 16))
-        .overlay(alignment: .bottomTrailing) {
-            Image(systemName: "pencil")
-                .font(.body.bold())
-                .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(Color(.primaryBrown), in: .circle)
-                .padding(.bottom, 6)
-                .accessibilityHidden(true)
         }
     }
 
@@ -234,35 +218,6 @@ struct DogFormView: View {
 
     private var parsedWeightKg: Double? {
         DogDraft.weightKg(fromText: weightText)
-    }
-
-    private func loadPhoto(from selection: PhotosPickerItem?) {
-        guard let selection else {
-            return
-        }
-
-        Task {
-            do {
-                guard
-                    let loadedPhotoData = try await selection.loadTransferable(
-                        type: Data.self
-                    )
-                else {
-                    AccessibilityNotification.Announcement(
-                        "Unable to load dog photo"
-                    ).post()
-                    return
-                }
-
-                photoData = loadedPhotoData
-                AccessibilityNotification.Announcement("Dog photo selected")
-                    .post()
-            } catch {
-                AccessibilityNotification.Announcement(
-                    "Unable to load dog photo"
-                ).post()
-            }
-        }
     }
 
     private func saveDog() {
@@ -294,6 +249,21 @@ private extension Optional where Wrapped == Sex {
     }
 }
 
-#Preview {
+#Preview("Add") {
     DogFormView { _ in }
+}
+
+#Preview("Edit") {
+    DogFormView(
+        title: "Edit Dog",
+        saveTitle: "Save",
+        draft: DogDraft(
+            name: "Berry",
+            breed: "Labrador Retriever",
+            weightKg: 12.4,
+            sex: .female
+        ),
+        onDelete: {},
+        onSave: { _ in }
+    )
 }

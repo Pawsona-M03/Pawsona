@@ -14,6 +14,9 @@ struct VaccineRecordFormView: View {
     @Query(sort: \Dog.name) private var dogs: [Dog]
 
     let title: String
+    /// Supplied only when editing. Its presence is what puts the delete button
+    /// on screen, so the add form stays exactly as it was.
+    let onDelete: (() -> Void)?
     let onSave: (VaccineRecordDraft) -> Void
 
     @State private var vaccines: [VaccineType]
@@ -21,12 +24,16 @@ struct VaccineRecordFormView: View {
     @State private var dateGiven: Date
     @State private var notes: String
 
+    /// `onDelete` sits ahead of `onSave` so a trailing-closure call still binds
+    /// to `onSave`.
     init(
         title: String = "New Vaccination Record",
         draft: VaccineRecordDraft = VaccineRecordDraft(),
+        onDelete: (() -> Void)? = nil,
         onSave: @escaping (VaccineRecordDraft) -> Void
     ) {
         self.title = title
+        self.onDelete = onDelete
         self.onSave = onSave
         self._vaccines = State(initialValue: draft.vaccines)
         self._selectedDogIDs = State(initialValue: Set(draft.dogs.map(\.id)))
@@ -42,16 +49,33 @@ struct VaccineRecordFormView: View {
                     VaccineDateSection(dateGiven: $dateGiven)
                     VaccineDogSection(dogs: dogs, selectedDogIDs: $selectedDogIDs)
                     VaccineNotesSection(notes: $notes)
+
+                    if let onDelete {
+                        DeleteConfirmationButton(
+                            title: "Delete Record",
+                            message: """
+                                This removes the record from every dog it's \
+                                assigned to. You can't undo this.
+                                """
+                        ) {
+                            onDelete()
+                            dismiss()
+                        }
+                        .cardBackground()
+                    }
                 }
                 .padding(.horizontal, 30)
                 .padding(.top, 18)
                 .padding(.bottom, 40)
             }
+            .background(Color(.appBackground).ignoresSafeArea())
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close", systemImage: "xmark", action: dismiss.callAsFunction)
+                        .buttonStyle(.glassProminent)
+                        .tint(.gray)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -106,6 +130,9 @@ private struct VaccineTypeSection: View {
                     )
                 }
             }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .cardBackground()
         }
     }
 
@@ -143,6 +170,11 @@ private struct VaccineDateSection: View {
             )
             .labelsHidden()
         }
+        // Reads as one form row — label left, pickers right, on white — the way
+        // the reminder sheet's date row does.
+        .padding(.horizontal)
+        .padding(.vertical, 12)
+        .cardBackground()
     }
 }
 
@@ -181,6 +213,8 @@ private struct VaccineDogSection: View {
                         )
                     }
                 }
+                .padding()
+                .cardBackground()
             }
         }
     }
@@ -294,7 +328,17 @@ private struct VaccineDogSelectionButton: View {
     }
 }
 
-#Preview {
+#Preview("New") {
     VaccineRecordFormView { _ in }
         .modelContainer(for: [Dog.self, VaccineRecord.self], inMemory: true)
+}
+
+#Preview("Edit") {
+    VaccineRecordFormView(
+        title: "Edit Vaccination Record",
+        draft: VaccineRecordDraft(vaccines: [.rabies], notes: "Given at the clinic on Jalan Raya."),
+        onDelete: {},
+        onSave: { _ in }
+    )
+    .modelContainer(for: [Dog.self, VaccineRecord.self], inMemory: true)
 }

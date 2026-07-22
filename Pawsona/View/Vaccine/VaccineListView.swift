@@ -15,6 +15,7 @@ struct VaccineListView: View {
     @State private var viewModel = VaccineViewModel()
     @State private var scanViewModel = VaccineScanViewModel()
     @State private var editingVaccineRecord: VaccineRecord?
+    @State private var recordPendingDeletion: VaccineRecord?
     @State private var isShowingNewVaccineForm = false
     @State private var isShowingCamera = false
     @State private var capturedImage: UIImage?
@@ -103,7 +104,7 @@ struct VaccineListView: View {
                     onSave: createVaccineRecord
                 )
             }
-            .sheet(item: $editingVaccineRecord) { vaccineRecord in
+            .sheet(item: $editingVaccineRecord, onDismiss: deleteIfRequested) { vaccineRecord in
                 VaccineRecordFormView(
                     title: "Edit Vaccination Record",
                     draft: VaccineRecordDraft(
@@ -112,6 +113,7 @@ struct VaccineListView: View {
                         dogs: vaccineRecord.dogList ?? [],
                         notes: vaccineRecord.notes
                     ),
+                    onDelete: { recordPendingDeletion = vaccineRecord },
                     onSave: { draft in
                         viewModel.editRecord(vaccineRecord, from: draft, in: modelContext)
                     }
@@ -139,6 +141,16 @@ struct VaccineListView: View {
 
     private func createVaccineRecord(_ draft: VaccineRecordDraft) {
         viewModel.createRecord(from: draft, in: modelContext)
+    }
+
+    /// Runs once the edit sheet is gone. Deleting from inside it would destroy
+    /// the record while `sheet(item:)` still holds it, and rebuilding that sheet
+    /// re-reads the record's properties to fill the draft.
+    private func deleteIfRequested() {
+        guard let record = recordPendingDeletion else { return }
+
+        recordPendingDeletion = nil
+        viewModel.deleteRecord(record, in: modelContext)
     }
 }
 
