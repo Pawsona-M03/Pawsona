@@ -41,10 +41,48 @@ final class Dog {
         breed.isEmpty ? "Breed not set" : breed
     }
 
-    /// "3 years old", or nil when the date of birth is unknown.
+    /// "1 year, 2 months old", or nil when the date of birth is unknown.
     var ageText: String? {
-        guard let age else { return nil }
-        return age == 1 ? "1 year old" : "\(age) years old"
+        Self.ageText(from: dateOfBirth)
+    }
+
+    static func ageText(
+        from dateOfBirth: Date?,
+        to now: Date = .now,
+        calendar: Calendar = .current
+    ) -> String? {
+        guard let dateOfBirth else { return nil }
+
+        let components = calendar.dateComponents([.year, .month, .day], from: dateOfBirth, to: now)
+        let years = components.year ?? 0
+        let months = components.month ?? 0
+        let days = components.day ?? 0
+
+        let ageParts: [String?]
+        if years > 0 {
+            ageParts = [
+                agePart(value: years, singularUnit: "year"),
+                agePart(value: months, singularUnit: "month")
+            ]
+        } else {
+            ageParts = [
+                agePart(value: months, singularUnit: "month"),
+                agePart(value: days, singularUnit: "day")
+            ]
+        }
+        let visibleAgeParts = ageParts.compactMap { $0 }
+
+        if visibleAgeParts.isEmpty {
+            return "0 days old"
+        }
+
+        return "\(visibleAgeParts.joined(separator: ", ")) old"
+    }
+
+    private static func agePart(value: Int, singularUnit: String) -> String? {
+        guard value > 0 else { return nil }
+        let unit = value == 1 ? singularUnit : "\(singularUnit)s"
+        return "\(value) \(unit)"
     }
 
     init(

@@ -243,14 +243,21 @@ struct DogViewModelTests {
         #expect(Dog(name: "Berry", breed: "Poodle").breedText == "Poodle")
     }
 
-    @Test("Age text is singular at one year and nil without a birthday")
-    func ageTextReadsNaturally() {
-        let calendar = Calendar.current
-        let oneYearAgo = try? #require(calendar.date(byAdding: .year, value: -1, to: .now))
-        let threeYearsAgo = try? #require(calendar.date(byAdding: .year, value: -3, to: .now))
+    @Test("Age text omits zero units and days after one year")
+    func ageTextReadsNaturally() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 22)))
+        let oneDayAgo = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 21)))
+        let twoMonthsAgo = try #require(calendar.date(from: DateComponents(year: 2026, month: 5, day: 22)))
+        let fullAge = try #require(calendar.date(from: DateComponents(year: 2025, month: 5, day: 19)))
+        let oneYearAgo = try #require(calendar.date(from: DateComponents(year: 2025, month: 7, day: 22)))
+        let newborn = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 22)))
 
-        #expect(Dog(name: "Berry", breed: "Poodle", dateOfBirth: oneYearAgo).ageText == "1 year old")
-        #expect(Dog(name: "Berry", breed: "Poodle", dateOfBirth: threeYearsAgo).ageText == "3 years old")
-        #expect(Dog(name: "Berry", breed: "Poodle").ageText == nil)
+        #expect(Dog.ageText(from: oneDayAgo, to: now, calendar: calendar) == "1 day old")
+        #expect(Dog.ageText(from: twoMonthsAgo, to: now, calendar: calendar) == "2 months old")
+        #expect(Dog.ageText(from: fullAge, to: now, calendar: calendar) == "1 year, 2 months old")
+        #expect(Dog.ageText(from: oneYearAgo, to: now, calendar: calendar) == "1 year old")
+        #expect(Dog.ageText(from: newborn, to: now, calendar: calendar) == "0 days old")
+        #expect(Dog.ageText(from: nil, to: now, calendar: calendar) == nil)
     }
 }
