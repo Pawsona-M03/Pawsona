@@ -10,8 +10,11 @@ import SwiftUI
 
 struct DogDetailView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @State private var dogViewModel = DogViewModel()
     @State private var isShowingEditDogForm = false
+    @State private var isPendingDeletion = false
     @State private var sharedFile: SharedFile?
 
     let dog: Dog
@@ -53,6 +56,9 @@ struct DogDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit", action: showEditDogForm)
+                    // These two are chrome, not calls to action, so they opt out
+                    // of the brown the TabView tints everything with.
+                    .tint(.primary)
                     .accessibilityShowsLargeContentViewer()
                     .accessibilityLabel("Edit \(displayName)")
             }
@@ -71,11 +77,12 @@ struct DogDetailView: View {
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
+                .tint(.primary)
                 .accessibilityLabel("Share \(displayName)")
             }
         }
-        .sheet(isPresented: $isShowingEditDogForm) {
-            DogEditView(dog: dog)
+        .sheet(isPresented: $isShowingEditDogForm, onDismiss: deleteIfRequested) {
+            DogEditView(dog: dog, onDelete: { isPendingDeletion = true })
         }
         // Both exports are generated on tap. They used to run on every
         // appearance and every edit-sheet toggle, rendering the dog's photo
@@ -229,6 +236,19 @@ struct DogDetailView: View {
 
     private func showEditDogForm() {
         isShowingEditDogForm = true
+    }
+
+    /// Runs once the edit sheet is fully gone, not from inside it. This screen is
+    /// pushed and holds `dog`, so destroying the model while the sheet is still
+    /// animating away would leave the body reading an invalidated object for a
+    /// frame. Popping first means there is nothing left to re-render.
+    private func deleteIfRequested() {
+        guard isPendingDeletion else { return }
+
+        isPendingDeletion = false
+        dismiss()
+        dogViewModel.deleteDog(dog, in: modelContext)
+        AccessibilityNotification.Announcement("Dog deleted").post()
     }
 }
 

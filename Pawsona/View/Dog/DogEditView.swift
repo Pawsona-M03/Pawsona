@@ -14,6 +14,11 @@ struct DogEditView: View {
 
     let dog: Dog
 
+    /// Reports that the user confirmed deletion — it does not delete anything
+    /// itself. The presenting screen owns the delete so it can tear itself down
+    /// first; see `DogDetailView`.
+    let onDelete: () -> Void
+
     var body: some View {
         DogFormView(
             title: "Edit Dog",
@@ -27,6 +32,7 @@ struct DogEditView: View {
                 sex: dog.sex,
                 photoData: dog.photoData
             ),
+            onDelete: onDelete,
             onSave: editDog
         )
     }
@@ -44,7 +50,8 @@ struct DogEditView: View {
             breed: "Labrador Retriever",
             backgroundColor: .green,
             dateOfBirth: Date.now
-        )
+        ),
+        onDelete: {}
     )
     .modelContainer(for: Dog.self, inMemory: true)
 }
