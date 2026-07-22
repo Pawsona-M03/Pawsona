@@ -95,6 +95,7 @@ struct VaccineRecordFormView: View {
             DatePicker(
                 "Vaccination date",
                 selection: $dateGiven,
+                in: Calendar.current.startOfDay(for: .now)...,
                 displayedComponents: .date
             )
             .labelsHidden()
