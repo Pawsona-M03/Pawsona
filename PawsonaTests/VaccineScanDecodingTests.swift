@@ -153,7 +153,7 @@ struct VaccineScanDecodingTests {
         arguments: [
             ("2020-05-26", Self.localDate(2020, 5, 26)),
             ("2025-09-06", Self.localDate(2025, 9, 6)),
-            ("26/05/2020", nil),
+            ("26/05/2020", Self.localDate(2020, 5, 26)),
             ("", nil)
         ]
     )
