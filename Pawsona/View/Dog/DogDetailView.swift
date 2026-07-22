@@ -30,6 +30,7 @@ struct DogDetailView: View {
                 .frame(maxWidth: 410)
                 .frame(height: displayedHeroHeight)
                 .background(dog.backgroundColor.color.opacity(0.3))
+                .background(dog.backgroundColor.color.opacity(0.3))
                 .clipped()
                 .ignoresSafeArea(edges: .top)
                 .accessibilityLabel("Photo of \(displayName)")
@@ -192,13 +193,11 @@ struct DogDetailView: View {
     }
 
     private var ageText: String {
-        guard let age = dog.age else { return "-" }
-        return "\(age)"
+        dog.ageText ?? "-"
     }
 
     private var ageAccessibilityValue: String {
-        guard let age = dog.age else { return "Not set" }
-        return age == 1 ? "1 year" : "\(age) years"
+        dog.ageText ?? "Not set"
     }
 
     private var sexText: String {
