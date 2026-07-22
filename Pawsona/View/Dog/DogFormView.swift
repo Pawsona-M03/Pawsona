@@ -17,9 +17,6 @@ struct DogFormView: View {
     let onDelete: (() -> Void)?
     let onSave: (DogDraft) -> Void
 
-    /// Form rows grow with Dynamic Type rather than clipping at a fixed 60pt.
-    @ScaledMetric(relativeTo: .body) private var rowHeight = 60
-
     @State private var name: String
     @State private var breed: String
     @State private var dateOfBirth: Date
@@ -59,99 +56,17 @@ struct DogFormView: View {
                 )
                 .padding(.bottom, 30)
 
-                // No explicit spacing: each button spreads to an equal share of
-                // the width instead, which is what buys the 44pt hit target
-                // without eight fixed 44pt boxes overflowing the screen.
-                HStack(spacing: 0) {
-                    ForEach(ColorType.allCases, id: \.self) { color in
-                        Button {
-                            backgroundColor = color
-                        } label: {
-                            DogColorPickerRow(
-                                color: color,
-                                isSelected: backgroundColor == color
-                            )
-                            .frame(width: 17, height: 17)
-                            // The swatch stays 17pt to match the hifi; the
-                            // button around it is what has to clear 44x44pt.
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                            .contentShape(.rect)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(color.accessibilityName)
-                        .accessibilityAddTraits(
-                            backgroundColor == color ? .isSelected : []
-                        )
-                    }
-                }
-                .padding(.horizontal, 30)
-                .padding(.bottom, 16)
-                VStack(spacing: 0) {
-                    ZStack(alignment: .leading) {
-                        if breed.isEmpty {
-                            HStack(spacing: 2) {
-                                Text("Breed")
-                                    .foregroundStyle(.secondary)
-                                Text("*")
-                                    .foregroundStyle(.red)
-                            }
-                            .allowsHitTesting(false)
-                        }
+                DogFormColorPickerView(backgroundColor: $backgroundColor)
+                    .padding(.horizontal, 30)
+                    .padding(.bottom, 16)
 
-                        TextField("", text: $breed)
-                            .textInputAutocapitalization(.words)
-                            .accessibilityLabel("Dog breed")
-                    }
-                    .frame(minHeight: rowHeight)
-
-                    Divider()
-
-                    TextField("Name", text: $name)
-                        .textInputAutocapitalization(.words)
-                        .accessibilityLabel("Dog name")
-                        .frame(minHeight: rowHeight)
-
-                    Divider()
-
-                    Menu {
-                        Button("Male") {
-                            sex = .male
-                        }
-
-                        Button("Female") {
-                            sex = .female
-                        }
-
-                        Button("Not Set") {
-                            sex = nil
-                        }
-                    } label: {
-                        HStack {
-                            Text(sex.displayName)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                        }
-                        .frame(minHeight: rowHeight)
-                        .contentShape(.rect)
-                    }
-                    .accessibilityLabel("Dog gender")
-
-                    Divider()
-
-                    DatePicker(
-                        "Date of Birth",
-                        selection: $dateOfBirth,
-                        displayedComponents: .date
-                    )
-                    .frame(minHeight: rowHeight)
-
-                    Divider()
-
-                    TextField("Weight (kg)", text: $weightText)
-                        .keyboardType(.decimalPad)
-                        .accessibilityLabel("Dog weight")
-                        .frame(minHeight: rowHeight)
-                }
+                DogFormFieldsView(
+                    name: $name,
+                    breed: $breed,
+                    dateOfBirth: $dateOfBirth,
+                    weightText: $weightText,
+                    sex: $sex
+                )
                 .padding(.horizontal, 14)
                 .cardBackground(cornerRadius: 32)
                 .padding(.horizontal, 30)
@@ -178,11 +93,9 @@ struct DogFormView: View {
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .background {
-                Color(.appBackground)
-            }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+            .background(Color(.appBackground).ignoresSafeArea())
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(
@@ -202,7 +115,7 @@ struct DogFormView: View {
                         .accessibilityHint(
                             "Enter a breed before saving",
                             isEnabled: trimmedBreed.isEmpty
-                        )
+                    )
                 }
             }
         }
@@ -233,19 +146,6 @@ struct DogFormView: View {
             )
         )
         dismiss()
-    }
-}
-
-private extension Optional where Wrapped == Sex {
-    var displayName: String {
-        switch self {
-        case .male:
-            "Male"
-        case .female:
-            "Female"
-        case nil:
-            "Gender"
-        }
     }
 }
 

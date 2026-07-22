@@ -21,7 +21,7 @@ struct DogColorPickerRow: View {
                     // a cue that survives when the swatch colour is hard to
                     // tell apart from its neighbours.
                     Circle()
-                        .strokeBorder(.primary, lineWidth: 2)
+                        .strokeBorder(.primary, lineWidth: 0)
                 }
             }
             .animation(.snappy, value: isSelected)
