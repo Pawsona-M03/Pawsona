@@ -159,7 +159,7 @@ private struct VaccineDateSection: View {
             DatePicker(
                 "Vaccination date",
                 selection: $dateGiven,
-                in: Calendar.current.startOfDay(for: .now)...,
+                in: ...Date.now,
                 displayedComponents: .date
             )
             .labelsHidden()
@@ -167,6 +167,7 @@ private struct VaccineDateSection: View {
             DatePicker(
                 "Vaccination time",
                 selection: $dateGiven,
+                in: ...Date.now,
                 displayedComponents: .hourAndMinute
             )
             .labelsHidden()
