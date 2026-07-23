@@ -63,6 +63,27 @@ final class DogViewModel {
         saveChanges(in: modelContext)
     }
 
+    /// Creates a new dog from another's profile — breed, colour, birth date,
+    /// weight, sex, and photo — named "<name> Copy". Health history is
+    /// deliberately left behind: a duplicate is a fresh profile, not a second
+    /// copy of the same vaccine records and reminders.
+    @discardableResult
+    func duplicateDog(_ dog: Dog, in modelContext: ModelContext) -> Dog {
+        let copy = Dog(
+            name: "\(dog.displayName) Copy",
+            breed: dog.breed,
+            backgroundColor: dog.backgroundColor,
+            dateOfBirth: dog.dateOfBirth,
+            weight: dog.weight,
+            sex: dog.sex,
+            photoData: dog.photoData
+        )
+
+        modelContext.insert(copy)
+        saveChanges(in: modelContext)
+        return copy
+    }
+
     // MARK: - Exports
 
     /// Renders the dogs to a PDF on disk. Call this only when the user actually

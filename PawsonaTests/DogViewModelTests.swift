@@ -149,6 +149,50 @@ struct DogViewModelTests {
         #expect(try context.fetch(FetchDescriptor<Dog>()).isEmpty)
     }
 
+    // MARK: - Duplicating
+
+    @Test("Duplicating copies the profile and appends Copy to the name")
+    func duplicateCopiesProfile() throws {
+        let context = try TestSupport.makeContext()
+        let viewModel = DogViewModel()
+        let birthday = Date(timeIntervalSince1970: 1_600_000_000)
+        let original = viewModel.createDog(
+            from: DogDraft(
+                name: "Berry",
+                breed: "Labrador",
+                dateOfBirth: birthday,
+                backgroundColor: .green,
+                weightKg: 12.5,
+                sex: .female
+            ),
+            in: context
+        )
+
+        let copy = viewModel.duplicateDog(original, in: context)
+
+        #expect(copy.name == "Berry Copy")
+        #expect(copy.breed == "Labrador")
+        #expect(copy.backgroundColor == .green)
+        #expect(copy.dateOfBirth == birthday)
+        #expect(copy.weight == 12.5)
+        #expect(copy.sex == .female)
+        #expect(copy.id != original.id)
+        #expect(try context.fetch(FetchDescriptor<Dog>()).count == 2)
+        #expect(viewModel.errorMessage == nil)
+    }
+
+    @Test("Duplicating does not clone vaccine records")
+    func duplicateDropsHealthHistory() throws {
+        let context = try TestSupport.makeContext()
+        let viewModel = DogViewModel()
+        let original = viewModel.createDog(from: DogDraft(name: "Berry", breed: "Labrador"), in: context)
+        original.vaccineRecords = [VaccineRecord(vaccines: [.rabies], dateGiven: .now, dogList: [original])]
+
+        let copy = viewModel.duplicateDog(original, in: context)
+
+        #expect((copy.vaccineRecords ?? []).isEmpty)
+    }
+
     // MARK: - Sharing and import
 
     @Test("A shared dog round-trips back through import")
