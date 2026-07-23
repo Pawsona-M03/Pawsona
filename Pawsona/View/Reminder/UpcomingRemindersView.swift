@@ -16,6 +16,7 @@ struct UpcomingRemindersView: View {
     @State private var notificationService: NotificationService
     @State private var viewModel: UpcomingRemindersViewModel
     @State private var editingReminder: Reminder?
+    @State private var reminderPendingDeletion: Reminder?
     @State private var isShowingNewReminderForm = false
 
     init() {
@@ -68,6 +69,11 @@ struct UpcomingRemindersView: View {
                                     viewModel.delete(reminder, in: modelContext)
                                 }
                             }
+                            .contextMenu {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    reminderPendingDeletion = reminder
+                                }
+                            }
                         }
                         .listRowBackground(Color(.cardSurface))
                     }
@@ -77,6 +83,16 @@ struct UpcomingRemindersView: View {
             // system's, so a reminder row and a vaccine card are the same colour
             // in both appearances.
             .scrollContentBackground(.hidden)
+            .deleteConfirmation(
+                $reminderPendingDeletion,
+                title: "Delete Reminder?",
+                message: { reminder in
+                    "This deletes \"\(reminder.title)\" and cancels its notification. You can't undo this."
+                },
+                perform: { reminder in
+                    viewModel.delete(reminder, in: modelContext)
+                }
+            )
             .background(Color(.appBackground).ignoresSafeArea())
             .navigationTitle("Reminder")
             .task {
