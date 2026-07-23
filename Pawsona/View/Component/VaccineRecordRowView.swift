@@ -36,7 +36,7 @@ struct VaccineRecordRowView: View {
                             .font(.subheadline)
                             .foregroundStyle(.orange)
                     } else {
-                        HStack(alignment: .top, spacing: 14) {
+                        FlowLayout(spacing: 14) {
                             ForEach(vaccineRecord.dogList ?? [], id: \.id) { dog in
                                 VaccineRecordDogBadge(dog: dog)
                             }

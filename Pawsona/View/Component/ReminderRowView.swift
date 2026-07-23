@@ -44,22 +44,27 @@ struct ReminderRowView: View {
                 }
 
                 if let dogs = reminder.dogList, !dogs.isEmpty {
-                    HStack(alignment: .top) {
+                    FlowLayout(spacing: 8) {
                         ForEach(dogs) { dog in
-                            VStack {
+                            VStack(spacing: 4) {
                                 DogPhotoView(dog: dog, placeholderIconHeight: avatarSize / 2)
                                     .frame(width: avatarSize, height: avatarSize)
                                     .clipShape(.circle)
                                 Text(dog.displayName)
                                     .font(.caption)
                                     .foregroundStyle(.primary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
+                            .frame(width: avatarSize)
                         }
                     }
                     .padding(.top, 4)
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(.rect)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }
