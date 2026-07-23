@@ -7,7 +7,6 @@ import SwiftUI
 
 struct DogSexMenu: View {
     @Binding var sex: Sex?
-    let rowHeight: CGFloat
 
     var body: some View {
         Menu {
@@ -29,7 +28,6 @@ struct DogSexMenu: View {
                     .foregroundStyle(.primary)
                 Spacer()
             }
-            .frame(minHeight: rowHeight)
             .contentShape(.rect)
         }
         .tint(.primary)
@@ -51,5 +49,5 @@ private extension Optional where Wrapped == Sex {
 }
 
 #Preview {
-    DogSexMenu(sex: .constant(.female), rowHeight: 60)
+    DogSexMenu(sex: .constant(.female))
 }

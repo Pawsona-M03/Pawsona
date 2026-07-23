@@ -12,40 +12,41 @@ struct DogFormFieldsView: View {
     @Binding var weightText: String
     @Binding var sex: Sex?
 
-    /// Form rows grow with Dynamic Type rather than clipping at a fixed 60pt.
-    @ScaledMetric(relativeTo: .body) private var rowHeight = 60
-
     var body: some View {
-        VStack(spacing: 0) {
-            DogBreedField(breed: $breed, rowHeight: rowHeight)
+        Form {
+            // Breed is the one required field, so it stands alone in its own
+            // section — the visual separation tells the user it's the must-fill.
+            Section {
+                DogBreedField(breed: $breed)
+            }
 
-            Divider()
+            // Everything below is optional and grouped together.
+            Section {
+                TextField("Name", text: $name)
+                    .textInputAutocapitalization(.words)
+                    .accessibilityLabel("Dog name")
 
-            TextField("Name", text: $name)
-                .textInputAutocapitalization(.words)
-                .accessibilityLabel("Dog name")
-                .frame(minHeight: rowHeight)
+                DogSexMenu(sex: $sex)
 
-            Divider()
+                DatePicker(
+                    "Date of Birth",
+                    selection: $dateOfBirth,
+                    in: ...Date.now,
+                    displayedComponents: .date
+                )
 
-            DogSexMenu(sex: $sex, rowHeight: rowHeight)
-
-            Divider()
-
-            DatePicker(
-                "Date of Birth",
-                selection: $dateOfBirth,
-                displayedComponents: .date
-            )
-            .frame(minHeight: rowHeight)
-
-            Divider()
-
-            TextField("Weight (kg)", text: $weightText)
-                .keyboardType(.decimalPad)
-                .accessibilityLabel("Dog weight")
-                .frame(minHeight: rowHeight)
+                HStack {
+                    TextField("Weight", text: $weightText)
+                        .keyboardType(.decimalPad)
+                        .accessibilityLabel("Dog weight in kilograms")
+                    if !weightText.isEmpty {
+                        Text("kg")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
+        .scrollContentBackground(.hidden)
     }
 }
 

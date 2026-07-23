@@ -7,7 +7,6 @@ import SwiftUI
 
 struct DogBreedField: View {
     @Binding var breed: String
-    let rowHeight: CGFloat
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -25,10 +24,9 @@ struct DogBreedField: View {
                 .textInputAutocapitalization(.words)
                 .accessibilityLabel("Dog breed")
         }
-        .frame(minHeight: rowHeight)
     }
 }
 
 #Preview {
-    DogBreedField(breed: .constant(""), rowHeight: 60)
+    DogBreedField(breed: .constant(""))
 }
