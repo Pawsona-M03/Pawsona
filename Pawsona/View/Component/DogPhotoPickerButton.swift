@@ -57,15 +57,15 @@ struct DogPhotoPickerButton: View {
         }
         .frame(width: 160, height: 160)
         .clipShape(.rect(cornerRadius: 16))
-        .overlay(alignment: .bottomTrailing) {
-            Image(systemName: "pencil")
-                .font(.body.bold())
-                .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(Color(.primaryBrown), in: .circle)
-                .padding(.bottom, 6)
-                .accessibilityHidden(true)
-        }
+//        .overlay(alignment: .bottomTrailing) {
+//            Image(systemName: "pencil")
+//                .font(.body.bold())
+//                .foregroundStyle(.white)
+//                .frame(width: 44, height: 44)
+//                .background(Color(.primaryBrown), in: .circle)
+//                .padding(.bottom, 6)
+//                .accessibilityHidden(true)
+//        }
     }
 
     private func loadPhoto(from selection: PhotosPickerItem?) {

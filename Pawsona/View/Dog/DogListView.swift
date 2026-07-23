@@ -15,6 +15,7 @@ struct DogListView: View {
     @State private var isShowingAddDogForm = false
     @State private var searchText = ""
     @State private var sortOption: DogSortOption = .dateAdded
+    @State private var sortDirection: DogSortDirection = .descending
 
     private var columns: [GridItem] {
         if dynamicTypeSize.isAccessibilitySize {
@@ -28,7 +29,12 @@ struct DogListView: View {
         NavigationStack {
             // The sort lives in a child so `@Query` can be rebuilt with a new
             // sort descriptor when it changes — a Query's sort is fixed at init.
-            SortedDogListView(sortOption: sortOption, searchText: searchText, columns: columns)
+            SortedDogListView(
+                sortOption: sortOption,
+                sortDirection: sortDirection,
+                searchText: searchText,
+                columns: columns
+            )
                 .navigationTitle("Puppy")
                 .navigationDestination(for: Dog.self) { dog in
                     DogDetailView(dog: dog)
@@ -42,10 +48,16 @@ struct DogListView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu("Sort", systemImage: "arrow.up.arrow.down") {
-                            SortOrderPicker(selection: $sortOption)
+                            SortOrderPicker(selection: $sortOption, direction: $sortDirection)
                         }
+                        .tint(.primary)
                         .accessibilityLabel("Sort dogs")
-                        .accessibilityValue(sortOption.title)
+                        .accessibilityValue(
+                            "\(sortOption.title), \(sortOption.directionTitle(for: sortDirection))"
+                        )
+                        .onChange(of: sortOption) { _, newOption in
+                            sortDirection = newOption.defaultDirection
+                        }
                     }
 
                     ToolbarItem(placement: .topBarTrailing) {
@@ -81,8 +93,8 @@ private struct SortedDogListView: View {
     let searchText: String
     let columns: [GridItem]
 
-    init(sortOption: DogSortOption, searchText: String, columns: [GridItem]) {
-        _dogs = Query(sort: [sortOption.sortDescriptor])
+    init(sortOption: DogSortOption, sortDirection: DogSortDirection, searchText: String, columns: [GridItem]) {
+        _dogs = Query(sort: [sortOption.sortDescriptor(direction: sortDirection)])
         self.searchText = searchText
         self.columns = columns
     }

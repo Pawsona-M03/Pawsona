@@ -22,7 +22,8 @@ struct DogSexMenu: View {
             Button("Not Set") {
                 sex = nil
             }
-        } label: {
+        }
+        label: {
             HStack {
                 Text(sex.displayName)
                     .foregroundStyle(.primary)
@@ -31,6 +32,7 @@ struct DogSexMenu: View {
             .frame(minHeight: rowHeight)
             .contentShape(.rect)
         }
+        .tint(.primary)
         .accessibilityLabel("Dog gender")
     }
 }

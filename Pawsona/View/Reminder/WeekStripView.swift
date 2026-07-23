@@ -81,7 +81,7 @@ struct WeekStripView: View {
                 Text(day.formatted(.dateTime.day()))
                     .font(isSelected ? .title2 : .body)
                     .bold(isSelected)
-                    .foregroundStyle(isSelected ? Color(.primaryBrown) : Color.primary)
+                    .foregroundStyle(Color.primary)
                     .frame(
                         width: isSelected ? selectedDaySize : daySize,
                         height: isSelected ? selectedDaySize : daySize
@@ -107,4 +107,15 @@ struct WeekStripView: View {
             scrollPosition.scrollTo(id: calendar.startOfDay(for: day), anchor: .center)
         }
     }
+}
+
+#Preview {
+    @Previewable @State var selected = Calendar.current.startOfDay(for: .now)
+    let days = (-15...15).compactMap {
+        Calendar.current.date(byAdding: .day, value: $0, to: .now)
+    }.map {
+        Calendar.current.startOfDay(for: $0)
+    }
+    WeekStripView(days: days, selectedDate: $selected)
+        .padding()
 }
