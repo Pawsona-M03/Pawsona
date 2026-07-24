@@ -215,6 +215,12 @@ If it is configured, prefer its tools over generic alternatives:
 - **Always fill the PR body from `.github/pull_request_template.md`.** Match its section
   headings exactly (Summary, Related Issue, Why, How, Checklist, Verification) — do not invent
   your own structure or skip the checklist.
+- **Always attach a screenshot (or short recording) of any UI change to the PR.** A UI PR
+  without a visual is incomplete — include one per screen you changed, and check the
+  "Screenshots / recording attached" box. If the simulator has no seed data to show real
+  content, render the relevant SwiftUI `#Preview` and use that. Because the `gh` CLI can't
+  upload images into a PR body, commit them under `Screenshots/` and embed with a `?raw=true`
+  blob URL (or drag them into the PR by hand).
 - Follow the branch naming and conventional-commit rules in `README.md`.
 - If SwiftLint is installed, make sure it returns no warnings or errors before committing.
 - **Never add AI attribution to commits.** No `Co-Authored-By: Claude` (or any other
