@@ -240,6 +240,7 @@
 				INFOPLIST_FILE = Pawsona/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pawsona uses the camera to take photos of your dog and scan their vaccine book.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pawsona uses the microphone so you can dictate search terms instead of typing.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pawsona uses speech recognition to turn your dictated search into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -279,6 +280,7 @@
 				INFOPLIST_FILE = Pawsona/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pawsona uses the camera to take photos of your dog and scan their vaccine book.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pawsona uses the microphone so you can dictate search terms instead of typing.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pawsona uses speech recognition to turn your dictated search into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
