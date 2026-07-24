@@ -5,6 +5,7 @@
 //  Created by Christianto Elvern Haryanto on 17/07/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct DogListContentView: View {

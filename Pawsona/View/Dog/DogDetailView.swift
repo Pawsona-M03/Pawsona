@@ -16,13 +16,28 @@ struct DogDetailView: View {
     @State private var isShowingEditDogForm = false
     @State private var isPendingDeletion = false
     @State private var sharedFile: SharedFile?
+    @State private var marketplaceListing: MarketplaceListing?
+    @State private var isShowingMarketplaceFlow = false
+    @State private var isCheckingMarketplaceListing = false
 
     let dog: Dog
+    private let marketplaceRepository: any MarketplaceRepository
+    private let sellerBlockStore: any SellerBlocking
 
     @ScaledMetric(relativeTo: .largeTitle) private var heroHeight = 380
     private let sheetCornerRadius: CGFloat = 32
 
     @State private var containerHeight: CGFloat = 0
+
+    init(
+        dog: Dog,
+        marketplaceRepository: any MarketplaceRepository = LazyCloudKitMarketplaceRepository(),
+        sellerBlockStore: any SellerBlocking = UserDefaultsSellerBlockStore()
+    ) {
+        self.dog = dog
+        self.marketplaceRepository = marketplaceRepository
+        self.sellerBlockStore = sellerBlockStore
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -92,6 +107,26 @@ struct DogDetailView: View {
         .sheet(item: $sharedFile) { sharedFile in
             ShareSheet(fileURL: sharedFile.url, previewTitle: displayName)
         }
+        .sheet(isPresented: $isShowingMarketplaceFlow, onDismiss: refreshMarketplaceListing) {
+            if let marketplaceListing {
+                NavigationStack {
+                    MarketplaceDetailView(
+                        listing: marketplaceListing,
+                        repository: marketplaceRepository,
+                        blockStore: sellerBlockStore,
+                        updateListingFromPuppy: updateMarketplaceListingFromPuppy
+                    )
+                }
+            } else {
+                MarketplacePublishingFlowView(
+                    puppy: MarketplaceDogSnapshotMapper.snapshot(from: dog),
+                    repository: marketplaceRepository
+                )
+            }
+        }
+        .task {
+            await loadMarketplaceListing()
+        }
         .alert("Something went wrong", isPresented: $dogViewModel.isShowingError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -157,6 +192,23 @@ struct DogDetailView: View {
             .accessibilityLabel("Vaccination record")
             .accessibilityValue(vaccineRecordAccessibilityValue)
             .accessibilityHint("Shows vaccination records")
+
+            Button(
+                marketplaceListing == nil
+                    ? "List on Marketplace" : "Manage Marketplace Listing",
+                systemImage: marketplaceListing == nil ? "storefront" : "slider.horizontal.3"
+            ) {
+                isShowingMarketplaceFlow = true
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(isCheckingMarketplaceListing)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal)
+            .accessibilityHint(
+                marketplaceListing == nil
+                    ? "Creates a public snapshot after confirmation"
+                    : "Shows public listing management actions"
+            )
 
             Spacer(minLength: 40)
         }
@@ -239,6 +291,40 @@ struct DogDetailView: View {
 
     private func showEditDogForm() {
         isShowingEditDogForm = true
+    }
+
+    private func loadMarketplaceListing() async {
+        guard !isCheckingMarketplaceListing else { return }
+        isCheckingMarketplaceListing = true
+        defer { isCheckingMarketplaceListing = false }
+        marketplaceListing = try? await marketplaceRepository.fetchListing(
+            sourceDogID: MarketplaceDogSnapshotMapper.safeSourceID(for: dog)
+        )
+    }
+
+    private func refreshMarketplaceListing() {
+        Task {
+            await loadMarketplaceListing()
+        }
+    }
+
+    private func updateMarketplaceListingFromPuppy() async throws -> MarketplaceListing {
+        guard let marketplaceListing else {
+            throw MarketplaceError.notFound
+        }
+        let sellerProfile = try await marketplaceRepository.fetchSellerProfile(
+            id: marketplaceListing.sellerProfileID
+        )
+        let snapshot = try MarketplaceDogSnapshotMapper.listing(
+            from: MarketplaceDogSnapshotMapper.snapshot(from: dog),
+            sellerProfile: sellerProfile,
+            listingType: marketplaceListing.listingType,
+            priceAmount: marketplaceListing.priceAmount,
+            existingListing: marketplaceListing
+        )
+        let updated = try await marketplaceRepository.updateListingFromDog(snapshot)
+        self.marketplaceListing = updated
+        return updated
     }
 
     /// Runs once the edit sheet is fully gone, not from inside it. This screen is

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum ColorType: String, Codable, CaseIterable {
+enum ColorType: String, Codable, CaseIterable, Hashable {
     case red
     case orange
     case yellow

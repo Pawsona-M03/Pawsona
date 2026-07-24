@@ -13,10 +13,24 @@ struct ContentView: View {
     @State private var viewModel = DogViewModel()
     @State private var selectedTab = AppTab.puppy
 
+    private let marketplaceRepository: any MarketplaceRepository
+    private let sellerBlockStore: any SellerBlocking
+
+    init(
+        marketplaceRepository: any MarketplaceRepository = LazyCloudKitMarketplaceRepository(),
+        sellerBlockStore: any SellerBlocking = UserDefaultsSellerBlockStore()
+    ) {
+        self.marketplaceRepository = marketplaceRepository
+        self.sellerBlockStore = sellerBlockStore
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Puppy", systemImage: "dog", value: .puppy) {
-                DogListView()
+                DogListView(
+                    marketplaceRepository: marketplaceRepository,
+                    sellerBlockStore: sellerBlockStore
+                )
             }
 
             Tab("Reminder", systemImage: "bell", value: .reminder) {
@@ -25,6 +39,13 @@ struct ContentView: View {
 
             Tab("Vaccine", systemImage: "syringe", value: .vaccine) {
                 VaccineListView()
+            }
+
+            Tab("Marketplace", systemImage: "storefront", value: .marketplace) {
+                MarketplaceView(
+                    repository: marketplaceRepository,
+                    blockStore: sellerBlockStore
+                )
             }
         }
         .tint(Color(.primaryBrown))
