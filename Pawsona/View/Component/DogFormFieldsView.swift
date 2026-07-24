@@ -26,7 +26,7 @@ struct DogFormFieldsView: View {
                     .textInputAutocapitalization(.words)
                     .accessibilityLabel("Dog name")
 
-                DogSexMenu(sex: $sex)
+                DogSexPicker(sex: $sex)
 
                 DatePicker(
                     "Date of Birth",
