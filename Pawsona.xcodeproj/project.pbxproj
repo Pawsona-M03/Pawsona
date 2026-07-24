@@ -234,12 +234,13 @@
 				CODE_SIGN_ENTITLEMENTS = Pawsona/Pawsona.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K64G2J8QL7;
+				DEVELOPMENT_TEAM = QU4D5KRV4A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pawsona uses the camera to take photos of your dog and scan their vaccine book.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pawsona uses the microphone so you can dictate search terms instead of typing.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pawsona uses speech recognition to turn your dictated search into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -252,7 +253,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona33;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -273,12 +274,13 @@
 				CODE_SIGN_ENTITLEMENTS = Pawsona/Pawsona.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K64G2J8QL7;
+				DEVELOPMENT_TEAM = QU4D5KRV4A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pawsona uses the camera to take photos of your dog and scan their vaccine book.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pawsona uses the microphone so you can dictate search terms instead of typing.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pawsona uses speech recognition to turn your dictated search into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -291,7 +293,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona33;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
