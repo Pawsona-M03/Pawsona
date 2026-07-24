@@ -155,7 +155,12 @@ These are not theoretical: the `ModelContainer` is pointed at CloudKit (`cloudKi
 
 ## Project structure
 
-- Use a consistent structure, with folder layout determined by app features.
+- Organize the source **layer-first**: top-level `Model/`, `View/`, `ViewModel/`, `Service/`, and
+  `Repository/` folders, each split into per-feature subfolders (`Model/Dog`, `View/Marketplace`,
+  and so on). Match this layout for every new feature — do not introduce a feature-first top-level
+  folder (e.g. a single `Marketplace/` holding its own Model/View/ViewModel). `Repository/` is the
+  home for data-access types that sit behind a protocol (currently the marketplace's public-CloudKit
+  layer); everything else non-UI lives under `Service/`.
 - Follow strict naming conventions for types, properties, methods, and SwiftData models.
 - One type per file — don't put multiple structs, classes, or enums in a single Swift file.
 - Write unit tests for core application logic. Only write UI tests if unit tests aren't possible.
