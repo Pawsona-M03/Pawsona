@@ -16,6 +16,7 @@ struct VaccineListView: View {
     @State private var scanViewModel = VaccineScanViewModel()
     @State private var editingVaccineRecord: VaccineRecord?
     @State private var recordPendingDeletion: VaccineRecord?
+    @State private var recordPendingContextDeletion: VaccineRecord?
     @State private var isShowingNewVaccineForm = false
     @State private var isShowingCamera = false
     @State private var capturedImage: UIImage?
@@ -31,20 +32,31 @@ struct VaccineListView: View {
                         description: Text("Scan a vaccine book or add a record by hand to start tracking.")
                     )
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(vaccineRecords, id: \.id) { vaccineRecord in
-                                Button {
-                                    editingVaccineRecord = vaccineRecord
-                                } label: {
-                                    VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: true)
+                    List {
+                        ForEach(vaccineRecords, id: \.id) { vaccineRecord in
+                            Button {
+                                editingVaccineRecord = vaccineRecord
+                            } label: {
+                                VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: true)
+                            }
+                            .buttonStyle(.plain)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 26, bottom: 8, trailing: 26))
+                            .swipeActions {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    viewModel.deleteRecord(vaccineRecord, in: modelContext)
                                 }
-                                .buttonStyle(.plain)
+                            }
+                            .contextMenu {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    recordPendingContextDeletion = vaccineRecord
+                                }
                             }
                         }
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 26)
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                     .scrollIndicators(.hidden)
                 }
             }
@@ -98,6 +110,19 @@ struct VaccineListView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
+            .deleteConfirmation(
+                $recordPendingContextDeletion,
+                title: "Delete Record?",
+                message: { record in
+                    """
+                    This removes the \(record.vaccineNames) record from every dog \
+                    it's assigned to. You can't undo this.
+                    """
+                },
+                perform: { record in
+                    viewModel.deleteRecord(record, in: modelContext)
+                }
+            )
             .sheet(isPresented: $isShowingNewVaccineForm) {
                 VaccineRecordFormView(
                     title: "New Vaccination Record",

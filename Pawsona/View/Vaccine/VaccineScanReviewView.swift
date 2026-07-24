@@ -42,11 +42,15 @@ struct VaccineScanReviewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", action: dismiss.callAsFunction)
+                    Button("Close", systemImage: "xmark", action: dismiss.callAsFunction)
+                        .buttonStyle(.glassProminent)
+                        .tint(.gray)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add \(includedIDs.count)", action: confirm)
+                        .buttonStyle(.glassProminent)
+                        .tint(Color(.primaryBrown))
                         .disabled(includedIDs.isEmpty)
                 }
             }

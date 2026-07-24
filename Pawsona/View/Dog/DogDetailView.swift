@@ -105,11 +105,15 @@ struct DogDetailView: View {
                 Text(displayName)
                     .font(.title2.bold())
                     .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                     .accessibilityHeading(.h1)
 
                 Text(breedText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                     .accessibilityLabel("Breed")
                     .accessibilityValue(breedText)
             }
@@ -255,7 +259,7 @@ struct DogDetailView: View {
     NavigationStack {
         DogDetailView(
             dog: Dog(
-                name: "Berry",
+                name: "Berry sodijoasidjfoaisdjfoaisdjfoaisdosidBerry  Berry asiodjfoaisjdfoaisjdoaijdsfoaijsdofiajsdo",
                 breed: "Labrador Retriever",
                 backgroundColor: .green,
                 dateOfBirth: Date.now

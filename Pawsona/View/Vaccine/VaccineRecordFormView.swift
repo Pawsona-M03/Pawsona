@@ -7,7 +7,6 @@
 
 import SwiftData
 import SwiftUI
-import UIKit
 
 struct VaccineRecordFormView: View {
     @Environment(\.dismiss) private var dismiss
@@ -159,7 +158,7 @@ private struct VaccineDateSection: View {
             DatePicker(
                 "Vaccination date",
                 selection: $dateGiven,
-                in: Calendar.current.startOfDay(for: .now)...,
+                in: ...Date.now,
                 displayedComponents: .date
             )
             .labelsHidden()
@@ -167,6 +166,7 @@ private struct VaccineDateSection: View {
             DatePicker(
                 "Vaccination time",
                 selection: $dateGiven,
+                in: ...Date.now,
                 displayedComponents: .hourAndMinute
             )
             .labelsHidden()
@@ -182,6 +182,11 @@ private struct VaccineDateSection: View {
 private struct VaccineDogSection: View {
     let dogs: [Dog]
     @Binding var selectedDogIDs: Set<UUID>
+
+    /// Scaled, because the avatars inside each cell scale too — a fixed minimum
+    /// lets the grid lay out more columns than actually fit at accessibility
+    /// text sizes, which pushes the whole form wider than the screen.
+    @ScaledMetric private var gridMinimum = 72
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -205,13 +210,11 @@ private struct VaccineDogSection: View {
                     description: Text("You can save this record now and assign a dog once you add one.")
                 )
             } else {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 58), spacing: 5)], alignment: .leading, spacing: 8) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: gridMinimum))], alignment: .leading) {
                     ForEach(dogs, id: \.id) { dog in
-                        VaccineDogSelectionButton(
-                            dog: dog,
-                            isSelected: selectedDogIDs.contains(dog.id),
-                            action: { toggle(dog) }
-                        )
+                        PuppySelectionRow(dog: dog, isSelected: selectedDogIDs.contains(dog.id)) {
+                            toggle(dog)
+                        }
                     }
                 }
                 .padding()
@@ -278,54 +281,6 @@ private struct VaccineSelectionButton: View {
         .buttonStyle(.plain)
         .frame(minHeight: 44)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-
-private struct VaccineDogSelectionButton: View {
-    let dog: Dog
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                avatar
-                    .overlay {
-                        Circle()
-                            .stroke(isSelected ? Color(.primaryBrown) : Color.clear, lineWidth: 3)
-                    }
-
-                Text(dog.displayName)
-                    .font(.caption2.bold())
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .frame(width: 58)
-            }
-        }
-        .buttonStyle(.plain)
-        .frame(minWidth: 58, minHeight: 78)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-
-    @ViewBuilder
-    private var avatar: some View {
-        if let image = DogPhotoCache.image(for: dog) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 50, height: 50)
-                .clipShape(.circle)
-        } else {
-            Circle()
-                .fill(.secondary.opacity(0.14))
-                .frame(width: 50, height: 50)
-                .overlay {
-                    Image(systemName: "pawprint.fill")
-                        .font(.title3)
-                        .foregroundStyle(.secondary.opacity(0.28))
-                }
-        }
     }
 }
 

@@ -124,7 +124,6 @@ struct ReminderFormView: View {
 #Preview("Add") {
     ReminderFormView(notificationService: NotificationService())
         .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
-        .tint(Color(.primaryBrown))
 }
 
 #Preview("Edit") {
@@ -139,5 +138,4 @@ struct ReminderFormView: View {
         notificationService: NotificationService()
     )
     .modelContainer(for: [Dog.self, Reminder.self], inMemory: true)
-    .tint(Color(.primaryBrown))
 }

@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// A selectable puppy avatar in the reminder form's Dog grid. Selection is
-/// shown as an orange ring around the photo, per the hifi.
+/// A selectable puppy avatar in the reminder and vaccine forms' Dog grids.
+/// Selection is shown as an orange ring around the photo, per the hifi.
 struct PuppySelectionRow: View {
     let dog: Dog
     let isSelected: Bool

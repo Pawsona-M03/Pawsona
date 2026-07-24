@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import UIKit
 
 struct VaccineRecordRowView: View {
     let vaccineRecord: VaccineRecord
@@ -36,7 +35,7 @@ struct VaccineRecordRowView: View {
                             .font(.subheadline)
                             .foregroundStyle(.orange)
                     } else {
-                        HStack(alignment: .top, spacing: 14) {
+                        FlowLayout(spacing: 14) {
                             ForEach(vaccineRecord.dogList ?? [], id: \.id) { dog in
                                 VaccineRecordDogBadge(dog: dog)
                             }
@@ -84,42 +83,22 @@ struct VaccineRecordRowView: View {
 private struct VaccineRecordDogBadge: View {
     let dog: Dog
 
+    @ScaledMetric private var avatarSize = 48
+    @ScaledMetric private var labelWidth = 52
+
     var body: some View {
         VStack(spacing: 4) {
-            avatar
+            DogPhotoView(dog: dog, placeholderIconHeight: avatarSize / 2)
+                .frame(width: avatarSize, height: avatarSize)
+                .clipShape(.circle)
 
-            Text(displayName)
+            Text(dog.displayName)
                 .font(.caption2.bold())
                 .foregroundStyle(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-                .frame(width: 52)
+                .frame(width: labelWidth)
         }
-    }
-
-    @ViewBuilder
-    private var avatar: some View {
-        if let image = DogPhotoCache.image(for: dog) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 48, height: 48)
-                .clipShape(.circle)
-        } else {
-            Circle()
-                .fill(.secondary.opacity(0.18))
-                .frame(width: 48, height: 48)
-                .overlay {
-                    Image(systemName: "pawprint.fill")
-                        .font(.title3)
-                        .foregroundStyle(Color.secondary.opacity(0.35))
-                }
-        }
-    }
-
-    private var displayName: String {
-        let trimmedName = dog.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmedName.isEmpty ? "Puppy" : trimmedName
     }
 }
 

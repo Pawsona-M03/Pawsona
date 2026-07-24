@@ -28,6 +28,7 @@ struct DogCardView: View {
                 Text(dog.displayName)
                     .font(.headline)
                     .foregroundStyle(.primary)
+                    .lineLimit(1)
 
                 Text(dog.breedText)
                     .font(.subheadline)

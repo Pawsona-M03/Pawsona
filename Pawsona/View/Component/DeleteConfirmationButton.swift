@@ -26,24 +26,16 @@ struct DeleteConfirmationButton: View {
             isShowingConfirmation = true
         }
         .frame(maxWidth: .infinity, minHeight: 44)
-        // A popover anchors the confirmation to the button itself; a
-        // confirmationDialog would slide up from the bottom of the screen
-        // instead.
-        .popover(isPresented: $isShowingConfirmation, arrowEdge: .bottom) {
-            VStack(spacing: 16) {
-                Text(message)
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-
-                Button(title, role: .destructive, action: action)
-                    .buttonStyle(.borderedProminent)
-                    // Otherwise it inherits the app's brown tint and stops
-                    // reading as destructive.
-                    .tint(.red)
-            }
-            .padding()
-            .frame(idealWidth: 260)
-            .presentationCompactAdaptation(.popover)
+        // A native alert: the centred modal that asks for a deliberate second
+        // tap before the destructive action runs.
+        .alert(title, isPresented: $isShowingConfirmation) {
+            Button("Delete", role: .destructive, action: action)
+            // Opt out of the app's brown tint so Cancel reads as a plain,
+            // standard alert button rather than a branded one.
+            Button("Cancel", role: .cancel) {}
+                .tint(.primary)
+        } message: {
+            Text(message)
         }
     }
 }

@@ -57,8 +57,7 @@ struct DogFormView: View {
                 .padding(.bottom, 30)
 
                 DogFormColorPickerView(backgroundColor: $backgroundColor)
-                    .padding(.horizontal, 30)
-                    .padding(.bottom, 16)
+//                    .padding(.horizontal, 30)
 
                 DogFormFieldsView(
                     name: $name,
@@ -67,9 +66,6 @@ struct DogFormView: View {
                     weightText: $weightText,
                     sex: $sex
                 )
-                .padding(.horizontal, 14)
-                .cardBackground(cornerRadius: 32)
-                .padding(.horizontal, 30)
 
                 if let onDelete {
                     DeleteConfirmationButton(

@@ -22,11 +22,36 @@ enum DogSortOption: String, CaseIterable, Identifiable {
         }
     }
 
-    var sortDescriptor: SortDescriptor<Dog> {
+    /// The direction this field should start in when it becomes the active sort.
+    var defaultDirection: DogSortDirection {
         switch self {
-        case .dateAdded: SortDescriptor(\Dog.createdAt, order: .reverse)
-        case .name: SortDescriptor(\Dog.name, order: .forward)
-        case .breed: SortDescriptor(\Dog.breed, order: .forward)
+        case .dateAdded: .descending
+        case .name, .breed: .ascending
+        }
+    }
+
+    func sortDescriptor(direction: DogSortDirection) -> SortDescriptor<Dog> {
+        switch self {
+        case .dateAdded: SortDescriptor(\Dog.createdAt, order: direction.sortOrder)
+        case .name: SortDescriptor(\Dog.name, order: direction.sortOrder)
+        case .breed: SortDescriptor(\Dog.breed, order: direction.sortOrder)
+        }
+    }
+
+    /// Direction labels read differently per field — "Newest First" makes sense
+    /// for a date, "A to Z" for text — so the copy is chosen here.
+    func directionTitle(for direction: DogSortDirection) -> String {
+        switch self {
+        case .dateAdded:
+            switch direction {
+            case .ascending: "Oldest First"
+            case .descending: "Newest First"
+            }
+        case .name, .breed:
+            switch direction {
+            case .ascending: "A to Z"
+            case .descending: "Z to A"
+            }
         }
     }
 }

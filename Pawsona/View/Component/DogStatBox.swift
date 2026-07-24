@@ -21,6 +21,8 @@ struct DogStatBox: View {
             Text(value)
                 .font(.headline)
                 .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

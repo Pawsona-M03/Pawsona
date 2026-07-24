@@ -15,6 +15,7 @@ struct DogVaccinationRecordView: View {
     @State private var isShowingEditVaccineForm = false
     @State private var editingVaccineRecord: VaccineRecord?
     @State private var recordPendingDeletion: VaccineRecord?
+    @State private var recordPendingContextDeletion: VaccineRecord?
 
     let dog: Dog
 
@@ -31,29 +32,36 @@ struct DogVaccinationRecordView: View {
                     Spacer()
                 }
             } else {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(sortedVaccineRecords, id: \.id) { vaccineRecord in
-                            Button {
-                                editingVaccineRecord = vaccineRecord
-                            } label: {
-                                VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: false)
+                List {
+                    ForEach(sortedVaccineRecords, id: \.id) { vaccineRecord in
+                        Button {
+                            editingVaccineRecord = vaccineRecord
+                        } label: {
+                            VaccineRecordRowView(vaccineRecord: vaccineRecord, showsDogName: false)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 26, bottom: 8, trailing: 26))
+                        .swipeActions {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                deleteSingleVaccineRecord(vaccineRecord)
                             }
-                            .buttonStyle(.plain)
-                            // Long-press to delete.
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    deleteSingleVaccineRecord(vaccineRecord)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
+                        }
+                        .contextMenu {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                recordPendingContextDeletion = vaccineRecord
                             }
                         }
                     }
-                    .padding(.vertical, 16)
-                    .padding(.horizontal, 26)
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
                 .scrollIndicators(.hidden)
+                // Restore the 16pt breathing room this screen had above the
+                // first card and below the last: 8pt of content margin on top
+                // of each row's 8pt inset. Inter-card spacing stays 16pt.
+                .contentMargins(.vertical, 8, for: .scrollContent)
             }
         }
         .background(Color(.appBackground).ignoresSafeArea())
@@ -62,6 +70,8 @@ struct DogVaccinationRecordView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Add Vaccine Record", systemImage: "plus", action: showAddVaccineForm)
+                    .buttonStyle(.glassProminent)
+                    .tint(.primaryBrown)
             }
         }
         .sheet(isPresented: $isShowingAddVaccineForm) {
@@ -75,6 +85,19 @@ struct DogVaccinationRecordView: View {
         } message: {
             Text(vaccineViewModel.errorMessage ?? "")
         }
+        .deleteConfirmation(
+            $recordPendingContextDeletion,
+            title: "Delete Record?",
+            message: { record in
+                """
+                This removes the \(record.vaccineNames) record from every dog \
+                it's assigned to. You can't undo this.
+                """
+            },
+            perform: { record in
+                deleteSingleVaccineRecord(record)
+            }
+        )
         .sheet(item: $editingVaccineRecord, onDismiss: deleteIfRequested) { vaccineRecord in
             VaccineRecordFormView(
                 title: "Edit Vaccination Record",
