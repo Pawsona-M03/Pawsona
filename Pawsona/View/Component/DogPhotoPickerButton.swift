@@ -83,11 +83,10 @@ struct DogPhotoPickerButton: View {
             capturedImage = nil
         }
         .onChange(of: backgroundColor) {
-            guard let subjectCutout else {
-                return
-            }
-
-            renderPhoto(from: subjectCutout)
+            renderCachedCutout()
+        }
+        .onChange(of: subjectCutout) {
+            renderCachedCutout()
         }
         .alert(
             "Unable to Process Photo",
@@ -222,7 +221,6 @@ struct DogPhotoPickerButton: View {
 
                 await MainActor.run {
                     subjectCutout = cutout
-                    renderPhoto(from: cutout)
                     isProcessingPhoto = false
                     AccessibilityNotification.Announcement(
                         "Dog photo selected"
@@ -234,6 +232,21 @@ struct DogPhotoPickerButton: View {
                 }
             }
         }
+    }
+
+    /// Re-composite the cached cutout whenever it or the card colour changes.
+    ///
+    /// Both callers are `onChange` actions, which SwiftUI rebuilds on every body
+    /// pass, so `backgroundColor` here is always the colour currently selected.
+    /// Rendering straight from `processPhoto` instead would use the colour
+    /// captured when the photo was picked, which goes stale if the user changes
+    /// the card colour while the subject is still being extracted.
+    private func renderCachedCutout() {
+        guard let subjectCutout else {
+            return
+        }
+
+        renderPhoto(from: subjectCutout)
     }
 
     /// Composite the transparent subject over the currently selected card colour.
