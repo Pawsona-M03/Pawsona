@@ -7,7 +7,15 @@ final class MarketplaceBrowseViewModel {
     var isLoading = false
     var isLoadingNextPage = false
     var hasLoaded = false
+
+    /// Blocking failure: we have nothing to show, so the screen becomes the error.
     var errorMessage: String?
+
+    /// Non-blocking failure: listings are on screen and usable, something
+    /// secondary (a continuation page, a "load more") failed. Surfaced inline
+    /// rather than as a modal — interrupting a working grid with an alert the
+    /// user can only dismiss is noise, not information.
+    var noticeMessage: String?
 
     private(set) var listings: [MarketplaceListing] = []
     private(set) var nextToken: MarketplacePageToken?
@@ -48,6 +56,7 @@ final class MarketplaceBrowseViewModel {
         guard !isLoading else { return }
         isLoading = true
         errorMessage = nil
+        noticeMessage = nil
         defer {
             isLoading = false
             hasLoaded = true
@@ -57,30 +66,45 @@ final class MarketplaceBrowseViewModel {
             var page = try await repository.fetchListings(query: query, after: nil)
             var loadedListings = page.listings
 
-            // CloudKit has no localized substring predicate. For an active
-            // name/breed search, walk the bounded cursor window and apply the
-            // localized match to each page instead of searching only page one.
-            while !query.searchText.isEmpty,
-                  let token = page.nextToken,
-                  loadedListings.count < 240 {
-                page = try await repository.fetchListings(query: query, after: token)
-                let loadedIDs = Set(loadedListings.map(\.id))
-                loadedListings.append(
-                    contentsOf: page.listings.filter { !loadedIDs.contains($0.id) }
-                )
+            do {
+                // CloudKit has no localized substring predicate. For an active
+                // name/breed search, walk the bounded cursor window and apply the
+                // localized match to each page instead of searching only page one.
+                while !query.searchText.isEmpty,
+                      let token = page.nextToken,
+                      loadedListings.count < 240 {
+                    page = try await repository.fetchListings(query: query, after: token)
+                    let loadedIDs = Set(loadedListings.map(\.id))
+                    loadedListings.append(
+                        contentsOf: page.listings.filter { !loadedIDs.contains($0.id) }
+                    )
+                }
+            } catch {
+                // The first page already succeeded. Failing to widen the search
+                // window costs us later matches, not the ones in hand — so keep
+                // them and say so quietly.
+                noticeMessage = readableMessage(for: error)
             }
 
             listings = loadedListings
             nextToken = page.nextToken
         } catch {
-            errorMessage = readableMessage(for: error)
+            // Only take over the screen when there is nothing else to show. A
+            // failed pull-to-refresh over a populated grid leaves results that
+            // are stale, not wrong — replacing them with a full-screen error
+            // (or worse, an alert) throws away something the user can still use.
+            if listings.isEmpty {
+                errorMessage = readableMessage(for: error)
+            } else {
+                noticeMessage = readableMessage(for: error)
+            }
         }
     }
 
     func loadNextPage() async {
         guard let nextToken, !isLoadingNextPage else { return }
         isLoadingNextPage = true
-        errorMessage = nil
+        noticeMessage = nil
         defer { isLoadingNextPage = false }
 
         do {
@@ -89,7 +113,8 @@ final class MarketplaceBrowseViewModel {
             listings.append(contentsOf: page.listings.filter { !existingIDs.contains($0.id) })
             self.nextToken = page.nextToken
         } catch {
-            errorMessage = readableMessage(for: error)
+            // Paging is additive. Whatever is already on screen stays valid.
+            noticeMessage = readableMessage(for: error)
         }
     }
 

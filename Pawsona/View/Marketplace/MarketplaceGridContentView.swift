@@ -5,10 +5,17 @@ struct MarketplaceGridContentView: View {
     let columns: [GridItem]
     let isLoadingNextPage: Bool
     let hasNextPage: Bool
+    var noticeMessage: String?
+    var dismissNotice: () -> Void = {}
     let loadNextPage: () -> Void
 
     var body: some View {
         ScrollView {
+            if let noticeMessage {
+                MarketplaceNoticeBanner(message: noticeMessage, dismiss: dismissNotice)
+                    .padding(.bottom, 8)
+            }
+
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(listings) { listing in
                     NavigationLink(value: listing) {

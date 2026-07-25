@@ -74,6 +74,8 @@ struct MarketplaceView: View {
                         columns: columns,
                         isLoadingNextPage: viewModel.isLoadingNextPage,
                         hasNextPage: viewModel.nextToken != nil,
+                        noticeMessage: viewModel.noticeMessage,
+                        dismissNotice: { viewModel.noticeMessage = nil },
                         loadNextPage: {
                             Task { await viewModel.loadNextPage() }
                         }
@@ -146,11 +148,6 @@ struct MarketplaceView: View {
                 }
                 await viewModel.reload()
             }
-            .alert("Marketplace", isPresented: errorBinding) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(viewModel.errorMessage ?? "")
-            }
         }
     }
 
@@ -160,10 +157,4 @@ struct MarketplaceView: View {
             : [GridItem(.flexible()), GridItem(.flexible())]
     }
 
-    private var errorBinding: Binding<Bool> {
-        Binding(
-            get: { viewModel.errorMessage != nil && !viewModel.listings.isEmpty },
-            set: { if !$0 { viewModel.errorMessage = nil } }
-        )
-    }
 }

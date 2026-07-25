@@ -32,9 +32,12 @@ extension CloudKitMarketplaceRepository {
             )
         }
 
-        let listings = try response.matchResults.compactMap { _, result in
-            let record = try record(from: result)
-            return try MarketplaceCloudKitMapper.listing(from: record)
+        // Per-record failures are per-record. A single listing written by a
+        // newer or buggy client used to throw out of the whole `compactMap` and
+        // blank the entire page; skipping just that row keeps the rest browsable.
+        let listings = response.matchResults.compactMap { _, result -> MarketplaceListing? in
+            guard let record = try? record(from: result) else { return nil }
+            return try? MarketplaceCloudKitMapper.listing(from: record)
         }
 
         let nextToken = response.queryCursor.map { cursor in
