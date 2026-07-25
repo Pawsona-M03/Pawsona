@@ -4,6 +4,7 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
     case invalidSalePrice
     case adoptionCannotHavePrice
     case incompleteSellerProfile
+    case alreadyListed
     case invalidPhoneNumber
     case authenticationRequired
     case notAuthorized
@@ -23,6 +24,8 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
             "Adoption listings cannot include a price."
         case .incompleteSellerProfile:
             "Complete all required seller profile fields first."
+        case .alreadyListed:
+            "This puppy is already on Marketplace. Manage its listing from the Puppy tab."
         case .invalidPhoneNumber:
             "Enter a valid international WhatsApp number."
         case .authenticationRequired:

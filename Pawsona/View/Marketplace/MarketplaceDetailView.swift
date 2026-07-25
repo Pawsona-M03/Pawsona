@@ -7,7 +7,9 @@ struct MarketplaceDetailView: View {
     @State private var isShowingContact = false
     @State private var isConfirmingBlock = false
     @State private var isConfirmingRemoval = false
+    @State private var isShowingTermsEditor = false
 
+    private let repository: any MarketplaceRepository
     private let updateListingFromPuppy: (() async throws -> MarketplaceListing)?
 
     init(
@@ -17,6 +19,7 @@ struct MarketplaceDetailView: View {
         isKnownOwnListing: Bool = false,
         updateListingFromPuppy: (() async throws -> MarketplaceListing)? = nil
     ) {
+        self.repository = repository
         _viewModel = State(
             initialValue: MarketplaceDetailViewModel(
                 listing: listing,
@@ -92,6 +95,7 @@ struct MarketplaceDetailView: View {
                             listing: viewModel.listing,
                             canUpdateFromPuppy: updateListingFromPuppy != nil,
                             isPerformingAction: viewModel.isPerformingAction,
+                            editTerms: { isShowingTermsEditor = true },
                             updateFromPuppy: updateFromPuppy,
                             updateStatus: { status in
                                 Task { await viewModel.updateStatus(status) }
@@ -134,6 +138,14 @@ struct MarketplaceDetailView: View {
         .sheet(isPresented: $isShowingContact) {
             if let contact = viewModel.sellerContact {
                 MarketplaceContactView(contact: contact, puppyName: viewModel.listing.name)
+            }
+        }
+        .sheet(isPresented: $isShowingTermsEditor) {
+            MarketplaceListingTermsView(
+                listing: viewModel.listing,
+                repository: repository
+            ) { updated in
+                viewModel.replaceListing(updated, message: "Listing terms updated.")
             }
         }
         .sheet(isPresented: $isShowingReport) {

@@ -92,6 +92,14 @@ extension CloudKitMarketplaceRepository {
             throw MarketplaceError.incompleteSellerProfile
         }
 
+        // One puppy, one public listing. The Puppy tab hides the publish button
+        // once a listing exists, but that check can miss — an offline launch, a
+        // second device mid-sync — and a duplicate is not something the owner
+        // can then untangle, so the rule is enforced here too.
+        if try await fetchListing(sourceDogID: validatedListing.sourceDogID) != nil {
+            throw MarketplaceError.alreadyListed
+        }
+
         let record = CKRecord(
             recordType: MarketplaceCloudKitSchema.RecordType.listing,
             recordID: CKRecord.ID(recordName: validatedListing.id)
@@ -127,6 +135,32 @@ extension CloudKitMarketplaceRepository {
         return try MarketplaceCloudKitMapper
             .listing(from: saved)
             .withPhotoData(updated.photoData)
+    }
+
+    /// Changes the commercial terms — sale vs adoption, and the asking price —
+    /// without touching the puppy snapshot. Those two move independently: the
+    /// snapshot follows the private puppy profile, the terms follow the seller.
+    func updateListingTerms(
+        id: String,
+        listingType: MarketplaceListingType,
+        priceAmount: Int64?
+    ) async throws -> MarketplaceListing {
+        let record = try await ownedRecord(id: id)
+        let existing = try MarketplaceCloudKitMapper.listing(from: record)
+
+        var updated = existing
+        updated.listingType = listingType
+        updated.priceAmount = listingType == .adoption ? nil : priceAmount
+        updated.updatedAt = .now
+        _ = try updated.validated()
+
+        MarketplaceCloudKitMapper.apply(updated, to: record)
+        let saved = try await withRetry {
+            try await self.database.save(record)
+        }
+        return try MarketplaceCloudKitMapper
+            .listing(from: saved)
+            .withPhotoData(existing.photoData)
     }
 
     func updateListingStatus(id: String, status: MarketplaceListingStatus) async throws {

@@ -4,18 +4,23 @@ struct MarketplaceOwnerActionsView: View {
     let listing: MarketplaceListing
     let canUpdateFromPuppy: Bool
     let isPerformingAction: Bool
+    let editTerms: () -> Void
     let updateFromPuppy: () -> Void
     let updateStatus: (MarketplaceListingStatus) -> Void
     let remove: () -> Void
 
     var body: some View {
         VStack(spacing: 12) {
+            Button("Edit Price & Listing Type", systemImage: "tag", action: editTerms)
+                .buttonStyle(.borderedProminent)
+                .disabled(isPerformingAction)
+
             Button(
                 "Update listing from puppy profile",
                 systemImage: "arrow.triangle.2.circlepath",
                 action: updateFromPuppy
             )
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.bordered)
             .disabled(isPerformingAction)
 
             Menu("Change Listing Status", systemImage: "slider.horizontal.3") {

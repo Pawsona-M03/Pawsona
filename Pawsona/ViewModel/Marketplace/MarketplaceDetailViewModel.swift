@@ -106,9 +106,12 @@ final class MarketplaceDetailViewModel {
         }
     }
 
-    func replaceListing(_ updatedListing: MarketplaceListing) {
+    func replaceListing(
+        _ updatedListing: MarketplaceListing,
+        message: String = "Listing updated from the puppy profile."
+    ) {
         listing = updatedListing
-        confirmationMessage = "Listing updated from the puppy profile."
+        confirmationMessage = message
     }
 
     func showMessage(_ message: String) {

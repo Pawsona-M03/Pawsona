@@ -30,6 +30,18 @@ final class LazyCloudKitMarketplaceRepository: MarketplaceRepository {
         try await repository.updateListingFromDog(listing)
     }
 
+    func updateListingTerms(
+        id: String,
+        listingType: MarketplaceListingType,
+        priceAmount: Int64?
+    ) async throws -> MarketplaceListing {
+        try await repository.updateListingTerms(
+            id: id,
+            listingType: listingType,
+            priceAmount: priceAmount
+        )
+    }
+
     func updateListingStatus(id: String, status: MarketplaceListingStatus) async throws {
         try await repository.updateListingStatus(id: id, status: status)
     }

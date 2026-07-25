@@ -10,6 +10,11 @@ protocol MarketplaceRepository {
     func fetchListing(sourceDogID: String) async throws -> MarketplaceListing?
     func publish(_ listing: MarketplaceListing) async throws -> MarketplaceListing
     func updateListingFromDog(_ listing: MarketplaceListing) async throws -> MarketplaceListing
+    func updateListingTerms(
+        id: String,
+        listingType: MarketplaceListingType,
+        priceAmount: Int64?
+    ) async throws -> MarketplaceListing
     func updateListingStatus(id: String, status: MarketplaceListingStatus) async throws
     func deleteListing(id: String) async throws
     func fetchSellerProfile(id: String) async throws -> SellerProfile
