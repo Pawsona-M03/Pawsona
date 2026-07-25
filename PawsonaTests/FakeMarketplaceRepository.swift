@@ -12,7 +12,14 @@ final class FakeMarketplaceRepository: MarketplaceRepository {
     )
     var isOwner = false
     var fetchError: Error?
+    /// Hands out a cursor on the first fetch so paging paths become reachable.
+    var nextTokenForFirstPage: MarketplacePageToken?
+    /// Fails every fetch after the first, to exercise the "page one worked,
+    /// something later did not" branch.
+    var errorAfterFirstFetch: Error?
+    private(set) var fetchCount = 0
     var statusUpdates: [(String, MarketplaceListingStatus)] = []
+    var termsUpdates: [RecordedTermsUpdate] = []
     var submittedReports: [(String, MarketplaceReportReason, String?)] = []
     var deletedListingIDs: [String] = []
 
@@ -24,12 +31,16 @@ final class FakeMarketplaceRepository: MarketplaceRepository {
         query: MarketplaceListingQuery,
         after token: MarketplacePageToken?
     ) async throws -> MarketplacePage {
+        fetchCount += 1
         if let fetchError {
             throw fetchError
         }
+        if fetchCount > 1, let errorAfterFirstFetch {
+            throw errorAfterFirstFetch
+        }
         return MarketplacePage(
             listings: query.sorted(listings.filter(query.matches)),
-            nextToken: nil
+            nextToken: token == nil ? nextTokenForFirstPage : nil
         )
     }
 
@@ -54,6 +65,27 @@ final class FakeMarketplaceRepository: MarketplaceRepository {
             listings[index] = listing
         }
         return listing
+    }
+
+    func updateListingTerms(
+        id: String,
+        listingType: MarketplaceListingType,
+        priceAmount: Int64?
+    ) async throws -> MarketplaceListing {
+        guard let index = listings.firstIndex(where: { $0.id == id }) else {
+            throw MarketplaceError.notFound
+        }
+        termsUpdates.append(
+            RecordedTermsUpdate(
+                listingID: id,
+                listingType: listingType,
+                priceAmount: priceAmount
+            )
+        )
+        listings[index].listingType = listingType
+        listings[index].priceAmount = listingType == .adoption ? nil : priceAmount
+        listings[index].updatedAt = .now
+        return try listings[index].validated()
     }
 
     func updateListingStatus(id: String, status: MarketplaceListingStatus) async throws {
