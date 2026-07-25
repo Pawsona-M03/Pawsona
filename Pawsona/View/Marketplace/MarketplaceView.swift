@@ -4,6 +4,7 @@ struct MarketplaceView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var viewModel: MarketplaceBrowseViewModel
     @State private var isShowingFilters = false
+    @State private var isShowingBlockedSellers = false
 
     private let repository: any MarketplaceRepository
     private let blockStore: any SellerBlocking
@@ -124,6 +125,15 @@ struct MarketplaceView: View {
                     .tint(viewModel.query.hasFilters ? Color(.primaryBrown) : .primary)
                     .accessibilityValue(viewModel.query.hasFilters ? "Filters applied" : "No filters")
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu("More", systemImage: "ellipsis.circle") {
+                        Button("Blocked Sellers", systemImage: "person.crop.circle.badge.xmark") {
+                            isShowingBlockedSellers = true
+                        }
+                    }
+                    .tint(.primary)
+                }
             }
             .sheet(isPresented: $isShowingFilters) {
                 MarketplaceFilterView(
@@ -133,6 +143,11 @@ struct MarketplaceView: View {
                 ) { query in
                     Task { await viewModel.applyFilters(query) }
                 }
+            }
+            .sheet(isPresented: $isShowingBlockedSellers) {
+                viewModel.refreshBlockedSellers()
+            } content: {
+                BlockedSellersView(repository: repository, blockStore: blockStore)
             }
             .task {
                 if !viewModel.hasLoaded {
