@@ -37,6 +37,17 @@ struct MarketplaceListing: Identifiable, Equatable, Hashable {
         PuppyAgeText.value(from: dateOfBirth) ?? "Age not provided"
     }
 
+    /// Re-attaches photo bytes we already hold in memory. CloudKit hands a saved
+    /// record back with its `CKAsset` pointing at the temporary file we uploaded
+    /// from, which is deleted the moment the save returns — so the round-trip
+    /// would otherwise report a photo we know we sent as missing.
+    func withPhotoData(_ photoData: Data?) -> Self {
+        guard let photoData else { return self }
+        var copy = self
+        copy.photoData = photoData
+        return copy
+    }
+
     func validated() throws -> Self {
         switch listingType {
         case .sale:

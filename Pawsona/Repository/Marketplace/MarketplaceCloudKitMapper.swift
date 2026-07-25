@@ -53,7 +53,7 @@ enum MarketplaceCloudKitMapper {
 
         let sex = (record[MarketplaceCloudKitSchema.ListingField.sex] as? String)
             .flatMap(Sex.init(rawValue:))
-        let photoData = try photoData(
+        let photoData = photoData(
             from: record[MarketplaceCloudKitSchema.ListingField.photo] as? CKAsset
         )
 
@@ -162,12 +162,13 @@ enum MarketplaceCloudKitMapper {
         )
     }
 
-    private static func photoData(from asset: CKAsset?) throws -> Data? {
+    /// A photo we cannot read is a missing picture, not a corrupt listing.
+    /// The asset's local file is a cache CloudKit owns — it can be absent,
+    /// evicted, or (right after a save) already cleaned up by us. Treating any
+    /// of those as `invalidRecord` threw away the whole listing, which is how a
+    /// successful publish came back reported as "could not read this item".
+    private static func photoData(from asset: CKAsset?) -> Data? {
         guard let fileURL = asset?.fileURL else { return nil }
-        do {
-            return try Data(contentsOf: fileURL)
-        } catch {
-            throw MarketplaceError.invalidRecord
-        }
+        return try? Data(contentsOf: fileURL)
     }
 }

@@ -95,7 +95,9 @@ extension CloudKitMarketplaceRepository {
         )
         MarketplaceCloudKitMapper.apply(validatedListing, to: record)
         let saved = try await save(record, photoData: validatedListing.photoData)
-        return try MarketplaceCloudKitMapper.listing(from: saved)
+        return try MarketplaceCloudKitMapper
+            .listing(from: saved)
+            .withPhotoData(validatedListing.photoData)
     }
 
     func updateListingFromDog(_ listing: MarketplaceListing) async throws -> MarketplaceListing {
@@ -119,7 +121,9 @@ extension CloudKitMarketplaceRepository {
 
         MarketplaceCloudKitMapper.apply(updated, to: record)
         let saved = try await save(record, photoData: updated.photoData)
-        return try MarketplaceCloudKitMapper.listing(from: saved)
+        return try MarketplaceCloudKitMapper
+            .listing(from: saved)
+            .withPhotoData(updated.photoData)
     }
 
     func updateListingStatus(id: String, status: MarketplaceListingStatus) async throws {
