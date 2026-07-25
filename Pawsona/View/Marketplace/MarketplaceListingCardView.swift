@@ -4,6 +4,7 @@ struct MarketplaceListingCardView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let listing: MarketplaceListing
+    var isOwnListing = false
 
     @ScaledMetric(relativeTo: .largeTitle) private var cardHeight = 280
 
@@ -16,6 +17,16 @@ struct MarketplaceListingCardView: View {
             .frame(maxWidth: .infinity)
             .frame(height: cardHeight * 0.58)
             .clipped()
+            .overlay(alignment: .topLeading) {
+                if isOwnListing {
+                    Text("Your listing")
+                        .font(.caption.bold())
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.thinMaterial, in: .rect(cornerRadius: 8))
+                        .padding(8)
+                }
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -60,6 +71,7 @@ struct MarketplaceListingCardView: View {
 
     private var accessibilityLabel: String {
         """
+        \(isOwnListing ? "Your listing. " : "")\
         \(listing.name), \(listing.breed), \(listing.priceText), \
         \(listing.region), \(listing.status.displayName)
         """

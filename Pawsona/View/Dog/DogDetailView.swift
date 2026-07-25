@@ -114,6 +114,9 @@ struct DogDetailView: View {
                         listing: marketplaceListing,
                         repository: marketplaceRepository,
                         blockStore: sellerBlockStore,
+                        // Reached from this puppy's own profile, so ownership
+                        // is a fact here rather than something to go ask about.
+                        isKnownOwnListing: true,
                         updateListingFromPuppy: updateMarketplaceListingFromPuppy
                     )
                 }

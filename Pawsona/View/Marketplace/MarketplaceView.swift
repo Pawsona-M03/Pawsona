@@ -76,6 +76,7 @@ struct MarketplaceView: View {
                         isLoadingNextPage: viewModel.isLoadingNextPage,
                         hasNextPage: viewModel.nextToken != nil,
                         noticeMessage: viewModel.noticeMessage,
+                        isOwnListing: viewModel.isOwnListing,
                         dismissNotice: { viewModel.noticeMessage = nil },
                         loadNextPage: {
                             Task { await viewModel.loadNextPage() }
@@ -93,7 +94,8 @@ struct MarketplaceView: View {
                 MarketplaceDetailView(
                     listing: listing,
                     repository: repository,
-                    blockStore: blockStore
+                    blockStore: blockStore,
+                    isKnownOwnListing: viewModel.isOwnListing(listing)
                 )
             }
             .searchable(
@@ -150,6 +152,7 @@ struct MarketplaceView: View {
                 BlockedSellersView(repository: repository, blockStore: blockStore)
             }
             .task {
+                await viewModel.loadCurrentSeller()
                 if !viewModel.hasLoaded {
                     await viewModel.reload()
                 }

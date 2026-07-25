@@ -6,6 +6,7 @@ struct MarketplaceGridContentView: View {
     let isLoadingNextPage: Bool
     let hasNextPage: Bool
     var noticeMessage: String?
+    var isOwnListing: (MarketplaceListing) -> Bool = { _ in false }
     var dismissNotice: () -> Void = {}
     let loadNextPage: () -> Void
 
@@ -19,7 +20,10 @@ struct MarketplaceGridContentView: View {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(listings) { listing in
                     NavigationLink(value: listing) {
-                        MarketplaceListingCardView(listing: listing)
+                        MarketplaceListingCardView(
+                            listing: listing,
+                            isOwnListing: isOwnListing(listing)
+                        )
                     }
                     .buttonStyle(.plain)
                     .accessibilityHint("Shows marketplace listing details")

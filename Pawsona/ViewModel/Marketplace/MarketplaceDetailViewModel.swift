@@ -18,16 +18,26 @@ final class MarketplaceDetailViewModel {
     init(
         listing: MarketplaceListing,
         repository: any MarketplaceRepository,
-        blockStore: any SellerBlocking
+        blockStore: any SellerBlocking,
+        isKnownOwnListing: Bool = false
     ) {
         self.listing = listing
         self.repository = repository
         self.blockStore = blockStore
+        // Browse already resolved ownership against the signed-in seller
+        // profile. Seeding it here means the owner never sees a frame of the
+        // buyer's UI — Contact Seller, Report, Block — on their own listing.
+        isOwner = isKnownOwnListing
     }
 
     var isSellerBlocked: Bool {
         blockStore.isBlocked(listing.sellerProfileID)
     }
+
+    /// Reporting or blocking yourself is never a real intent, and self-blocking
+    /// silently hid the user's own puppy from Marketplace with no way to
+    /// discover why.
+    var canReportOrBlock: Bool { !isOwner }
 
     func load() async {
         guard !isLoading else { return }
@@ -37,7 +47,13 @@ final class MarketplaceDetailViewModel {
         do {
             async let profile = repository.fetchSellerProfile(id: listing.sellerProfileID)
             sellerProfile = try await profile
-            isOwner = (try? await repository.isListingOwnedByCurrentUser(id: listing.id)) ?? false
+            let currentProfile = (try? await repository.fetchCurrentSellerProfile()) ?? nil
+            if let currentProfile, currentProfile.id == listing.sellerProfileID {
+                isOwner = true
+            } else if let confirmed = try? await repository
+                .isListingOwnedByCurrentUser(id: listing.id) {
+                isOwner = confirmed
+            }
         } catch {
             errorMessage = readableMessage(for: error)
         }
@@ -123,6 +139,10 @@ final class MarketplaceDetailViewModel {
     }
 
     func blockSeller() {
+        guard !isOwner else {
+            errorMessage = "You can't block yourself. This is your own listing."
+            return
+        }
         blockStore.block(listing.sellerProfileID)
         confirmationMessage = "Seller blocked. Their listings will no longer appear."
     }

@@ -14,13 +14,15 @@ struct MarketplaceDetailView: View {
         listing: MarketplaceListing,
         repository: any MarketplaceRepository,
         blockStore: any SellerBlocking,
+        isKnownOwnListing: Bool = false,
         updateListingFromPuppy: (() async throws -> MarketplaceListing)? = nil
     ) {
         _viewModel = State(
             initialValue: MarketplaceDetailViewModel(
                 listing: listing,
                 repository: repository,
-                blockStore: blockStore
+                blockStore: blockStore,
+                isKnownOwnListing: isKnownOwnListing
             )
         )
         self.updateListingFromPuppy = updateListingFromPuppy
@@ -110,30 +112,14 @@ struct MarketplaceDetailView: View {
                         .frame(maxWidth: .infinity)
                     }
 
-                    HStack {
-                        ShareLink(
-                            item: shareText,
-                            subject: Text("\(viewModel.listing.name) on Pawsona"),
-                            message: Text("View this Pawsona marketplace listing.")
-                        ) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                        }
-
-                        Spacer()
-
-                        Button("Report", systemImage: "exclamationmark.bubble") {
-                            isShowingReport = true
-                        }
-
-                        Button(
-                            viewModel.isSellerBlocked ? "Unblock Seller" : "Block Seller",
-                            systemImage: viewModel.isSellerBlocked ? "person.crop.circle.badge.checkmark"
-                                : "person.crop.circle.badge.xmark"
-                        ) {
-                            isConfirmingBlock = true
-                        }
-                    }
-                    .buttonStyle(.bordered)
+                    MarketplaceListingActionsRow(
+                        listingName: viewModel.listing.name,
+                        shareText: shareText,
+                        canReportOrBlock: viewModel.canReportOrBlock,
+                        isSellerBlocked: viewModel.isSellerBlocked,
+                        report: { isShowingReport = true },
+                        toggleBlock: { isConfirmingBlock = true }
+                    )
                 }
                 .padding(.horizontal)
                 .padding(.bottom)

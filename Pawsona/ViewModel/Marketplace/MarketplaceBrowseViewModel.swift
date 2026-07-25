@@ -19,6 +19,7 @@ final class MarketplaceBrowseViewModel {
 
     private(set) var listings: [MarketplaceListing] = []
     private(set) var nextToken: MarketplacePageToken?
+    private(set) var currentSeller: SellerProfile?
 
     private let repository: any MarketplaceRepository
     private let blockStore: any SellerBlocking
@@ -34,10 +35,34 @@ final class MarketplaceBrowseViewModel {
     var visibleListings: [MarketplaceListing] {
         query.sorted(
             listings.filter { listing in
-                query.matches(listing)
-                    && !blockStore.isBlocked(listing.sellerProfileID)
+                query.matches(listing) && !isHiddenByBlock(listing)
             }
         )
+    }
+
+    /// Whether this listing was posted by the signed-in user.
+    ///
+    /// Matched *only* on the seller profile the listing was published under.
+    /// `sellerCreatorRecordName` looks like a tempting second signal, but the
+    /// public database reports `creatorUserRecordID` inconsistently, and this
+    /// check must fail closed: a false "this is yours" hides Report and Block
+    /// on a stranger's listing, which is a safety tool the user may need. Being
+    /// wrong the other way costs nothing but a redundant button.
+    func isOwnListing(_ listing: MarketplaceListing) -> Bool {
+        guard let currentSeller else { return false }
+        return listing.sellerProfileID == currentSeller.id
+    }
+
+    /// Your own listings are never hidden by a block. Blocking is a tool for
+    /// getting away from other people, and a self-block used to silently erase
+    /// your puppy from the grid with no way to tell why.
+    private func isHiddenByBlock(_ listing: MarketplaceListing) -> Bool {
+        !isOwnListing(listing) && blockStore.isBlocked(listing.sellerProfileID)
+    }
+
+    func loadCurrentSeller() async {
+        guard currentSeller == nil else { return }
+        currentSeller = (try? await repository.fetchCurrentSellerProfile()) ?? nil
     }
 
     var isOffline: Bool {
