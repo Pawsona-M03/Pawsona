@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct MarketplaceDetailView: View {
     @Environment(\.dismiss) private var dismiss
@@ -8,6 +9,7 @@ struct MarketplaceDetailView: View {
     @State private var isConfirmingBlock = false
     @State private var isConfirmingRemoval = false
     @State private var isShowingTermsEditor = false
+    @State private var shareCardImage: Image?
 
     private let repository: any MarketplaceRepository
     private let updateListingFromPuppy: (() async throws -> MarketplaceListing)?
@@ -119,6 +121,7 @@ struct MarketplaceDetailView: View {
                     MarketplaceListingActionsRow(
                         listingName: viewModel.listing.name,
                         shareText: shareText,
+                        shareCardImage: shareCardImage,
                         canReportOrBlock: viewModel.canReportOrBlock,
                         isSellerBlocked: viewModel.isSellerBlocked,
                         report: { isShowingReport = true },
@@ -134,6 +137,17 @@ struct MarketplaceDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.load()
+        }
+        .task(id: shareCardIdentity) {
+            // Let the screen paint first — rasterising the card is main-actor
+            // work and the share button is never the first thing tapped.
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled else { return }
+            shareCardImage = MarketplaceShareCardRenderer.image(
+                for: viewModel.listing,
+                sellerProfile: viewModel.sellerProfile
+            )
+            .map(Image.init(uiImage:))
         }
         .sheet(isPresented: $isShowingContact) {
             if let contact = viewModel.sellerContact {
@@ -204,6 +218,17 @@ struct MarketplaceDetailView: View {
         \(viewModel.listing.name) · \(viewModel.listing.breed) · \
         \(viewModel.listing.priceText) · \(viewModel.listing.region)
         """
+    }
+
+    /// Re-renders the card when anything it draws changes — the listing itself
+    /// (a price edit, a refreshed photo) or the seller profile arriving late.
+    private var shareCardIdentity: String {
+        [
+            viewModel.listing.id,
+            viewModel.listing.updatedAt.formatted(.iso8601),
+            viewModel.sellerProfile?.id ?? ""
+        ]
+        .joined(separator: "|")
     }
 
     private func updateFromPuppy() {
