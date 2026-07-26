@@ -17,6 +17,17 @@ struct DogListView: View {
     @State private var sortOption: DogSortOption = .dateAdded
     @State private var sortDirection: DogSortDirection = .descending
 
+    private let marketplaceRepository: any MarketplaceRepository
+    private let sellerBlockStore: any SellerBlocking
+
+    init(
+        marketplaceRepository: any MarketplaceRepository = LazyCloudKitMarketplaceRepository(),
+        sellerBlockStore: any SellerBlocking = UserDefaultsSellerBlockStore()
+    ) {
+        self.marketplaceRepository = marketplaceRepository
+        self.sellerBlockStore = sellerBlockStore
+    }
+
     private var columns: [GridItem] {
         if dynamicTypeSize.isAccessibilitySize {
             [GridItem(.flexible())]
@@ -37,7 +48,11 @@ struct DogListView: View {
             )
                 .navigationTitle("Puppy")
                 .navigationDestination(for: Dog.self) { dog in
-                    DogDetailView(dog: dog)
+                    DogDetailView(
+                        dog: dog,
+                        marketplaceRepository: marketplaceRepository,
+                        sellerBlockStore: sellerBlockStore
+                    )
                 }
                 .searchable(
                     text: $searchText,
