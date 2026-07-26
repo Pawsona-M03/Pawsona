@@ -105,7 +105,9 @@ extension CloudKitMarketplaceRepository {
         return try MarketplaceCloudKitMapper.sellerContact(from: record)
     }
 
-    private static func sellerProfileID(for userRecordID: CKRecord.ID) -> String {
+    /// Deterministic, so ownership can be decided from a record's own fields
+    /// without a round trip to fetch the signed-in seller's profile.
+    static func sellerProfileID(for userRecordID: CKRecord.ID) -> String {
         "seller-\(userRecordID.recordName)"
     }
 

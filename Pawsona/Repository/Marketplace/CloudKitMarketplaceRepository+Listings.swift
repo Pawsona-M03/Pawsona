@@ -75,10 +75,9 @@ extension CloudKitMarketplaceRepository {
             )
         }
         for (_, result) in response.matchResults {
-            let record = try record(from: result)
-            if record.creatorUserRecordID == userRecordID {
-                return try MarketplaceCloudKitMapper.listing(from: record)
-            }
+            guard let record = try? record(from: result), isOwned(record, userRecordID: userRecordID)
+            else { continue }
+            return try MarketplaceCloudKitMapper.listing(from: record)
         }
         return nil
     }
@@ -182,7 +181,7 @@ extension CloudKitMarketplaceRepository {
     func isListingOwnedByCurrentUser(id: String) async throws -> Bool {
         let userRecordID = try await authenticatedUserRecordID()
         let record = try await record(id: id)
-        return record.creatorUserRecordID == userRecordID
+        return isOwned(record, userRecordID: userRecordID)
     }
 
     private func predicate(for query: MarketplaceListingQuery) -> NSPredicate {

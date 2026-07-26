@@ -67,13 +67,13 @@ struct DogVaccinationRecordView: View {
         .background(Color(.appBackground).ignoresSafeArea())
         .navigationTitle("Vaccination Record")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Add Vaccine Record", systemImage: "plus", action: showAddVaccineForm)
-                    .buttonStyle(.glassProminent)
-                    .tint(.primaryBrown)
-            }
-        }
+//        .toolbar {
+//            ToolbarItem(placement: .topBarTrailing) {
+//                Button("Add Vaccine Record", systemImage: "plus", action: showAddVaccineForm)
+//                    .buttonStyle(.glassProminent)
+//                    .tint(.primaryBrown)
+//            }
+//        }
         .sheet(isPresented: $isShowingAddVaccineForm) {
             VaccineRecordFormView(
                 draft: VaccineRecordDraft(dogs: [dog]),

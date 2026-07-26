@@ -42,6 +42,17 @@ extension CloudKitMarketplaceRepository {
         return record
     }
 
+    /// The seller profile a record belongs to. A profile record is its own
+    /// owner; listings and contacts point at one through a reference.
+    func sellerProfileID(of record: CKRecord) -> String? {
+        if record.recordType == MarketplaceCloudKitSchema.RecordType.sellerProfile {
+            return record.recordID.recordName
+        }
+        let reference =
+            record[MarketplaceCloudKitSchema.ListingField.sellerProfile] as? CKRecord.Reference
+        return reference?.recordID.recordName
+    }
+
     func authenticatedUserRecordID() async throws -> CKRecord.ID {
         guard await accountState() == .available else {
             throw MarketplaceError.authenticationRequired
@@ -54,7 +65,18 @@ extension CloudKitMarketplaceRepository {
     func authorize(_ record: CKRecord, userRecordID: CKRecord.ID) throws {
         try MarketplaceOwnershipAuthorizer.authorize(
             creatorUserRecordID: record.creatorUserRecordID,
-            currentUserRecordID: userRecordID
+            recordSellerProfileID: sellerProfileID(of: record),
+            currentUserRecordID: userRecordID,
+            currentSellerProfileID: Self.sellerProfileID(for: userRecordID)
+        )
+    }
+
+    func isOwned(_ record: CKRecord, userRecordID: CKRecord.ID) -> Bool {
+        MarketplaceOwnershipAuthorizer.isOwner(
+            creatorUserRecordID: record.creatorUserRecordID,
+            recordSellerProfileID: sellerProfileID(of: record),
+            currentUserRecordID: userRecordID,
+            currentSellerProfileID: Self.sellerProfileID(for: userRecordID)
         )
     }
 

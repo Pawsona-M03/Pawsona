@@ -52,8 +52,7 @@ fastlane/test_output/
 *.swp
 *.lock
 docs/
-!Docs/
-!Docs/MarketplaceCloudKitSetup.md
+Docs/
 
 # --------------------------------------------------
 # AI agent tooling
