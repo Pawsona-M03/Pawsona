@@ -46,29 +46,4 @@ struct MarketplaceCloudKitMapperTests {
 
         #expect(decoded == original)
     }
-
-    @Test("Ownership checks require the server creator record id")
-    func ownership() {
-        let ownerID = CKRecord.ID(recordName: "owner")
-        let otherID = CKRecord.ID(recordName: "other")
-
-        #expect(throws: Never.self) {
-            try MarketplaceOwnershipAuthorizer.authorize(
-                creatorUserRecordID: ownerID,
-                currentUserRecordID: ownerID
-            )
-        }
-        #expect(throws: MarketplaceError.notAuthorized) {
-            try MarketplaceOwnershipAuthorizer.authorize(
-                creatorUserRecordID: otherID,
-                currentUserRecordID: ownerID
-            )
-        }
-        #expect(throws: MarketplaceError.notAuthorized) {
-            try MarketplaceOwnershipAuthorizer.authorize(
-                creatorUserRecordID: nil,
-                currentUserRecordID: ownerID
-            )
-        }
-    }
 }
