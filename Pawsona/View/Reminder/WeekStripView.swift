@@ -28,14 +28,6 @@ struct WeekStripView: View {
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 8) {
-            Button("Go to Today", systemImage: "calendar") {
-                goToToday()
-            }
-            .buttonStyle(.bordered)
-            .disabled(calendar.isDateInToday(selectedDate))
-            .frame(minHeight: 44)
-            .tint(.primaryBrown)
-
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     ForEach(days, id: \.self) { day in
@@ -110,12 +102,6 @@ struct WeekStripView: View {
         .buttonStyle(.plain)
         .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-
-    private func goToToday() {
-        let today = calendar.startOfDay(for: .now)
-        selectedDate = today
-        center(on: today, animated: true)
     }
 
     private func center(on day: Date, animated: Bool) {

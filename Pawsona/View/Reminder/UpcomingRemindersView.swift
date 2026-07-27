@@ -99,6 +99,14 @@ struct UpcomingRemindersView: View {
                 await notificationService.requestPermission()
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Today") {
+                        selectToday()
+                    }
+                    .disabled(Calendar.current.isDateInToday(viewModel.selectedDate))
+                    .tint(Color(.primaryBrown))
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button("New Reminder", systemImage: "plus") {
                         isShowingNewReminderForm = true
@@ -124,6 +132,10 @@ struct UpcomingRemindersView: View {
         Calendar.current.isDateInToday(viewModel.selectedDate)
             ? "No Reminder for Today"
             : "No Reminders"
+    }
+
+    private func selectToday() {
+        viewModel.selectedDate = Calendar.current.startOfDay(for: .now)
     }
 }
 
