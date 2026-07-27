@@ -9,6 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct DogDetailView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -85,6 +86,10 @@ struct DogDetailView: View {
                 Menu {
                     Button("Share via AirDrop", systemImage: "wifi") {
                         share(dogViewModel.shareDogData(dog))
+                    }
+
+                    Button("Share as Image", systemImage: "photo") {
+                        share(dogViewModel.exportDogToImage(dog, colorScheme: colorScheme))
                     }
 
                     Button("Export as PDF", systemImage: "doc.richtext") {

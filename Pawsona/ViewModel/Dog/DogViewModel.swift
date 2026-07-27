@@ -9,6 +9,7 @@ import Foundation
 import Observation
 import PDFKit
 import SwiftData
+import SwiftUI
 
 /// Writes and exports for dogs. Reading is `@Query`'s job — this deliberately
 /// keeps no dog array of its own, so there is one source of truth and no manual
@@ -100,6 +101,17 @@ final class DogViewModel {
 
     func exportDogToPDF(_ dog: Dog) -> URL? {
         exportDogsToPDF([dog], named: "\(sanitizedFileName(for: dog))-data")
+    }
+
+    /// Renders the dog's profile as a shareable card image. As with the PDF,
+    /// this is main-actor rendering work — only call it on an explicit tap.
+    func exportDogToImage(_ dog: Dog, colorScheme: ColorScheme) -> URL? {
+        guard let pngData = DogShareCardRenderer.pngData(for: dog, colorScheme: colorScheme) else {
+            errorMessage = "That card couldn't be created. Try again."
+            return nil
+        }
+
+        return write(pngData, to: "\(sanitizedFileName(for: dog))-card.png")
     }
 
     /// Packages the dog and its vaccine history for AirDrop.
