@@ -9,6 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct DogDetailView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -16,6 +17,7 @@ struct DogDetailView: View {
     @State private var isShowingEditDogForm = false
     @State private var isPendingDeletion = false
     @State private var sharedFile: SharedFile?
+    @State private var isShowingShareCardPicker = false
     @State private var marketplaceListing: MarketplaceListing?
     @State private var isShowingMarketplaceFlow = false
     @State private var isCheckingMarketplaceListing = false
@@ -87,6 +89,10 @@ struct DogDetailView: View {
                         share(dogViewModel.shareDogData(dog))
                     }
 
+                    Button("Share as Image", systemImage: "photo") {
+                        isShowingShareCardPicker = true
+                    }
+
                     Button("Export as PDF", systemImage: "doc.richtext") {
                         share(dogViewModel.exportDogToPDF(dog))
                     }
@@ -106,6 +112,15 @@ struct DogDetailView: View {
         // majority of visits that never shared anything.
         .sheet(item: $sharedFile) { sharedFile in
             ShareSheet(fileURL: sharedFile.url, previewTitle: displayName)
+        }
+        .sheet(isPresented: $isShowingShareCardPicker) {
+            DogShareCardPickerView(
+                dog: dog,
+                dogViewModel: dogViewModel,
+                // The card starts in the appearance the user is already in,
+                // which ImageRenderer cannot work out for itself.
+                colorScheme: colorScheme
+            )
         }
         .sheet(isPresented: $isShowingMarketplaceFlow, onDismiss: refreshMarketplaceListing) {
             if let marketplaceListing {
