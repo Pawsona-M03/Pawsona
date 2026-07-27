@@ -43,11 +43,10 @@ struct DogDetailView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            DogPhotoView(dog: dog, placeholderIconHeight: displayedHeroHeight * 0.6)
-                .frame(maxWidth: 410)
+            DogPhotoView(dog: dog, placeholderIconHeight: displayedHeroHeight * 0.8)
+                .frame(maxWidth: .infinity)
                 .frame(height: displayedHeroHeight)
-                .background(dog.backgroundColor.color.opacity(0.3))
-                .background(dog.backgroundColor.color.opacity(0.3))
+                .background(dog.backgroundColor.pastelColor)
                 .clipped()
                 .ignoresSafeArea(edges: .top)
                 .accessibilityLabel("Photo of \(displayName)")
@@ -71,6 +70,11 @@ struct DogDetailView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        // The hero behind this bar is always a light pastel, in both
+        // appearances, so the bar's content has to stay dark. Left to resolve
+        // normally the `.primary` tints below go white in Dark Mode and vanish
+        // against the pastel.
+        .toolbarColorScheme(.light, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit", action: showEditDogForm)

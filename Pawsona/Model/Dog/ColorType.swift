@@ -17,6 +17,7 @@ enum ColorType: String, Codable, CaseIterable, Hashable {
     case pink
     case gray
 
+    /// Fully saturated swatch, for the small circles in the colour picker.
     var color: Color {
         switch self {
         case .red: .red
@@ -27,6 +28,26 @@ enum ColorType: String, Codable, CaseIterable, Hashable {
         case .purple: .purple
         case .pink: .pink
         case .gray: .gray
+        }
+    }
+
+    /// Muted fill used behind photos and placeholders.
+    ///
+    /// Deliberately light-only: the same pastel renders in both appearances so
+    /// a dog's colour reads identically everywhere, including in photos that
+    /// bake it in and in shared cards. Anything drawn on top of one of these
+    /// must therefore use a fixed dark foreground rather than `.primary`,
+    /// which would go white in Dark Mode and disappear.
+    var pastelColor: Color {
+        switch self {
+        case .red: Color(.pastelRed)
+        case .orange: Color(.pastelOrange)
+        case .yellow: Color(.pastelYellow)
+        case .green: Color(.pastelGreen)
+        case .blue: Color(.pastelBlue)
+        case .purple: Color(.pastelPurple)
+        case .pink: Color(.pastelPink)
+        case .gray: Color(.pastelGray)
         }
     }
 

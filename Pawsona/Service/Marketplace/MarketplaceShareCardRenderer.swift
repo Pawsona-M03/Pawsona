@@ -15,6 +15,10 @@ enum MarketplaceShareCardRenderer {
                 listing: listing,
                 sellerProfile: sellerProfile
             )
+            // The card is a fixed poster on a white background, so every colour
+            // inside it has to resolve light. Without this a seller sharing from
+            // Dark Mode exports a dark hero and dark text onto white.
+            .environment(\.colorScheme, .light)
         )
         renderer.proposedSize = ProposedViewSize(
             width: MarketplaceShareCardView.width,
