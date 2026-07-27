@@ -179,14 +179,8 @@ struct DogShareCardView: View {
             .sorted { $0.dateGiven == $1.dateGiven ? $0.id < $1.id : $0.dateGiven > $1.dateGiven }
     }
 
-    /// Months rather than the app's "1 year, 2 months old": that phrasing wraps
-    /// onto a second line in a stat column and pushes the vaccine list down,
-    /// and months is how a puppy's age gets talked about anyway.
     private var ageText: String {
-        guard let dateOfBirth = dog.dateOfBirth else { return "Not set" }
-
-        let months = max(0, Calendar.current.dateComponents([.month], from: dateOfBirth, to: .now).month ?? 0)
-        return "\(months) \(months == 1 ? "month" : "months")"
+        PuppyAgeText.largestUnit(from: dog.dateOfBirth) ?? "Not set"
     }
 
     private var sexText: String {
