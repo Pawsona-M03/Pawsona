@@ -36,9 +36,28 @@ struct DogShareCardRendererTests {
         }
     }
 
-    @Test("A dog with no vaccine records still renders")
+    /// `ImageRenderer` does not inherit the app's environment, so the injected
+    /// colour scheme is the only thing making the dark card dark. If that
+    /// injection ever stops working the picker silently offers two identical
+    /// cards, which no size or alpha assertion would catch.
+    @Test("The two appearances render differently")
+    func appearancesDiffer() throws {
+        let dog = Dog(name: "Nathan", breed: "Golden Retriever")
+
+        let light = try #require(DogShareCardRenderer.pngData(for: dog, colorScheme: .light))
+        let dark = try #require(DogShareCardRenderer.pngData(for: dog, colorScheme: .dark))
+
+        #expect(light != dark)
+    }
+
+    /// A brand-new puppy has no records at all, and the vaccine section is left
+    /// empty rather than growing placeholder text.
+    @Test("A dog with no vaccine records still renders at the same size")
     func rendersWithoutVaccineRecords() throws {
-        let data = DogShareCardRenderer.pngData(for: Dog(), colorScheme: .light)
-        #expect(data != nil)
+        let data = try #require(DogShareCardRenderer.pngData(for: Dog(), colorScheme: .light))
+        let image = try #require(UIImage(data: data))
+
+        #expect(image.size.width == DogShareCardView.width * 2)
+        #expect(image.size.height == DogShareCardView.height * 2)
     }
 }

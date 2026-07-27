@@ -17,6 +17,7 @@ struct DogDetailView: View {
     @State private var isShowingEditDogForm = false
     @State private var isPendingDeletion = false
     @State private var sharedFile: SharedFile?
+    @State private var isShowingShareCardPicker = false
     @State private var marketplaceListing: MarketplaceListing?
     @State private var isShowingMarketplaceFlow = false
     @State private var isCheckingMarketplaceListing = false
@@ -89,7 +90,7 @@ struct DogDetailView: View {
                     }
 
                     Button("Share as Image", systemImage: "photo") {
-                        share(dogViewModel.exportDogToImage(dog, colorScheme: colorScheme))
+                        isShowingShareCardPicker = true
                     }
 
                     Button("Export as PDF", systemImage: "doc.richtext") {
@@ -111,6 +112,15 @@ struct DogDetailView: View {
         // majority of visits that never shared anything.
         .sheet(item: $sharedFile) { sharedFile in
             ShareSheet(fileURL: sharedFile.url, previewTitle: displayName)
+        }
+        .sheet(isPresented: $isShowingShareCardPicker) {
+            DogShareCardPickerView(
+                dog: dog,
+                dogViewModel: dogViewModel,
+                // The card starts in the appearance the user is already in,
+                // which ImageRenderer cannot work out for itself.
+                colorScheme: colorScheme
+            )
         }
         .sheet(isPresented: $isShowingMarketplaceFlow, onDismiss: refreshMarketplaceListing) {
             if let marketplaceListing {

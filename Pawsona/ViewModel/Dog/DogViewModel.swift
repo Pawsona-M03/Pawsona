@@ -103,15 +103,11 @@ final class DogViewModel {
         exportDogsToPDF([dog], named: "\(sanitizedFileName(for: dog))-data")
     }
 
-    /// Renders the dog's profile as a shareable card image. As with the PDF,
-    /// this is main-actor rendering work — only call it on an explicit tap.
-    func exportDogToImage(_ dog: Dog, colorScheme: ColorScheme) -> URL? {
-        guard let pngData = DogShareCardRenderer.pngData(for: dog, colorScheme: colorScheme) else {
-            errorMessage = "That card couldn't be created. Try again."
-            return nil
-        }
-
-        return write(pngData, to: "\(sanitizedFileName(for: dog))-card.png")
+    /// Puts an already-rendered share card on disk so the share sheet has a file
+    /// to hand over. Rendering happens in `DogShareCardPickerView`, which needs
+    /// the image for its preview regardless.
+    func writeShareCard(_ pngData: Data, for dog: Dog) -> URL? {
+        write(pngData, to: "\(sanitizedFileName(for: dog))-card.png")
     }
 
     /// Packages the dog and its vaccine history for AirDrop.
