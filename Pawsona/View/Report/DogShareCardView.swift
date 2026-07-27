@@ -23,7 +23,7 @@ struct DogShareCardView: View {
     /// scale down rather than wrap, and the vaccine list is one row per type —
     /// so both appearances render at the same size and a well-vaccinated dog
     /// does not turn the card into a portrait poster.
-    static let height: CGFloat = 1000
+    static let height: CGFloat = 1036
     private static let cornerRadius: CGFloat = 44
     /// One brown on both cards. `PrimaryBrown` lightens to salmon in dark mode,
     /// which would make the two cards read as different brands rather than the
@@ -33,59 +33,54 @@ struct DogShareCardView: View {
             .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
     )
 
-    @Environment(\.colorScheme) private var colorScheme
-
     let dog: Dog
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
 
-            HStack(alignment: .top, spacing: 65) {
+            HStack(alignment: .top, spacing: 74) {
                 photo
+
                 details
+                    // SwiftUI tops-aligns line boxes, but the design aligns the
+                    // name's cap height with the top of the photo, so the text
+                    // drops by the gap between the two.
+                    .padding(.top, 21)
             }
-            .padding(.top, 90)
-            .padding(.leading, 172)
-            .padding(.trailing, 60)
+            .padding(.top, 102)
+            .padding(.leading, 173)
+            .padding(.trailing, 176)
 
             Spacer(minLength: 0)
         }
         .frame(width: Self.width, height: Self.height, alignment: .topLeading)
         .background(Color(.appBackground))
         .clipShape(.rect(cornerRadius: Self.cornerRadius))
-        .overlay {
-            // The dark card would otherwise dissolve into a dark chat bubble or
-            // a dark Photos background; the light one already has the contrast.
-            if colorScheme == .dark {
-                RoundedRectangle(cornerRadius: Self.cornerRadius)
-                    .stroke(.white.opacity(0.25), lineWidth: 4)
-            }
-        }
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 26) {
+        HStack(alignment: .top, spacing: 43) {
             // ponytail: the artwork is 91x124, so it is upscaled ~3x here and
             // will read a little soft. Re-export it larger, or redraw it as a
             // `Shape`, if that ever shows on a shared card.
             Image(.ribbon)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 144, height: 200)
+                .frame(width: 156, height: 213)
 
             Text("Pawsona")
-                .font(.system(size: 76, weight: .bold))
+                .font(.system(size: 86, weight: .bold))
                 .foregroundStyle(Self.brandBrown)
-                .padding(.top, 78)
+                .padding(.top, 91)
         }
-        .padding(.leading, 118)
+        .padding(.leading, 119)
     }
 
     private var photo: some View {
-        DogPhotoView(dog: dog, placeholderIconHeight: 340)
-            .frame(width: 500, height: 500)
-            .clipShape(.rect(cornerRadius: 46))
+        DogPhotoView(dog: dog, placeholderIconHeight: 350)
+            .frame(width: 502, height: 516)
+            .clipShape(.rect(cornerRadius: 60))
     }
 
     private var details: some View {
@@ -93,10 +88,10 @@ struct DogShareCardView: View {
             heading
 
             stats
-                .padding(.top, 30)
+                .padding(.top, 11)
 
             vaccineHistory
-                .padding(.top, 44)
+                .padding(.top, 15)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -107,10 +102,10 @@ struct DogShareCardView: View {
     /// `minimumScaleFactor` shrink them, so a long pair drops to a line each.
     private var heading: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 26) {
                 name
                 Text(verbatim: "|")
-                    .font(.system(size: 44, weight: .thin))
+                    .font(.system(size: 48, weight: .thin))
                     .foregroundStyle(.secondary)
                 breed
             }
@@ -124,37 +119,41 @@ struct DogShareCardView: View {
 
     private var name: some View {
         Text(dog.displayName)
-            .font(.system(size: 86, weight: .bold))
+            .font(.system(size: 84, weight: .bold))
             .lineLimit(1)
             .minimumScaleFactor(0.4)
     }
 
     private var breed: some View {
         Text(dog.breedText)
-            .font(.system(size: 41))
+            .font(.system(size: 48))
             .foregroundStyle(.secondary)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
     }
 
     private var stats: some View {
-        HStack(alignment: .top, spacing: 60) {
+        // No trailing `Spacer` here. In an `HStack` a spacer competes with the
+        // text for the proposed width, and `lineLimit(1)` resolves that by
+        // truncating — "14 mo…". Sizing the stack to its content and pushing it
+        // leading gives every column the width it asked for.
+        HStack(alignment: .top, spacing: 74) {
             DogShareCardStat(title: "Age", value: ageText)
             DogShareCardStat(title: "Sex", value: sexText)
             DogShareCardStat(title: "Weight", value: weightText)
-            Spacer(minLength: 0)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// The heading stays put when the dog has no records rather than being
     /// replaced by placeholder text: the card is a fixed canvas, so an empty
     /// section keeps every other card's layout identical.
     private var vaccineHistory: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 18) {
             Text("Vaccine history")
-                .font(.system(size: 41, weight: .bold))
+                .font(.system(size: 50, weight: .bold))
 
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 3) {
                 ForEach(vaccinations) { vaccination in
                     DogShareCardVaccineRow(vaccination: vaccination)
                 }
@@ -217,12 +216,12 @@ private struct DogShareCardStat: View {
     let value: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.system(size: 26, weight: .semibold))
+                .font(.system(size: 43, weight: .semibold))
 
             Text(value)
-                .font(.system(size: 26))
+                .font(.system(size: 43))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
         }
@@ -235,12 +234,12 @@ private struct DogShareCardVaccineRow: View {
     var body: some View {
         HStack(spacing: 24) {
             Text(vaccination.vaccine.displayName)
-                .font(.system(size: 26))
+                .font(.system(size: 43, weight: .semibold))
 
             Spacer(minLength: 24)
 
             Text(vaccination.dateGiven.formatted(date: .numeric, time: .omitted))
-                .font(.system(size: 26))
+                .font(.system(size: 43))
                 .foregroundStyle(.secondary)
         }
     }
