@@ -115,13 +115,14 @@ struct DogPhotoPickerButton: View {
                     .frame(width: 160, height: 160)
             } else {
                 Rectangle()
-                    .fill(backgroundColor.color.opacity(0.2))
+                    .fill(backgroundColor.pastelColor)
                     .frame(width: 160, height: 160)
                     .overlay(alignment: .bottom) {
                         Image(.dogPlaceholder)
                             .resizable()
                             .scaledToFit()
                             .frame(height: 120)
+                            .offset(x:10)
                     }
             }
         }

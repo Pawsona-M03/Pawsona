@@ -19,12 +19,13 @@ struct DogPhotoView: View {
                 .scaledToFill()
         } else {
             Rectangle()
-                .fill(dog.backgroundColor.color.opacity(0.2))
+                .fill(dog.backgroundColor.pastelColor)
                 .overlay(alignment: .bottom) {
                     Image(.dogPlaceholder)
                         .resizable()
                         .scaledToFit()
                         .frame(height: placeholderIconHeight)
+                        .offset(x: 25)
                 }
         }
     }

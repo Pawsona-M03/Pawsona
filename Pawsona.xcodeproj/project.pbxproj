@@ -19,6 +19,7 @@
 /* Begin PBXFileReference section */
 		1BD1B0E9BE234FF9DAC9F17A /* Secrets.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig.example; sourceTree = "<group>"; };
 		934A01F299CB816BD2F03C3A /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
+		A552EE6C3016FBC100B028CE /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		D819FD113001F219007D79F8 /* Pawsona.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pawsona.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA19FD0130020001007D79F8 /* PawsonaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PawsonaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -91,6 +92,7 @@
 			children = (
 				934A01F299CB816BD2F03C3A /* Shared.xcconfig */,
 				1BD1B0E9BE234FF9DAC9F17A /* Secrets.xcconfig.example */,
+				A552EE6C3016FBC100B028CE /* Secrets.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -234,7 +236,7 @@
 				CODE_SIGN_ENTITLEMENTS = Pawsona/Pawsona.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K64G2J8QL7;
+				DEVELOPMENT_TEAM = 75LP72YY5S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
@@ -253,7 +255,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jennifer.Pawsona;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -274,7 +276,7 @@
 				CODE_SIGN_ENTITLEMENTS = Pawsona/Pawsona.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K64G2J8QL7;
+				DEVELOPMENT_TEAM = 75LP72YY5S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
@@ -293,7 +295,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jennifer.Pawsona;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
