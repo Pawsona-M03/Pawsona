@@ -183,10 +183,15 @@ private struct VaccineDogSection: View {
     let dogs: [Dog]
     @Binding var selectedDogIDs: Set<UUID>
 
-    /// Scaled, because the avatars inside each cell scale too — a fixed minimum
-    /// lets the grid lay out more columns than actually fit at accessibility
-    /// text sizes, which pushes the whole form wider than the screen.
-    @ScaledMetric private var gridMinimum = 72
+    @ScaledMetric private var gridItemSize = 72
+    @ScaledMetric private var gridSpacing = 8
+
+    private var gridColumns: [GridItem] {
+        Array(
+            repeating: GridItem(.fixed(gridItemSize), spacing: gridSpacing, alignment: .center),
+            count: 4
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -210,7 +215,7 @@ private struct VaccineDogSection: View {
                     description: Text("You can save this record now and assign a dog once you add one.")
                 )
             } else {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: gridMinimum))], alignment: .leading) {
+                LazyVGrid(columns: gridColumns, alignment: .leading, spacing: gridSpacing) {
                     ForEach(dogs, id: \.id) { dog in
                         PuppySelectionRow(dog: dog, isSelected: selectedDogIDs.contains(dog.id)) {
                             toggle(dog)
@@ -287,6 +292,27 @@ private struct VaccineSelectionButton: View {
 #Preview("New") {
     VaccineRecordFormView { _ in }
         .modelContainer(for: [Dog.self, VaccineRecord.self], inMemory: true)
+}
+
+#Preview("New With Dogs") {
+    // swiftlint:disable:next force_try
+    let container = try! ModelContainer(
+        for: Dog.self, VaccineRecord.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+
+    let sampleDogs = [
+        Dog(name: "Berry", breed: "Labrador Retriever", backgroundColor: .green, sex: .female),
+        Dog(name: "Milo", breed: "Golden Retriever", backgroundColor: .orange, sex: .male),
+        Dog(name: "Coco", breed: "Poodle", backgroundColor: .pink, sex: .female)
+    ]
+
+    for dog in sampleDogs {
+        container.mainContext.insert(dog)
+    }
+
+    return VaccineRecordFormView { _ in }
+        .modelContainer(container)
 }
 
 #Preview("Edit") {

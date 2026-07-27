@@ -162,7 +162,17 @@ private struct SortedDogListView: View {
     )
 
     let sampleDogs = [
-        Dog(name: "Berry", breed: "Labrador Retriever", backgroundColor: .green, dateOfBirth: .now),
+        Dog(
+            name: "Berry",
+            breed: "Labrador Retriever",
+            backgroundColor: .green,
+            dateOfBirth: DateComponents(
+                calendar: .current,
+                year: 2000,
+                month: 10,
+                day: 19
+            ).date ?? .now
+        ),
         Dog(name: "Milo", breed: "Golden Retriever", backgroundColor: .orange, dateOfBirth: .now),
         Dog(name: "Coco", breed: "Poodle", backgroundColor: .pink, dateOfBirth: .now),
         Dog(name: "Rex", breed: "German Shepherd", backgroundColor: .blue, dateOfBirth: .now),

@@ -36,6 +36,33 @@ struct DogTests {
         #expect(Dog(breed: "Poodle").age == nil)
     }
 
+    @Test("Age text shows only years once at least one year old")
+    func ageTextShowsOnlyYears() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 27)))
+        let dateOfBirth = try #require(calendar.date(from: DateComponents(year: 2024, month: 5, day: 12)))
+
+        #expect(Dog.ageText(from: dateOfBirth, to: now, calendar: calendar) == "2 years old")
+    }
+
+    @Test("Age text shows months before one year old")
+    func ageTextShowsMonthsBeforeOneYear() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 27)))
+        let dateOfBirth = try #require(calendar.date(from: DateComponents(year: 2026, month: 5, day: 12)))
+
+        #expect(Dog.ageText(from: dateOfBirth, to: now, calendar: calendar) == "2 months old")
+    }
+
+    @Test("Age text shows days before one month old")
+    func ageTextShowsDaysBeforeOneMonth() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 27)))
+        let dateOfBirth = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 20)))
+
+        #expect(Dog.ageText(from: dateOfBirth, to: now, calendar: calendar) == "7 days old")
+    }
+
     @Test("Nil name, weight, sex, and photo round-trip through the container")
     func nilOptionalsRoundTrip() throws {
         let context = try TestSupport.makeContext()
