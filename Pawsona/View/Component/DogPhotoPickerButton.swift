@@ -23,6 +23,7 @@ struct DogPhotoPickerButton: View {
     @State private var photoSelection: PhotosPickerItem?
     @State private var capturedImage: UIImage?
     @State private var subjectCutout: CIImage?
+    @State private var hasFailedCutoutRecovery = false
     @State private var isProcessingPhoto = false
     @State private var processingError: String?
     @State private var isShowingSourceOptions = false
@@ -182,14 +183,29 @@ struct DogPhotoPickerButton: View {
 
     /// Center-crop the image, isolate its foreground subject with Vision, and
     /// cache the transparent cutout so changing the card colour can re-render it.
-    private func processPhoto(_ image: UIImage) {
+    ///
+    /// `isRecovery` marks the pass that re-segments a photo the dog already has,
+    /// rather than one the user just picked. A failure there is not worth an
+    /// alert — the user asked for a different colour, not a new photo — so it
+    /// keeps the existing photo and stops retrying instead.
+    private func processPhoto(_ image: UIImage, isRecovery: Bool = false) {
         processingError = nil
         subjectCutout = nil
         isProcessingPhoto = true
-        AccessibilityNotification.Announcement("Finding dog in photo").post()
+
+        if !isRecovery {
+            // A freshly picked photo deserves its own attempt, whatever happened
+            // to the one it replaces.
+            hasFailedCutoutRecovery = false
+            AccessibilityNotification.Announcement("Finding dog in photo").post()
+        }
 
         guard let cgImage = image.fixedOrientation().cgImage else {
-            showProcessingError("The selected photo could not be read.")
+            if isRecovery {
+                abandonCutoutRecovery()
+            } else {
+                showProcessingError("The selected photo could not be read.")
+            }
             return
         }
 
@@ -223,13 +239,20 @@ struct DogPhotoPickerButton: View {
                 await MainActor.run {
                     subjectCutout = cutout
                     isProcessingPhoto = false
-                    AccessibilityNotification.Announcement(
-                        "Dog photo selected"
-                    ).post()
+
+                    if !isRecovery {
+                        AccessibilityNotification.Announcement(
+                            "Dog photo selected"
+                        ).post()
+                    }
                 }
             } catch {
                 await MainActor.run {
-                    showProcessingError(error.localizedDescription)
+                    if isRecovery {
+                        abandonCutoutRecovery()
+                    } else {
+                        showProcessingError(error.localizedDescription)
+                    }
                 }
             }
         }
@@ -244,10 +267,32 @@ struct DogPhotoPickerButton: View {
     /// the card colour while the subject is still being extracted.
     private func renderCachedCutout() {
         guard let subjectCutout else {
+            recoverCutoutFromStoredPhoto()
             return
         }
 
         renderPhoto(from: subjectCutout)
+    }
+
+    /// Re-derive the cutout from the photo already on the dog.
+    ///
+    /// `subjectCutout` only lives in `@State`, so re-opening the form to edit an
+    /// existing dog starts with nothing cached and every colour change would
+    /// otherwise be a no-op, leaving the card stuck on the colour baked in when
+    /// the photo was first taken. Segmenting the stored photo again recovers a
+    /// transparent subject we can re-composite; the flat background behind the
+    /// dog makes it an easier subject than the original camera roll shot.
+    private func recoverCutoutFromStoredPhoto() {
+        guard
+            !isProcessingPhoto,
+            !hasFailedCutoutRecovery,
+            let photoData,
+            let image = UIImage(data: photoData)
+        else {
+            return
+        }
+
+        processPhoto(image, isRecovery: true)
     }
 
     /// Composite the transparent subject over the currently selected card colour.
@@ -273,6 +318,14 @@ struct DogPhotoPickerButton: View {
         }
 
         photoData = renderedData
+    }
+
+    /// Give up on re-cutting the stored photo, quietly. The dog keeps the photo
+    /// it already has; latching the flag stops every further colour tap from
+    /// paying for a segmentation pass that has already been shown to fail.
+    private func abandonCutoutRecovery() {
+        isProcessingPhoto = false
+        hasFailedCutoutRecovery = true
     }
 
     private func showProcessingError(_ message: String) {
