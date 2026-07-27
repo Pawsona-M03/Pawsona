@@ -39,6 +39,7 @@ struct MarketplaceView: View {
                             viewModel.isOffline ? "You're Offline" : "Marketplace Unavailable",
                             systemImage: viewModel.isOffline ? "wifi.slash" : "exclamationmark.triangle"
                         )
+                        .frame(maxWidth: .infinity, maxHeight: 27)
                     } description: {
                         Text(errorMessage)
                     } actions: {

@@ -13,27 +13,22 @@ enum PuppyAgeText {
         let months = components.month ?? 0
         let days = components.day ?? 0
 
-        let ageParts: [String?]
         if years > 0 {
-            ageParts = [
-                agePart(value: years, singularUnit: "year"),
-                agePart(value: months, singularUnit: "month")
-            ]
-        } else {
-            ageParts = [
-                agePart(value: months, singularUnit: "month"),
-                agePart(value: days, singularUnit: "day")
-            ]
+            return "\(agePart(value: years, singularUnit: "year")) old"
         }
-        let visibleAgeParts = ageParts.compactMap { $0 }
 
-        return visibleAgeParts.isEmpty
-            ? "0 days old"
-            : "\(visibleAgeParts.joined(separator: ", ")) old"
+        if months > 0 {
+            return "\(agePart(value: months, singularUnit: "month")) old"
+        }
+
+        if days > 0 {
+            return "\(agePart(value: days, singularUnit: "day")) old"
+        }
+
+        return "0 days old"
     }
 
-    private static func agePart(value: Int, singularUnit: String) -> String? {
-        guard value > 0 else { return nil }
+    private static func agePart(value: Int, singularUnit: String) -> String {
         let unit = value == 1 ? singularUnit : "\(singularUnit)s"
         return "\(value) \(unit)"
     }
