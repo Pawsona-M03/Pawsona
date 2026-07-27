@@ -19,7 +19,11 @@ import SwiftUI
 /// card comes out matching whatever appearance the user is in.
 struct DogShareCardView: View {
     static let width: CGFloat = 1500
-    private static let minimumHeight: CGFloat = 950
+    /// Fixed, not content-driven. Every field on the card is bounded — the name
+    /// and breed scale down rather than wrap, and the vaccine list is one row
+    /// per type — so the card can keep the same landscape shape for every dog
+    /// instead of growing into a portrait poster for a well-vaccinated one.
+    static let height: CGFloat = 1050
     private static let cornerRadius: CGFloat = 48
 
     @Environment(\.colorScheme) private var colorScheme
@@ -51,8 +55,7 @@ struct DogShareCardView: View {
             Spacer(minLength: 0)
         }
         .padding(64)
-        .frame(width: Self.width, alignment: .topLeading)
-        .frame(minHeight: Self.minimumHeight, alignment: .topLeading)
+        .frame(width: Self.width, height: Self.height, alignment: .topLeading)
         .background {
             Color(.appBackground)
 
@@ -75,27 +78,30 @@ struct DogShareCardView: View {
             }
     }
 
+    /// Name and breed sit on their own lines rather than sharing one. Side by
+    /// side they compete for the same width, and SwiftUI resolves that by
+    /// truncating both — "Nova Scotia Duck Tolling Retriev…" — instead of
+    /// letting `minimumScaleFactor` shrink them. A line each gives the full
+    /// width to one string, so long names scale down and stay readable.
     private var heading: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 14) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(dog.displayName)
                 .font(.system(size: 88, weight: .bold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.4)
 
-            Text(verbatim: "|")
-                .font(.system(size: 66, weight: .thin))
-                .foregroundStyle(.secondary)
-
             Text(dog.breedText)
                 .font(.system(size: 52))
+                .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var stats: some View {
         HStack(alignment: .firstTextBaseline, spacing: 64) {
-            DogShareCardStat(title: "Age", value: dog.ageText ?? "Not set")
+            DogShareCardStat(title: "Age", value: ageText)
             DogShareCardStat(title: "Sex", value: sexText)
             DogShareCardStat(title: "Weight", value: weightText)
         }
@@ -120,23 +126,33 @@ struct DogShareCardView: View {
         }
     }
 
-    /// One row per vaccine rather than per record: a single visit can cover four
-    /// vaccines, and the card lists them the way a vet's booklet does.
+    /// One row per vaccine *type*, carrying the most recent dose. Listing every
+    /// record instead would repeat the same seven names at every booster and
+    /// push the card past 5000px tall; what a reader actually wants to know is
+    /// which vaccines this dog has and how current each one is.
     ///
-    /// ponytail: uncapped. A dog with dozens of doses makes a very tall card;
-    /// add a "+N more" cutoff if that ever turns up in real data.
+    /// Bounded by `VaccineType.allCases`, which is what lets the card keep a
+    /// fixed height.
     private var vaccinations: [DogShareCardVaccination] {
-        (dog.vaccineRecords ?? [])
-            .flatMap { record in
-                record.vaccines.map {
-                    DogShareCardVaccination(
-                        recordID: record.id,
-                        vaccine: $0,
-                        dateGiven: record.dateGiven
-                    )
-                }
+        let latestDates = (dog.vaccineRecords ?? []).reduce(into: [VaccineType: Date]()) { dates, record in
+            for vaccine in record.vaccines {
+                dates[vaccine] = max(dates[vaccine] ?? .distantPast, record.dateGiven)
             }
-            .sorted { $0.dateGiven > $1.dateGiven }
+        }
+
+        return latestDates
+            .map { DogShareCardVaccination(vaccine: $0.key, dateGiven: $0.value) }
+            .sorted { $0.dateGiven == $1.dateGiven ? $0.id < $1.id : $0.dateGiven > $1.dateGiven }
+    }
+
+    /// Months rather than the app's "1 year, 2 months old": that phrasing wraps
+    /// onto a second line here and knocks the Age/Sex/Weight row out of
+    /// alignment, and months is how a puppy's age gets talked about anyway.
+    private var ageText: String {
+        guard let dateOfBirth = dog.dateOfBirth else { return "Not set" }
+
+        let months = max(0, Calendar.current.dateComponents([.month], from: dateOfBirth, to: .now).month ?? 0)
+        return "\(months) \(months == 1 ? "month" : "months")"
     }
 
     private var sexText: String {
@@ -153,14 +169,12 @@ struct DogShareCardView: View {
     }
 }
 
-/// A single dose on the card: one vaccine from one record, flattened so each
-/// gets its own line and date.
+/// One line on the card: a vaccine and the date it was most recently given.
 private struct DogShareCardVaccination: Identifiable {
-    let recordID: UUID
     let vaccine: VaccineType
     let dateGiven: Date
 
-    var id: String { "\(recordID)-\(vaccine.rawValue)" }
+    var id: String { vaccine.rawValue }
 }
 
 private struct DogShareCardStat: View {

@@ -25,7 +25,7 @@ struct DogShareCardRendererTests {
         let image = try #require(UIImage(data: data))
 
         #expect(image.size.width == DogShareCardView.width * 2)
-        #expect(image.size.height >= 950 * 2)
+        #expect(image.size.height == DogShareCardView.height * 2)
 
         // Top-left corner sits outside the rounded rect, so it must be clear.
         let corner = try #require(image.cgImage?.cropping(to: CGRect(x: 0, y: 0, width: 1, height: 1)))
