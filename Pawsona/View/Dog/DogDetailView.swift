@@ -68,6 +68,11 @@ struct DogDetailView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        // The hero behind this bar is always a light pastel, in both
+        // appearances, so the bar's content has to stay dark. Left to resolve
+        // normally the `.primary` tints below go white in Dark Mode and vanish
+        // against the pastel.
+        .toolbarColorScheme(.light, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit", action: showEditDogForm)

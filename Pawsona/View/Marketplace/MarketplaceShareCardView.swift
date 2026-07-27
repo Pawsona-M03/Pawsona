@@ -70,7 +70,7 @@ struct MarketplaceShareCardView: View {
                 .resizable()
                 .scaledToFill()
         } else {
-            listing.backgroundColor.color.opacity(0.35)
+            listing.backgroundColor.pastelColor
                 .overlay(alignment: .bottom) {
                     Image(.dogPlaceholder)
                         .resizable()

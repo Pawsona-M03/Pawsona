@@ -42,7 +42,7 @@ struct MarketplaceDetailView: View {
                 )
                 .frame(maxWidth: .infinity)
                 .frame(height: 360)
-                .background(viewModel.listing.backgroundColor.color.opacity(0.2))
+                .background(viewModel.listing.backgroundColor.pastelColor)
                 .clipped()
                 .accessibilityLabel("Photo of \(viewModel.listing.name)")
 

@@ -9,6 +9,10 @@ import SwiftUI
 import UIKit
 
 struct DogPhotoView: View {
+    /// Horizontal nudge applied to the placeholder artwork, as a fraction of
+    /// its rendered height.
+    static let placeholderOffsetRatio: CGFloat = 0.08
+
     let dog: Dog
     var placeholderIconHeight: CGFloat = 128
 
@@ -25,7 +29,10 @@ struct DogPhotoView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(height: placeholderIconHeight)
-                        .offset(x: 25)
+                        // The artwork reads better nudged off centre. Scaled
+                        // off the icon height so the shift stays proportional
+                        // at every size this view is used at.
+                        .offset(x: placeholderIconHeight * Self.placeholderOffsetRatio)
                 }
         }
     }

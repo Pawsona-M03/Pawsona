@@ -122,7 +122,7 @@ struct DogPhotoPickerButton: View {
                             .resizable()
                             .scaledToFit()
                             .frame(height: 120)
-                            .offset(x:10)
+                            .offset(x: 120 * DogPhotoView.placeholderOffsetRatio)
                     }
             }
         }
@@ -253,7 +253,7 @@ struct DogPhotoPickerButton: View {
     /// Composite the transparent subject over the currently selected card colour.
     private func renderPhoto(from cutout: CIImage) {
         let background = CIImage(
-            color: CIColor(color: UIColor(backgroundColor.color))
+            color: CIColor(color: UIColor(backgroundColor.pastelColor))
         )
         .cropped(to: cutout.extent)
         let composited = cutout.composited(over: background)

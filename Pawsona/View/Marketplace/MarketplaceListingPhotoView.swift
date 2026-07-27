@@ -12,7 +12,7 @@ struct MarketplaceListingPhotoView: View {
                 .scaledToFill()
         } else {
             Rectangle()
-                .fill(listing.backgroundColor.color)
+                .fill(listing.backgroundColor.pastelColor)
                 .overlay(alignment: .bottom) {
                     Image(.dogPlaceholder)
                         .resizable()
