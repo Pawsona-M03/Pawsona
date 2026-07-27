@@ -66,17 +66,18 @@ struct DogShareCardView: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 26) {
-            // `bookmark.fill` is the ribbon in the design: a flat top that sits
-            // flush with the card edge and a notch cut out of the bottom.
-            Image(systemName: "bookmark.fill")
-                .font(.system(size: 200))
-                .foregroundStyle(Self.brandBrown)
+            // ponytail: the artwork is 91x124, so it is upscaled ~3x here and
+            // will read a little soft. Re-export it larger, or redraw it as a
+            // `Shape`, if that ever shows on a shared card.
+            Image(.ribbon)
+                .resizable()
+                .scaledToFit()
                 .frame(width: 144, height: 200)
 
             Text("Pawsona")
-                .font(.system(size: 56, weight: .bold))
+                .font(.system(size: 76, weight: .bold))
                 .foregroundStyle(Self.brandBrown)
-                .padding(.top, 92)
+                .padding(.top, 78)
         }
         .padding(.leading, 118)
     }
