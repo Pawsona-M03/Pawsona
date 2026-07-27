@@ -16,6 +16,14 @@ struct PuppySelectionRow: View {
 
     @ScaledMetric private var avatarSize = 64
 
+    private var displayName: String {
+        guard dog.displayName.count > 5 else {
+            return dog.displayName
+        }
+
+        return "\(dog.displayName.prefix(5))..."
+    }
+
     var body: some View {
         Button(action: toggle) {
             VStack {
@@ -28,7 +36,7 @@ struct PuppySelectionRow: View {
                         }
                     }
 
-                Text(dog.displayName)
+                Text(displayName)
                     .font(.caption)
                     .bold()
                     .foregroundStyle(.primary)

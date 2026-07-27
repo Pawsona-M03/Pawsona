@@ -169,6 +169,13 @@ struct DogDetailView: View {
                     .truncationMode(.tail)
                     .accessibilityLabel("Breed")
                     .accessibilityValue(breedText)
+                Text(dateDog)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .accessibilityLabel("Date of Birth")
+                    .accessibilityValue(dateDog)
             }
             .padding(.top, 24)
 
@@ -211,22 +218,25 @@ struct DogDetailView: View {
             .accessibilityValue(vaccineRecordAccessibilityValue)
             .accessibilityHint("Shows vaccination records")
 
-            Button(
-                marketplaceListing == nil
-                    ? "List on Marketplace" : "Manage Marketplace Listing",
-                systemImage: marketplaceListing == nil ? "storefront" : "slider.horizontal.3"
-            ) {
+            Button {
                 isShowingMarketplaceFlow = true
+            } label: {
+                Label(
+                    marketplaceListing == nil
+                        ? "List on Marketplace" : "Manage Marketplace Listing",
+                    systemImage: marketplaceListing == nil ? "storefront" : "slider.horizontal.3"
+                )
+                .frame(maxWidth: .infinity, maxHeight: 27)
             }
             .buttonStyle(.borderedProminent)
             .disabled(isCheckingMarketplaceListing)
-            .frame(maxWidth: .infinity)
             .padding(.horizontal)
             .accessibilityHint(
                 marketplaceListing == nil
                     ? "Creates a public snapshot after confirmation"
                     : "Shows public listing management actions"
             )
+            .tint(.primaryBrown)
 
             Spacer(minLength: 40)
         }
@@ -258,6 +268,11 @@ struct DogDetailView: View {
     }
 
     private var breedText: String { dog.breedText }
+    private var dateDog: String {
+        guard let dateOfBirth = dog.dateOfBirth else { return "-" }
+
+        return dateOfBirth.formatted(date: .abbreviated, time: .omitted)
+    }
 
     /// Presents a freshly generated export, unless generating it failed — in
     /// which case the view model has already set the message the alert shows.
@@ -366,7 +381,12 @@ struct DogDetailView: View {
                 name: "Berry sodijoasidjfoaisdjfoaisdjfoaisdosidBerry  Berry asiodjfoaisjdfoaisjdoaijdsfoaijsdofiajsdo",
                 breed: "Labrador Retriever",
                 backgroundColor: .green,
-                dateOfBirth: Date.now
+                dateOfBirth: DateComponents(
+                    calendar: .current,
+                    year: 2000,
+                    month: 10,
+                    day: 19
+                ).date ?? .now
             )
         )
     }

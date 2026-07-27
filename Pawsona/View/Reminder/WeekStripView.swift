@@ -27,35 +27,37 @@ struct WeekStripView: View {
     private let calendar = Calendar.current
 
     var body: some View {
-        ScrollView(.horizontal) {
-            LazyHStack(spacing: 0) {
-                ForEach(days, id: \.self) { day in
-                    dayColumn(for: day)
-                        .containerRelativeFrame(
-                            .horizontal,
-                            count: visibleDays,
-                            spacing: 0
-                        )
+        VStack(alignment: .trailing, spacing: 8) {
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 0) {
+                    ForEach(days, id: \.self) { day in
+                        dayColumn(for: day)
+                            .containerRelativeFrame(
+                                .horizontal,
+                                count: visibleDays,
+                                spacing: 0
+                            )
+                    }
                 }
+                .scrollTargetLayout()
             }
-            .scrollTargetLayout()
-        }
-        .scrollIndicators(.hidden)
-        .scrollTargetBehavior(.viewAligned)
-        .scrollPosition($scrollPosition, anchor: .center)
-        .frame(height: selectedDaySize + labelHeight)
-        .onAppear {
-            center(on: selectedDate, animated: false)
-        }
-        .onChange(of: selectedDate) { _, newValue in
-            // Taps (and outside changes) pull the strip to match.
-            guard scrollPosition.viewID(type: Date.self) != newValue else { return }
-            center(on: newValue, animated: true)
-        }
-        .onChange(of: scrollPosition) { _, newValue in
-            // Scrolling pushes the centred day back into the selection.
-            guard let centred = newValue.viewID(type: Date.self), centred != selectedDate else { return }
-            selectedDate = centred
+            .scrollIndicators(.hidden)
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition($scrollPosition, anchor: .center)
+            .frame(height: selectedDaySize + labelHeight)
+            .onAppear {
+                center(on: selectedDate, animated: false)
+            }
+            .onChange(of: selectedDate) { _, newValue in
+                // Taps (and outside changes) pull the strip to match.
+                guard scrollPosition.viewID(type: Date.self) != newValue else { return }
+                center(on: newValue, animated: true)
+            }
+            .onChange(of: scrollPosition) { _, newValue in
+                // Scrolling pushes the centred day back into the selection.
+                guard let centred = newValue.viewID(type: Date.self), centred != selectedDate else { return }
+                selectedDate = centred
+            }
         }
     }
 

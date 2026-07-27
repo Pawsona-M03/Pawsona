@@ -56,15 +56,14 @@ struct PuppyAgeTextTests {
         #expect(PuppyAgeText.largestUnit(from: nil, to: now, calendar: calendar) == nil)
     }
 
-    /// The share card is the only caller; the list rows and the marketplace
-    /// still spell out two units.
-    @Test("The app's own phrasing is untouched")
-    func appPhrasingUnchanged() {
+    /// `value(from:)` is the same selection with "old" on the end — the card
+    /// drops the suffix because its column is already labelled "Age". Pinned so
+    /// the two cannot drift apart into two implementations again.
+    @Test("The app's phrasing is the same age with an \"old\" suffix")
+    func appPhrasingAddsSuffix() {
         let dateOfBirth = birthday(yearsAgo: 3, monthsAgo: 3, daysAgo: 24)
 
-        #expect(
-            PuppyAgeText.value(from: dateOfBirth, to: now, calendar: calendar)
-                == "3 years, 3 months old"
-        )
+        #expect(PuppyAgeText.largestUnit(from: dateOfBirth, to: now, calendar: calendar) == "3 years")
+        #expect(PuppyAgeText.value(from: dateOfBirth, to: now, calendar: calendar) == "3 years old")
     }
 }
