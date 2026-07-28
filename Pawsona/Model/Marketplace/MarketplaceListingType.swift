@@ -8,8 +8,8 @@ enum MarketplaceListingType: String, CaseIterable, Codable, Hashable, Identifiab
 
     var displayName: String {
         switch self {
-        case .sale: "For sale"
-        case .adoption: "Adoption"
+        case .sale: "Adoption fee"
+        case .adoption: "Free"
         }
     }
 }

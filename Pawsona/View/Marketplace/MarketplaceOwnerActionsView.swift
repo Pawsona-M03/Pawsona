@@ -11,7 +11,7 @@ struct MarketplaceOwnerActionsView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Button("Edit Price & Listing Type", systemImage: "tag", action: editTerms)
+            Button("Edit Fee & Listing Type", systemImage: "tag", action: editTerms)
                 .buttonStyle(.borderedProminent)
                 .disabled(isPerformingAction)
 
@@ -33,7 +33,7 @@ struct MarketplaceOwnerActionsView: View {
                 Button("Mark Reserved", systemImage: "clock") {
                     updateStatus(.reserved)
                 }
-                Button("Mark Sold", systemImage: "checkmark.seal") {
+                Button("Mark Adopted", systemImage: "checkmark.seal") {
                     updateStatus(.sold)
                 }
             }

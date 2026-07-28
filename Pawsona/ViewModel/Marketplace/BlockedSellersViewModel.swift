@@ -45,7 +45,7 @@ final class BlockedSellersViewModel {
                 )
             } else {
                 resolved.append(
-                    BlockedSeller(id: identifier, displayName: "Unknown seller", region: nil)
+                    BlockedSeller(id: identifier, displayName: "Unknown lister", region: nil)
                 )
             }
         }

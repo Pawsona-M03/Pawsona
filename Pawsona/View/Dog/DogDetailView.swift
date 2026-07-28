@@ -227,8 +227,8 @@ struct DogDetailView: View {
             } label: {
                 Label(
                     marketplaceListing == nil
-                        ? "List on Marketplace" : "Manage Marketplace Listing",
-                    systemImage: marketplaceListing == nil ? "storefront" : "slider.horizontal.3"
+                        ? "List in the Adoption Hub" : "Manage Adoption Listing",
+                    systemImage: marketplaceListing == nil ? "house" : "slider.horizontal.3"
                 )
                 .frame(maxWidth: .infinity, maxHeight: 27)
             }

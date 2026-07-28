@@ -29,14 +29,14 @@ struct MarketplaceView: View {
         NavigationStack {
             Group {
                 if viewModel.isLoading, !viewModel.hasLoaded {
-                    ProgressView("Loading marketplace")
+                    ProgressView("Loading the Adoption Hub")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .accessibilityLabel("Loading marketplace listings")
+                        .accessibilityLabel("Loading adoption listings")
                 } else if let errorMessage = viewModel.errorMessage,
                           viewModel.listings.isEmpty {
                     ContentUnavailableView {
                         Label(
-                            viewModel.isOffline ? "You're Offline" : "Marketplace Unavailable",
+                            viewModel.isOffline ? "You're Offline" : "Adoption Hub Unavailable",
                             systemImage: viewModel.isOffline ? "wifi.slash" : "exclamationmark.triangle"
                         )
                         .frame(maxWidth: .infinity, maxHeight: 27)
@@ -90,7 +90,7 @@ struct MarketplaceView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.appBackground).ignoresSafeArea())
-            .navigationTitle("Marketplace")
+            .navigationTitle("Adoption Hub")
             .navigationDestination(for: MarketplaceListing.self) { listing in
                 MarketplaceDetailView(
                     listing: listing,
@@ -131,7 +131,7 @@ struct MarketplaceView: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu("More", systemImage: "ellipsis.circle") {
-                        Button("Blocked Sellers", systemImage: "person.crop.circle.badge.xmark") {
+                        Button("Blocked Listers", systemImage: "person.crop.circle.badge.xmark") {
                             isShowingBlockedSellers = true
                         }
                     }

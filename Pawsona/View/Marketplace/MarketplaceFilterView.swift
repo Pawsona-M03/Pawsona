@@ -55,17 +55,17 @@ struct MarketplaceFilterView: View {
                 }
 
                 Section {
-                    TextField("Minimum price", value: $draft.minimumPrice, format: .number)
+                    TextField("Minimum fee", value: $draft.minimumPrice, format: .number)
                         .keyboardType(.numberPad)
-                    TextField("Maximum price", value: $draft.maximumPrice, format: .number)
+                    TextField("Maximum fee", value: $draft.maximumPrice, format: .number)
                         .keyboardType(.numberPad)
                 } header: {
-                    Text("Sale price in IDR")
+                    Text("Adoption fee in IDR")
                 } footer: {
-                    Text("Price filters apply only to sale listings.")
+                    Text("Fee filters apply only to listings with an adoption fee.")
                 }
             }
-            .navigationTitle("Marketplace Filters")
+            .navigationTitle("Adoption Hub Filters")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

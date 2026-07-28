@@ -67,7 +67,7 @@ struct MarketplaceDetailView: View {
                             .foregroundStyle(Color(.primaryBrown))
                             .accessibilityLabel(
                                 viewModel.listing.listingType == .adoption
-                                    ? "Free adoption" : "Price \(viewModel.listing.priceText)"
+                                    ? "Free adoption" : "Adoption fee \(viewModel.listing.priceText)"
                             )
 
                         Label(viewModel.listing.region, systemImage: "mappin.and.ellipse")
@@ -89,7 +89,7 @@ struct MarketplaceDetailView: View {
                     if let sellerProfile = viewModel.sellerProfile {
                         MarketplaceSellerProfileCard(profile: sellerProfile)
                     } else if viewModel.isLoading {
-                        ProgressView("Loading seller profile")
+                        ProgressView("Loading lister profile")
                     }
 
                     if viewModel.isOwner {
@@ -107,7 +107,7 @@ struct MarketplaceDetailView: View {
                             }
                         )
                     } else {
-                        Button("Contact Seller", systemImage: "message") {
+                        Button("Contact Lister", systemImage: "message") {
                             Task {
                                 await viewModel.revealContact()
                                 isShowingContact = viewModel.sellerContact != nil
@@ -168,22 +168,22 @@ struct MarketplaceDetailView: View {
             }
         }
         .confirmationDialog(
-            viewModel.isSellerBlocked ? "Unblock this seller?" : "Block this seller?",
+            viewModel.isSellerBlocked ? "Unblock this lister?" : "Block this lister?",
             isPresented: $isConfirmingBlock,
             titleVisibility: .visible
         ) {
             if viewModel.isSellerBlocked {
-                Button("Unblock Seller") {
+                Button("Unblock Lister") {
                     viewModel.unblockSeller()
                 }
             } else {
-                Button("Block Seller", role: .destructive) {
+                Button("Block Lister", role: .destructive) {
                     viewModel.blockSeller()
                 }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Blocked sellers are hidden from Marketplace on this device.")
+            Text("Blocked listers are hidden from the Adoption Hub on this device.")
         }
         .confirmationDialog(
             "Remove this public listing?",
@@ -201,12 +201,12 @@ struct MarketplaceDetailView: View {
         } message: {
             Text("Your private puppy profile remains in Pawsona.")
         }
-        .alert("Marketplace", isPresented: errorBinding) {
+        .alert("Adoption Hub", isPresented: errorBinding) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
-        .alert("Marketplace", isPresented: confirmationBinding) {
+        .alert("Adoption Hub", isPresented: confirmationBinding) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.confirmationMessage ?? "")

@@ -17,7 +17,7 @@ struct MarketplaceSellerProfileCard: View {
                 Spacer()
 
                 if profile.profileComplete {
-                    Label("Complete Seller Profile", systemImage: "checkmark.circle")
+                    Label("Complete Lister Profile", systemImage: "checkmark.circle")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.trailing)
