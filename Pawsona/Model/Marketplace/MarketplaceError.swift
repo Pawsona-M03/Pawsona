@@ -19,9 +19,9 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidSalePrice:
-            "Enter a sale price greater than zero."
+            "Enter an adoption fee greater than zero."
         case .adoptionCannotHavePrice:
-            "Adoption listings cannot include a price."
+            "Free listings cannot include an adoption fee."
         case .incompleteSellerProfile:
             "Complete all required lister profile fields first."
         case .alreadyListed:

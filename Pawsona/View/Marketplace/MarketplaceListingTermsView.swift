@@ -34,24 +34,24 @@ struct MarketplaceListingTermsView: View {
                     .pickerStyle(.segmented)
 
                     if viewModel.listingType == .sale {
-                        TextField("Price in IDR", text: $viewModel.priceText)
+                        TextField("Adoption fee in IDR", text: $viewModel.priceText)
                             .keyboardType(.numberPad)
-                            .accessibilityLabel("Sale price in Indonesian rupiah")
+                            .accessibilityLabel("Adoption fee in Indonesian rupiah")
 
                         if let formattedPricePreview = viewModel.formattedPricePreview {
                             LabeledContent("Adopters see", value: formattedPricePreview)
                         }
                     } else {
-                        LabeledContent("Price", value: "Free adoption")
+                        LabeledContent("Adoption fee", value: "Free")
                             .accessibilityElement(children: .ignore)
-                            .accessibilityLabel("Price")
-                            .accessibilityValue("Free adoption")
+                            .accessibilityLabel("Adoption fee")
+                            .accessibilityValue("Free")
                     }
                 } header: {
                     Text("Listing terms")
                 } footer: {
                     Text(
-                        "Changes go live immediately. Switching to adoption removes the price."
+                        "Changes go live immediately. Switching to free removes the adoption fee."
                     )
                 }
             }

@@ -24,14 +24,14 @@ struct MarketplacePublishConfirmationView: View {
                 .pickerStyle(.segmented)
 
                 if viewModel.listingType == .sale {
-                    TextField("Price in IDR", text: $viewModel.priceText)
+                    TextField("Adoption fee in IDR", text: $viewModel.priceText)
                         .keyboardType(.numberPad)
-                        .accessibilityLabel("Sale price in Indonesian rupiah")
+                        .accessibilityLabel("Adoption fee in Indonesian rupiah")
                 } else {
-                    LabeledContent("Price", value: "Free adoption")
+                    LabeledContent("Adoption fee", value: "Free")
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Price")
-                        .accessibilityValue("Free adoption")
+                        .accessibilityLabel("Adoption fee")
+                        .accessibilityValue("Free")
                 }
 
                 if let sellerProfile = viewModel.sellerProfile {

@@ -67,7 +67,7 @@ struct MarketplaceDetailView: View {
                             .foregroundStyle(Color(.primaryBrown))
                             .accessibilityLabel(
                                 viewModel.listing.listingType == .adoption
-                                    ? "Free adoption" : "Price \(viewModel.listing.priceText)"
+                                    ? "Free adoption" : "Adoption fee \(viewModel.listing.priceText)"
                             )
 
                         Label(viewModel.listing.region, systemImage: "mappin.and.ellipse")

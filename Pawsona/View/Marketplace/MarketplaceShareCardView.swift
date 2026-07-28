@@ -175,7 +175,7 @@ struct MarketplaceShareCardView: View {
 
             Spacer()
 
-            Text(listing.listingType == .adoption ? "Looking for a home" : "For sale")
+            Text(listing.listingType == .adoption ? "Looking for a home" : "Adoption fee")
                 .font(.system(size: 26, weight: .medium))
                 .foregroundStyle(.gray)
         }
