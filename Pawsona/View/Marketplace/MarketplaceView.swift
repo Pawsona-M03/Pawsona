@@ -131,7 +131,7 @@ struct MarketplaceView: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu("More", systemImage: "ellipsis.circle") {
-                        Button("Blocked Sellers", systemImage: "person.crop.circle.badge.xmark") {
+                        Button("Blocked Listers", systemImage: "person.crop.circle.badge.xmark") {
                             isShowingBlockedSellers = true
                         }
                     }

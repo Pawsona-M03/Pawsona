@@ -26,6 +26,6 @@ struct SellerProfileTests {
         let explanation = MarketplaceTestFixtures.sellerProfile().completenessExplanation
         #expect(explanation.contains("provided all required"))
         #expect(explanation.contains("not independently verified"))
-        #expect(!explanation.localizedStandardContains("Verified Seller"))
+        #expect(!explanation.localizedStandardContains("Verified Lister"))
     }
 }

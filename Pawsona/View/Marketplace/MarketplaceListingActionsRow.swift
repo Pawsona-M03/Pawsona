@@ -26,7 +26,7 @@ struct MarketplaceListingActionsRow: View {
                 Button("Report", systemImage: "exclamationmark.bubble", action: report)
 
                 Button(
-                    isSellerBlocked ? "Unblock Seller" : "Block Seller",
+                    isSellerBlocked ? "Unblock Lister" : "Block Lister",
                     systemImage: isSellerBlocked
                         ? "person.crop.circle.badge.checkmark"
                         : "person.crop.circle.badge.xmark",

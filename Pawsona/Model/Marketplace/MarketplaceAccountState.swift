@@ -12,7 +12,7 @@ enum MarketplaceAccountState: Equatable {
         case .available:
             nil
         case .noAccount:
-            "Sign in to iCloud in Settings to publish, manage, report, or contact marketplace sellers."
+            "Sign in to iCloud in Settings to publish, manage, report, or contact marketplace listers."
         case .restricted:
             "This iCloud account is restricted and cannot use authenticated marketplace actions."
         case .couldNotDetermine, .temporarilyUnavailable:

@@ -122,17 +122,17 @@ struct MarketplaceShareCardView: View {
         .clipShape(.rect(cornerRadius: 20))
     }
 
-    /// Names the seller and points the reader back into the app. The seller's
+    /// Names the lister and points the reader back into the app. The lister's
     /// phone number is deliberately absent: in-app it sits behind an explicit
-    /// "Contact Seller" tap by a signed-in user, and a shared image travels
+    /// "Contact Lister" tap by a signed-in user, and a shared image travels
     /// further than the person who shared it can see.
     private var contact: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Contact seller")
+            Text("Contact lister")
                 .font(.system(size: 26, weight: .semibold))
                 .foregroundStyle(.gray)
 
-            Text(sellerProfile?.displayName ?? "Pawsona seller")
+            Text(sellerProfile?.displayName ?? "Pawsona lister")
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundStyle(.black)
                 .lineLimit(1)
@@ -152,7 +152,7 @@ struct MarketplaceShareCardView: View {
 
     private var contactDetailText: String {
         guard let sellerProfile else {
-            return "Open Pawsona Marketplace to contact this seller."
+            return "Open Pawsona Marketplace to contact this lister."
         }
         return """
         \(sellerProfile.sellerType.displayName) · \(sellerProfile.region)

@@ -23,7 +23,7 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
         case .adoptionCannotHavePrice:
             "Adoption listings cannot include a price."
         case .incompleteSellerProfile:
-            "Complete all required seller profile fields first."
+            "Complete all required lister profile fields first."
         case .alreadyListed:
             "This puppy is already on Marketplace. Manage its listing from the Puppy tab."
         case .invalidPhoneNumber:
@@ -43,7 +43,7 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
         case .invalidRecord:
             "Pawsona could not read this marketplace item."
         case .unsupportedContactMethod:
-            "This seller's contact method is not supported."
+            "This lister's contact method is not supported."
         case .serviceUnavailable:
             "Marketplace is temporarily unavailable. Please try again."
         }
