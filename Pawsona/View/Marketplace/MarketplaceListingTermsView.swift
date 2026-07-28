@@ -39,7 +39,7 @@ struct MarketplaceListingTermsView: View {
                             .accessibilityLabel("Sale price in Indonesian rupiah")
 
                         if let formattedPricePreview = viewModel.formattedPricePreview {
-                            LabeledContent("Buyers see", value: formattedPricePreview)
+                            LabeledContent("Adopters see", value: formattedPricePreview)
                         }
                     } else {
                         LabeledContent("Price", value: "Free adoption")

@@ -26,7 +26,7 @@ final class MarketplaceDetailViewModel {
         self.blockStore = blockStore
         // Browse already resolved ownership against the signed-in lister
         // profile. Seeding it here means the owner never sees a frame of the
-        // buyer's UI — Contact Lister, Report, Block — on their own listing.
+        // adopter's UI — Contact Lister, Report, Block — on their own listing.
         isOwner = isKnownOwnListing
     }
 

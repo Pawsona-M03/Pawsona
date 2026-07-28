@@ -45,7 +45,7 @@ struct MarketplacePublishConfirmationView: View {
                     isOn: $viewModel.acceptedPublicSharing
                 )
                 Toggle(
-                    "I consent to sharing my contact details with signed-in interested buyers",
+                    "I consent to sharing my contact details with signed-in interested adopters",
                     isOn: $viewModel.acceptedContactSharing
                 )
 
