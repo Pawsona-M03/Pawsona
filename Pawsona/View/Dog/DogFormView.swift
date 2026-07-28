@@ -24,6 +24,8 @@ struct DogFormView: View {
     @State private var weightText: String
     @State private var sex: Sex?
     @State private var photoData: Data?
+    @State private var isShowingCancelConfirmation = false
+    @State private var hasAttemptedSave = false
 
     /// `onDelete` sits ahead of `onSave` so the add form's trailing-closure call
     /// still binds to `onSave`.
@@ -64,7 +66,8 @@ struct DogFormView: View {
                     breed: $breed,
                     dateOfBirth: $dateOfBirth,
                     weightText: $weightText,
-                    sex: $sex
+                    sex: $sex,
+                    showsBreedValidationError: hasAttemptedSave && trimmedBreed.isEmpty
                 )
 
                 if let onDelete {
@@ -96,9 +99,10 @@ struct DogFormView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(
                         "Close",
-                        systemImage: "xmark",
-                        action: dismiss.callAsFunction
-                    )
+                        systemImage: "xmark"
+                    ) {
+                        isShowingCancelConfirmation = true
+                    }
                     .buttonStyle(.glassProminent)
                     .tint(.gray)
                 }
@@ -107,12 +111,18 @@ struct DogFormView: View {
                     Button(saveTitle, systemImage: "checkmark", action: saveDog)
                         .buttonStyle(.glassProminent)
                         .tint(Color(.primaryBrown))
-                        .disabled(trimmedBreed.isEmpty)
                         .accessibilityHint(
                             "Enter a breed before saving",
                             isEnabled: trimmedBreed.isEmpty
                     )
                 }
+            }
+            .alert("Discard Changes?", isPresented: $isShowingCancelConfirmation) {
+                Button("Discard Changes", role: .destructive, action: dismiss.callAsFunction)
+                Button("Keep Editing", role: .cancel) {}
+                    .tint(.primary)
+            } message: {
+                Text("Your changes won't be saved.")
             }
         }
     }
@@ -130,6 +140,11 @@ struct DogFormView: View {
     }
 
     private func saveDog() {
+        guard !trimmedBreed.isEmpty else {
+            hasAttemptedSave = true
+            return
+        }
+
         onSave(
             DogDraft(
                 name: trimmedName,
