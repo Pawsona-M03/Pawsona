@@ -67,6 +67,7 @@ struct DogDetailView: View {
                 containerHeight = height
             }
         }
+        .background(Color(.appBackground).ignoresSafeArea(edges: .bottom))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -225,10 +226,10 @@ struct DogDetailView: View {
 
             Spacer(minLength: 40)
         }
-        .padding(.bottom, 24)
+        .padding(.bottom, 120)
         .frame(
             maxWidth: .infinity,
-            minHeight: max(0, containerHeight - (sheetCornerRadius)),
+            minHeight: max(0, containerHeight),
             alignment: .top
         )
         .background(Color(.appBackground))
