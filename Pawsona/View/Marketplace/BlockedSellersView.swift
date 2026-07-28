@@ -29,8 +29,8 @@ struct BlockedSellersView: View {
                     } description: {
                         Text(
                             """
-                            Listers you block are hidden from Marketplace on \
-                            this device. They'll appear here so you can \
+                            Listers you block are hidden from the Adoption Hub \
+                            on this device. They'll appear here so you can \
                             unblock them.
                             """
                         )

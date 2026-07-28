@@ -183,7 +183,7 @@ struct MarketplaceDetailView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Blocked listers are hidden from Marketplace on this device.")
+            Text("Blocked listers are hidden from the Adoption Hub on this device.")
         }
         .confirmationDialog(
             "Remove this public listing?",
@@ -201,12 +201,12 @@ struct MarketplaceDetailView: View {
         } message: {
             Text("Your private puppy profile remains in Pawsona.")
         }
-        .alert("Marketplace", isPresented: errorBinding) {
+        .alert("Adoption Hub", isPresented: errorBinding) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
-        .alert("Marketplace", isPresented: confirmationBinding) {
+        .alert("Adoption Hub", isPresented: confirmationBinding) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.confirmationMessage ?? "")

@@ -63,6 +63,6 @@ struct MarketplacePublishConfirmationView: View {
                 .disabled(!viewModel.canPublish || viewModel.isSaving)
             }
         }
-        .navigationTitle("List on Marketplace")
+        .navigationTitle("List in the Adoption Hub")
     }
 }

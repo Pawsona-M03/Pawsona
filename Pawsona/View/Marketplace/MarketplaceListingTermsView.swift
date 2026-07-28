@@ -73,7 +73,7 @@ struct MarketplaceListingTermsView: View {
                         .accessibilityLabel("Saving listing changes")
                 }
             }
-            .alert("Marketplace", isPresented: errorBinding) {
+            .alert("Adoption Hub", isPresented: errorBinding) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage ?? "")

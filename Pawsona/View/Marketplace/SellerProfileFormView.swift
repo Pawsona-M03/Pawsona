@@ -37,8 +37,8 @@ struct SellerProfileFormView: View {
                 )
             }
 
-            Section("Marketplace rules") {
-                Toggle("I accept the Pawsona Marketplace rules", isOn: $viewModel.acceptedMarketplaceRules)
+            Section("Adoption Hub rules") {
+                Toggle("I accept the Pawsona Adoption Hub rules", isOn: $viewModel.acceptedMarketplaceRules)
 
                 Text(
                     "No deposits or payments are processed by Pawsona. Never publish an exact home address, government identification, or private health documents."
@@ -46,7 +46,7 @@ struct SellerProfileFormView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
-                Text("Marketplace safety support is available through Report on every listing.")
+                Text("Adoption Hub safety support is available through Report on every listing.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }

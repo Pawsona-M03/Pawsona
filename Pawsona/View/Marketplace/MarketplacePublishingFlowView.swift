@@ -45,10 +45,10 @@ struct MarketplacePublishingFlowView: View {
                     ContentUnavailableView {
                         Label("Listing Published", systemImage: "checkmark.circle")
                     } description: {
-                        Text("\(listing.name) is now visible in Marketplace.")
+                        Text("\(listing.name) is now visible in the Adoption Hub.")
                     } actions: {
                         Button("Done") {
-                            AccessibilityNotification.Announcement("Marketplace listing published").post()
+                            AccessibilityNotification.Announcement("Adoption listing published").post()
                             dismiss()
                         }
                         .buttonStyle(.borderedProminent)
@@ -68,7 +68,7 @@ struct MarketplacePublishingFlowView: View {
                     await viewModel.prepare()
                 }
             }
-            .alert("Marketplace", isPresented: errorBinding) {
+            .alert("Adoption Hub", isPresented: errorBinding) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage ?? "")

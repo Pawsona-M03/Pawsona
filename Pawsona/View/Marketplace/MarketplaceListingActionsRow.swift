@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// Report and Block are absent on your own listing rather than disabled: they
 /// are not actions an owner can meaningfully take against themselves, and a
-/// self-block used to hide the user's own puppy from Marketplace.
+/// self-block used to hide the user's own puppy from the Adoption Hub.
 struct MarketplaceListingActionsRow: View {
     let listingName: String
     let shareText: String
@@ -54,7 +54,7 @@ struct MarketplaceListingActionsRow: View {
             ShareLink(
                 item: shareText,
                 subject: Text("\(listingName) on Pawsona"),
-                message: Text("View this Pawsona marketplace listing.")
+                message: Text("View this Pawsona adoption listing.")
             ) {
                 Label("Share", systemImage: "square.and.arrow.up")
             }

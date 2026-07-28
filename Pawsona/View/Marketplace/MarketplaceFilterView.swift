@@ -65,7 +65,7 @@ struct MarketplaceFilterView: View {
                     Text("Price filters apply only to sale listings.")
                 }
             }
-            .navigationTitle("Marketplace Filters")
+            .navigationTitle("Adoption Hub Filters")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

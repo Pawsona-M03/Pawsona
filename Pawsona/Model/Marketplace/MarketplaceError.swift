@@ -25,7 +25,7 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
         case .incompleteSellerProfile:
             "Complete all required lister profile fields first."
         case .alreadyListed:
-            "This puppy is already on Marketplace. Manage its listing from the Puppy tab."
+            "This puppy is already in the Adoption Hub. Manage its listing from the Puppy tab."
         case .invalidPhoneNumber:
             "Enter a valid international WhatsApp number."
         case .authenticationRequired:
@@ -33,19 +33,19 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
         case .notAuthorized:
             "Only the listing owner can make this change."
         case .notFound:
-            "This marketplace item is no longer available."
+            "This adoption listing is no longer available."
         case .conflict:
             "This listing changed elsewhere. Refresh and try again."
         case .networkUnavailable:
             "You're offline. Check your connection and try again."
         case .rateLimited:
-            "Marketplace is receiving too many requests. Please try again shortly."
+            "The Adoption Hub is receiving too many requests. Please try again shortly."
         case .invalidRecord:
-            "Pawsona could not read this marketplace item."
+            "Pawsona could not read this adoption listing."
         case .unsupportedContactMethod:
             "This lister's contact method is not supported."
         case .serviceUnavailable:
-            "Marketplace is temporarily unavailable. Please try again."
+            "The Adoption Hub is temporarily unavailable. Please try again."
         }
     }
 }

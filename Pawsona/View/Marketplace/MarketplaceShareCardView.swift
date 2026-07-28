@@ -152,11 +152,11 @@ struct MarketplaceShareCardView: View {
 
     private var contactDetailText: String {
         guard let sellerProfile else {
-            return "Open Pawsona Marketplace to contact this lister."
+            return "Open the Pawsona Adoption Hub to contact this lister."
         }
         return """
         \(sellerProfile.sellerType.displayName) · \(sellerProfile.region)
-        Message them in Pawsona Marketplace.
+        Message them in the Pawsona Adoption Hub.
         """
     }
 
@@ -169,7 +169,7 @@ struct MarketplaceShareCardView: View {
                 .font(.system(size: 52))
                 .foregroundStyle(Color(.primaryBrown))
 
-            Text("Pawsona Marketplace")
+            Text("Pawsona Adoption Hub")
                 .font(.system(size: 30, weight: .semibold))
                 .foregroundStyle(Color(.primaryBrown))
 
