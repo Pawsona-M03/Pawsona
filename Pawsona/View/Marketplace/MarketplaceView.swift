@@ -39,7 +39,6 @@ struct MarketplaceView: View {
                             viewModel.isOffline ? "You're Offline" : "Adoption Hub Unavailable",
                             systemImage: viewModel.isOffline ? "wifi.slash" : "exclamationmark.triangle"
                         )
-                        .frame(maxWidth: .infinity, maxHeight: 27)
                     } description: {
                         Text(errorMessage)
                     } actions: {
