@@ -38,6 +38,27 @@ enum MarketplaceTestFixtures {
         )
     }
 
+    static func puppySnapshot(
+        sourceDogID: String = "safe-source",
+        name: String = "Berry",
+        breed: String = "Labrador Retriever"
+    ) -> MarketplacePuppySnapshot {
+        MarketplacePuppySnapshot(
+            sourceDogID: sourceDogID,
+            name: name,
+            breed: breed,
+            dateOfBirth: Date(timeIntervalSince1970: 1_650_000_000),
+            sex: .female,
+            weight: 12.5,
+            backgroundColor: .green,
+            photoData: nil,
+            vaccinationSummary: MarketplaceVaccinationSummary(
+                vaccineNames: ["Rabies"],
+                recordCount: 1
+            )
+        )
+    }
+
     static func sellerProfile(
         id: String = "seller-1",
         complete: Bool = true

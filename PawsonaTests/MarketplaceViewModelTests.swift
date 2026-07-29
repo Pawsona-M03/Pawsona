@@ -131,4 +131,24 @@ struct MarketplaceViewModelTests {
             Issue.record("Expected listing confirmation for a complete seller")
         }
     }
+
+    @Test("A full iCloud account surfaces a storage warning instead of the generic failure")
+    func publishingReportsFullICloudStorage() async {
+        let repository = FakeMarketplaceRepository()
+        repository.profile = MarketplaceTestFixtures.sellerProfile()
+        repository.publishError = MarketplaceError.storageQuotaExceeded
+        let viewModel = MarketplacePublishingViewModel(repository: repository)
+
+        await viewModel.prepare()
+        viewModel.listingType = .adoption
+        viewModel.acceptedPublicSharing = true
+        viewModel.acceptedContactSharing = true
+        await viewModel.publish(puppy: MarketplaceTestFixtures.puppySnapshot())
+
+        #expect(viewModel.errorMessage?.localizedStandardContains("iCloud storage is full") == true)
+        #expect(repository.listings.isEmpty)
+        if case .published = viewModel.step {
+            Issue.record("Publishing must not report success when storage is full")
+        }
+    }
 }
