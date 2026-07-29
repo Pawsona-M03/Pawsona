@@ -17,7 +17,7 @@ struct MarketplaceContactView: View {
 
                     Button("Call Seller", systemImage: "phone") {
                         openPhone()
-                    }
+                    }.tint(Color(.primaryBrown))
                 } header: {
                     Text("Contact seller")
                 } footer: {
