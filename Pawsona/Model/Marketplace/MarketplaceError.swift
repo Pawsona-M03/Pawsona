@@ -7,6 +7,7 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
     case alreadyListed
     case invalidPhoneNumber
     case authenticationRequired
+    case storageQuotaExceeded
     case notAuthorized
     case notFound
     case conflict
@@ -30,6 +31,11 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
             "Enter a valid international WhatsApp number."
         case .authenticationRequired:
             "Sign in to iCloud to continue."
+        case .storageQuotaExceeded:
+            """
+            Your iCloud storage is full, so this listing could not be published. \
+            Free up space in Settings > [your name] > iCloud, then try again.
+            """
         case .notAuthorized:
             "Only the listing owner can make this change."
         case .notFound:

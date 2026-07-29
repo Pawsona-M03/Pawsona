@@ -17,21 +17,30 @@ struct MarketplaceListingActionsRow: View {
     let toggleBlock: () -> Void
 
     var body: some View {
-        HStack {
+        // Every control takes an equal share of the row. A `Spacer` used to sit
+        // between Share and Report, which pinned Share left and the other two
+        // right and left a hole in the middle of the row.
+        HStack(spacing: 12) {
             shareLink
-
-            Spacer()
+                .frame(maxWidth: .infinity)
 
             if canReportOrBlock {
                 Button("Report", systemImage: "exclamationmark.bubble", action: report)
+                    .frame(maxWidth: .infinity)
 
+                // "Unblock Lister" wrapped onto two lines and made the row
+                // taller than its neighbours. The lister card sits directly
+                // above, so the shorter label loses no meaning on screen — the
+                // full wording stays in the accessibility label.
                 Button(
-                    isSellerBlocked ? "Unblock Lister" : "Block Lister",
+                    isSellerBlocked ? "Unblock" : "Block",
                     systemImage: isSellerBlocked
                         ? "person.crop.circle.badge.checkmark"
                         : "person.crop.circle.badge.xmark",
                     action: toggleBlock
                 )
+                .frame(maxWidth: .infinity)
+                .accessibilityLabel(isSellerBlocked ? "Unblock lister" : "Block lister")
             }
         }
         .buttonStyle(.bordered)

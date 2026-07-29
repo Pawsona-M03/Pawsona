@@ -14,6 +14,9 @@ struct MarketplaceDetailView: View {
     private let repository: any MarketplaceRepository
     private let updateListingFromPuppy: (() async throws -> MarketplaceListing)?
 
+    @ScaledMetric(relativeTo: .largeTitle) private var heroHeight = 380
+    private let sheetCornerRadius: CGFloat = 32
+
     init(
         listing: MarketplaceListing,
         repository: any MarketplaceRepository,
@@ -34,107 +37,49 @@ struct MarketplaceDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                MarketplaceListingPhotoView(
-                    listing: viewModel.listing,
-                    placeholderIconHeight: 220
-                )
-                .frame(maxWidth: .infinity)
-                .frame(height: 360)
-                .background(viewModel.listing.backgroundColor.pastelColor)
-                .clipped()
-                .accessibilityLabel("Photo of \(viewModel.listing.name)")
+        ZStack(alignment: .top) {
+            MarketplaceListingPhotoView(
+                listing: viewModel.listing,
+                placeholderIconHeight: displayedHeroHeight * 0.8
+            )
+            .frame(maxWidth: .infinity)
+            .frame(height: displayedHeroHeight)
+            .background(viewModel.listing.backgroundColor.pastelColor)
+            .clipped()
+            .ignoresSafeArea(edges: .top)
+            .accessibilityLabel("Photo of \(viewModel.listing.name)")
+            .accessibilityHidden(viewModel.listing.photoData == nil)
 
-                VStack(alignment: .leading, spacing: 20) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(viewModel.listing.name)
-                                .font(.title.bold())
-                                .accessibilityHeading(.h1)
+            ScrollView {
+                VStack(spacing: 0) {
+                    Color.clear
+                        .frame(height: displayedHeroHeight - sheetCornerRadius)
 
-                            Spacer()
-
-                            MarketplaceStatusBadge(status: viewModel.listing.status)
-                        }
-
-                        Text(viewModel.listing.breed.isEmpty ? "Breed not set" : viewModel.listing.breed)
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-
-                        Text(viewModel.listing.priceText)
-                            .font(.title2.bold())
-                            .foregroundStyle(Color(.primaryBrown))
-                            .accessibilityLabel(
-                                viewModel.listing.listingType == .adoption
-                                    ? "Free adoption" : "Adoption fee \(viewModel.listing.priceText)"
-                            )
-
-                        Label(viewModel.listing.region, systemImage: "mappin.and.ellipse")
-                            .foregroundStyle(.secondary)
-                    }
-
-                    MarketplaceListingFactsView(listing: viewModel.listing)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Vaccination summary")
-                            .font(.headline)
-                        Text(viewModel.listing.vaccinationSummary.displayText)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .cardBackground()
-
-                    if let sellerProfile = viewModel.sellerProfile {
-                        MarketplaceSellerProfileCard(profile: sellerProfile)
-                    } else if viewModel.isLoading {
-                        ProgressView("Loading lister profile")
-                    }
-
-                    if viewModel.isOwner {
-                        MarketplaceOwnerActionsView(
-                            listing: viewModel.listing,
-                            canUpdateFromPuppy: updateListingFromPuppy != nil,
-                            isPerformingAction: viewModel.isPerformingAction,
-                            editTerms: { isShowingTermsEditor = true },
-                            updateFromPuppy: updateFromPuppy,
-                            updateStatus: { status in
-                                Task { await viewModel.updateStatus(status) }
-                            },
-                            remove: {
-                                isConfirmingRemoval = true
-                            }
-                        )
-                    } else {
-                        Button("Contact Lister", systemImage: "message") {
-                            Task {
-                                await viewModel.revealContact()
-                                isShowingContact = viewModel.sellerContact != nil
-                            }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(viewModel.isPerformingAction || viewModel.isSellerBlocked)
-                        .frame(maxWidth: .infinity)
-                    }
-
-                    MarketplaceListingActionsRow(
-                        listingName: viewModel.listing.name,
-                        shareText: shareText,
+                    MarketplaceListingSheetView(
+                        viewModel: viewModel,
+                        canUpdateFromPuppy: updateListingFromPuppy != nil,
                         shareCardImage: shareCardImage,
-                        canReportOrBlock: viewModel.canReportOrBlock,
-                        isSellerBlocked: viewModel.isSellerBlocked,
+                        shareText: shareText,
+                        cornerRadius: sheetCornerRadius,
+                        editTerms: { isShowingTermsEditor = true },
+                        updateFromPuppy: updateFromPuppy,
+                        remove: { isConfirmingRemoval = true },
+                        contactLister: revealContact,
                         report: { isShowingReport = true },
                         toggleBlock: { isConfirmingBlock = true }
                     )
                 }
-                .padding(.horizontal)
-                .padding(.bottom)
             }
+            .scrollIndicators(.hidden)
+            .ignoresSafeArea(edges: .top)
         }
-        .background(Color(.appBackground).ignoresSafeArea())
+        .background(Color(.appBackground).ignoresSafeArea(edges: .bottom))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        // The hero behind this bar is always a light pastel in both
+        // appearances, so the bar's content has to stay dark — the same reason
+        // `DogDetailView` pins it.
+        .toolbarColorScheme(.light, for: .navigationBar)
         .task {
             await viewModel.load()
         }
@@ -167,10 +112,12 @@ struct MarketplaceDetailView: View {
                 await viewModel.submitReport(reason: reason, details: details)
             }
         }
-        .confirmationDialog(
+        // An alert rather than a confirmation dialog: every other warning in
+        // Pawsona is a centred modal, and the action-sheet variant anchored
+        // itself to the button, half-covering the listing it asks about.
+        .alert(
             viewModel.isSellerBlocked ? "Unblock this lister?" : "Block this lister?",
-            isPresented: $isConfirmingBlock,
-            titleVisibility: .visible
+            isPresented: $isConfirmingBlock
         ) {
             if viewModel.isSellerBlocked {
                 Button("Unblock Lister") {
@@ -210,6 +157,19 @@ struct MarketplaceDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.confirmationMessage ?? "")
+        }
+    }
+
+    /// The hero grows with Dynamic Type but stops short of swallowing the
+    /// screen, matching `DogDetailView`'s cap.
+    private var displayedHeroHeight: CGFloat {
+        min(heroHeight, 520)
+    }
+
+    private func revealContact() {
+        Task {
+            await viewModel.revealContact()
+            isShowingContact = viewModel.sellerContact != nil
         }
     }
 

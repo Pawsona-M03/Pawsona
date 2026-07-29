@@ -6,12 +6,23 @@ struct MarketplaceStatusBadge: View {
     var body: some View {
         Label(status.displayName, systemImage: iconName)
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(tint)
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
-            .background(.secondary.opacity(0.12), in: .capsule)
+            .background(tint.opacity(0.15), in: .capsule)
             .accessibilityLabel("Listing status")
             .accessibilityValue(status.displayName)
+    }
+
+    /// Only `available` is coloured — it is the one status a reader scans for.
+    /// The rest stay neutral so the green keeps its meaning. `statusAvailable`
+    /// carries a darker green in light mode and a brighter one in dark so the
+    /// label clears contrast against its own tinted capsule either way.
+    private var tint: Color {
+        switch status {
+        case .available: Color(.statusAvailable)
+        default: .secondary
+        }
     }
 
     private var iconName: String {

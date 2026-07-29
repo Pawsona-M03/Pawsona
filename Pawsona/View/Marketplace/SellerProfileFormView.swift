@@ -55,7 +55,10 @@ struct SellerProfileFormView: View {
                 Button("Complete Lister Profile") {
                     Task { await viewModel.saveSellerProfile() }
                 }
+                .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity)
                 .disabled(!viewModel.canSaveProfile || viewModel.isSaving)
+                .listRowBackground(Color.clear)
             } footer: {
                 Text(SellerProfile.completenessExplanation)
             }

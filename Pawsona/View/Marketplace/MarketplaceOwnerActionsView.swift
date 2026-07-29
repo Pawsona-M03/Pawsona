@@ -10,9 +10,13 @@ struct MarketplaceOwnerActionsView: View {
     let remove: () -> Void
 
     var body: some View {
+        // Every control stretches to the full content width so the stack reads
+        // as one aligned column. Sized-to-fit buttons inside the detail view's
+        // leading-aligned VStack looked ragged and off-centre.
         VStack(spacing: 12) {
             Button("Edit Fee & Listing Type", systemImage: "tag", action: editTerms)
                 .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity)
                 .disabled(isPerformingAction)
 
             Button(
@@ -21,6 +25,7 @@ struct MarketplaceOwnerActionsView: View {
                 action: updateFromPuppy
             )
             .buttonStyle(.bordered)
+            .frame(maxWidth: .infinity)
             .disabled(isPerformingAction)
 
             Menu("Change Listing Status", systemImage: "slider.horizontal.3") {
@@ -38,10 +43,12 @@ struct MarketplaceOwnerActionsView: View {
                 }
             }
             .buttonStyle(.bordered)
+            .frame(maxWidth: .infinity)
             .disabled(isPerformingAction)
 
             Button("Remove Listing", systemImage: "trash", role: .destructive, action: remove)
                 .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity)
                 .disabled(isPerformingAction)
 
             if !canUpdateFromPuppy {
@@ -49,7 +56,9 @@ struct MarketplaceOwnerActionsView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
             }
         }
+        .frame(maxWidth: .infinity)
     }
 }
