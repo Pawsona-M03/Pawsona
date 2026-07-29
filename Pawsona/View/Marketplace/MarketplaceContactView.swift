@@ -17,7 +17,7 @@ struct MarketplaceContactView: View {
 
                     Button("Call Lister", systemImage: "phone") {
                         openPhone()
-                    }
+                    }.tint(Color(.primaryBrown))
                 } header: {
                     Text("Contact lister")
                 } footer: {

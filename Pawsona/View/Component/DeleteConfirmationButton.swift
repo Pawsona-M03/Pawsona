@@ -22,10 +22,13 @@ struct DeleteConfirmationButton: View {
     @State private var isShowingConfirmation = false
 
     var body: some View {
-        Button(title, role: .destructive) {
+        Button(role: .destructive) {
             isShowingConfirmation = true
+        } label: {
+            Text(title)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(.rect)
         }
-        .frame(maxWidth: .infinity, minHeight: 44)
         // A native alert: the centred modal that asks for a deliberate second
         // tap before the destructive action runs.
         .alert(title, isPresented: $isShowingConfirmation) {
