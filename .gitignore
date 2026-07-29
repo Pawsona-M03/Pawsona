@@ -64,6 +64,7 @@ Docs/
 .agents/
 .agent/
 .codex/
+.worktrees/
 .cursor/
 .gemini/
 .mcp.json
