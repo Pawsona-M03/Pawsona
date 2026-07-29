@@ -287,7 +287,7 @@ struct DogViewModelTests {
         #expect(Dog(name: "Berry", breed: "Poodle").breedText == "Poodle")
     }
 
-    @Test("Age text omits zero units and days after one year")
+    @Test("Age text reads as the largest unit that is not zero")
     func ageTextReadsNaturally() throws {
         let calendar = Calendar(identifier: .gregorian)
         let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 22)))
@@ -299,7 +299,9 @@ struct DogViewModelTests {
 
         #expect(Dog.ageText(from: oneDayAgo, to: now, calendar: calendar) == "1 day old")
         #expect(Dog.ageText(from: twoMonthsAgo, to: now, calendar: calendar) == "2 months old")
-        #expect(Dog.ageText(from: fullAge, to: now, calendar: calendar) == "1 year, 2 months old")
+        // 1 year 2 months 3 days: the months and days drop off, they do not
+        // trail the year. Left stale by #79, which changed the phrasing.
+        #expect(Dog.ageText(from: fullAge, to: now, calendar: calendar) == "1 year old")
         #expect(Dog.ageText(from: oneYearAgo, to: now, calendar: calendar) == "1 year old")
         #expect(Dog.ageText(from: newborn, to: now, calendar: calendar) == "0 days old")
         #expect(Dog.ageText(from: nil, to: now, calendar: calendar) == nil)

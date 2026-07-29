@@ -20,17 +20,17 @@ struct BlockedSellersView: View {
         NavigationStack {
             Group {
                 if viewModel.isLoading, viewModel.isEmpty {
-                    ProgressView("Loading blocked sellers")
+                    ProgressView("Loading blocked listers")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .accessibilityLabel("Loading blocked sellers")
+                        .accessibilityLabel("Loading blocked listers")
                 } else if viewModel.isEmpty {
                     ContentUnavailableView {
-                        Label("No Blocked Sellers", systemImage: "person.crop.circle.badge.checkmark")
+                        Label("No Blocked Listers", systemImage: "person.crop.circle.badge.checkmark")
                     } description: {
                         Text(
                             """
-                            Sellers you block are hidden from Marketplace on \
-                            this device. They'll appear here so you can \
+                            Listers you block are hidden from the Adoption Hub \
+                            on this device. They'll appear here so you can \
                             unblock them.
                             """
                         )
@@ -49,7 +49,7 @@ struct BlockedSellersView: View {
                     }
                 }
             }
-            .navigationTitle("Blocked Sellers")
+            .navigationTitle("Blocked Listers")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

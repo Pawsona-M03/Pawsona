@@ -15,14 +15,14 @@ struct MarketplaceContactView: View {
                         openWhatsApp()
                     }
 
-                    Button("Call Seller", systemImage: "phone") {
+                    Button("Call Lister", systemImage: "phone") {
                         openPhone()
                     }.tint(Color(.primaryBrown))
                 } header: {
-                    Text("Contact seller")
+                    Text("Contact lister")
                 } footer: {
                     Text(
-                        "You are leaving Pawsona to contact the seller. Pawsona does not process payments or messages."
+                        "You are leaving Pawsona to contact the lister. Pawsona does not process payments or messages."
                     )
                 }
             }

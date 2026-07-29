@@ -5,14 +5,14 @@ struct SellerProfileFormView: View {
 
     var body: some View {
         Form {
-            Section("Seller profile") {
+            Section("Lister profile") {
                 TextField("Display name", text: $viewModel.displayName)
                     .textContentType(.name)
 
                 TextField("Approximate city or region", text: $viewModel.region)
                     .textContentType(.addressCity)
 
-                Picker("Seller type", selection: $viewModel.sellerType) {
+                Picker("Lister type", selection: $viewModel.sellerType) {
                     ForEach(SellerType.allCases) { type in
                         Text(type.displayName).tag(type)
                     }
@@ -37,8 +37,8 @@ struct SellerProfileFormView: View {
                 )
             }
 
-            Section("Marketplace rules") {
-                Toggle("I accept the Pawsona Marketplace rules", isOn: $viewModel.acceptedMarketplaceRules)
+            Section("Adoption Hub rules") {
+                Toggle("I accept the Pawsona Adoption Hub rules", isOn: $viewModel.acceptedMarketplaceRules)
 
                 Text(
                     "No deposits or payments are processed by Pawsona. Never publish an exact home address, government identification, or private health documents."
@@ -46,22 +46,23 @@ struct SellerProfileFormView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
-                Text("Marketplace safety support is available through Report on every listing.")
+                Text("Adoption Hub safety support is available through Report on every listing.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
 
             Section {
-                Button("Complete Seller Profile") {
+                Button("Complete Lister Profile") {
                     Task { await viewModel.saveSellerProfile() }
                 }
+                .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity)
                 .disabled(!viewModel.canSaveProfile || viewModel.isSaving)
+                .listRowBackground(Color.clear)
             } footer: {
-                Text(
-                    "This seller has provided all required contact and profile information. Pawsona has not independently verified their identity."
-                )
+                Text(SellerProfile.completenessExplanation)
             }
         }
-        .navigationTitle("Seller Profile")
+        .navigationTitle("Lister Profile")
     }
 }

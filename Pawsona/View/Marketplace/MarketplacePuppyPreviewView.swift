@@ -16,7 +16,7 @@ struct MarketplacePuppyPreviewView: View {
                     .accessibilityLabel("Photo of \(puppy.name)")
             } else {
                 Rectangle()
-                    .fill(puppy.backgroundColor.color.opacity(0.2))
+                    .fill(puppy.backgroundColor.pastelColor)
                     .frame(maxWidth: .infinity)
                     .frame(height: 220)
                     .overlay {

@@ -12,6 +12,7 @@ final class FakeMarketplaceRepository: MarketplaceRepository {
     )
     var isOwner = false
     var fetchError: Error?
+    var publishError: Error?
     /// Hands out a cursor on the first fetch so paging paths become reachable.
     var nextTokenForFirstPage: MarketplacePageToken?
     /// Fails every fetch after the first, to exercise the "page one worked,
@@ -56,6 +57,9 @@ final class FakeMarketplaceRepository: MarketplaceRepository {
     }
 
     func publish(_ listing: MarketplaceListing) async throws -> MarketplaceListing {
+        if let publishError {
+            throw publishError
+        }
         listings.append(listing)
         return listing
     }

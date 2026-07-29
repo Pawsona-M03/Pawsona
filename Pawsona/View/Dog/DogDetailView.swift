@@ -9,6 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct DogDetailView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -16,6 +17,7 @@ struct DogDetailView: View {
     @State private var isShowingEditDogForm = false
     @State private var isPendingDeletion = false
     @State private var sharedFile: SharedFile?
+    @State private var isShowingShareCardPicker = false
     @State private var marketplaceListing: MarketplaceListing?
     @State private var isShowingMarketplaceFlow = false
     @State private var isCheckingMarketplaceListing = false
@@ -41,11 +43,10 @@ struct DogDetailView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            DogPhotoView(dog: dog, placeholderIconHeight: displayedHeroHeight * 0.6)
-                .frame(maxWidth: 410)
+            DogPhotoView(dog: dog, placeholderIconHeight: displayedHeroHeight * 0.8)
+                .frame(maxWidth: .infinity)
                 .frame(height: displayedHeroHeight)
-                .background(dog.backgroundColor.color.opacity(0.3))
-                .background(dog.backgroundColor.color.opacity(0.3))
+                .background(dog.backgroundColor.pastelColor)
                 .clipped()
                 .ignoresSafeArea(edges: .top)
                 .accessibilityLabel("Photo of \(displayName)")
@@ -70,6 +71,11 @@ struct DogDetailView: View {
         .background(Color(.appBackground).ignoresSafeArea(edges: .bottom))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        // The hero behind this bar is always a light pastel, in both
+        // appearances, so the bar's content has to stay dark. Left to resolve
+        // normally the `.primary` tints below go white in Dark Mode and vanish
+        // against the pastel.
+        .toolbarColorScheme(.light, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit", action: showEditDogForm)
@@ -86,6 +92,10 @@ struct DogDetailView: View {
                 Menu {
                     Button("Share via AirDrop", systemImage: "wifi") {
                         share(dogViewModel.shareDogData(dog))
+                    }
+
+                    Button("Share as Image", systemImage: "photo") {
+                        isShowingShareCardPicker = true
                     }
 
                     Button("Export as PDF", systemImage: "doc.richtext") {
@@ -107,6 +117,15 @@ struct DogDetailView: View {
         // majority of visits that never shared anything.
         .sheet(item: $sharedFile) { sharedFile in
             ShareSheet(fileURL: sharedFile.url, previewTitle: displayName)
+        }
+        .sheet(isPresented: $isShowingShareCardPicker) {
+            DogShareCardPickerView(
+                dog: dog,
+                dogViewModel: dogViewModel,
+                // The card starts in the appearance the user is already in,
+                // which ImageRenderer cannot work out for itself.
+                colorScheme: colorScheme
+            )
         }
         .sheet(isPresented: $isShowingMarketplaceFlow, onDismiss: refreshMarketplaceListing) {
             if let marketplaceListing {
@@ -209,8 +228,8 @@ struct DogDetailView: View {
             } label: {
                 Label(
                     marketplaceListing == nil
-                        ? "List on Marketplace" : "Manage Marketplace Listing",
-                    systemImage: marketplaceListing == nil ? "storefront" : "slider.horizontal.3"
+                        ? "List in the Adoption Hub" : "Manage Adoption Listing",
+                    systemImage: marketplaceListing == nil ? "house" : "slider.horizontal.3"
                 )
                 .frame(maxWidth: .infinity, maxHeight: 27)
             }

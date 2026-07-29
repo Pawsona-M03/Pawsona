@@ -18,7 +18,7 @@ struct DogCardView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            DogPhotoView(dog: dog, placeholderIconHeight: photoHeight * 0.6)
+            DogPhotoView(dog: dog, placeholderIconHeight: photoHeight * 0.8)
                 .frame(width: dynamicTypeSize.isAccessibilitySize ? nil : 162)
                 .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil)
                 .frame(height: photoHeight)

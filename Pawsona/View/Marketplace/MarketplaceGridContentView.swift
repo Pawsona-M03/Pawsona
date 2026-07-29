@@ -26,7 +26,7 @@ struct MarketplaceGridContentView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .accessibilityHint("Shows marketplace listing details")
+                    .accessibilityHint("Shows adoption listing details")
                 }
             }
             .padding(.horizontal)
@@ -45,7 +45,7 @@ struct MarketplaceGridContentView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityRotor("Marketplace listings") {
+        .accessibilityRotor("Adoption listings") {
             ForEach(listings) { listing in
                 AccessibilityRotorEntry(listing.name, id: listing.id)
             }

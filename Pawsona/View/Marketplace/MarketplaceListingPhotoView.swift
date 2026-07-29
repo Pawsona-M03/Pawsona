@@ -12,12 +12,15 @@ struct MarketplaceListingPhotoView: View {
                 .scaledToFill()
         } else {
             Rectangle()
-                .fill(listing.backgroundColor.color.opacity(0.2))
+                .fill(listing.backgroundColor.pastelColor)
                 .overlay(alignment: .bottom) {
                     Image(.dogPlaceholder)
                         .resizable()
                         .scaledToFit()
                         .frame(height: placeholderIconHeight)
+                        // Same nudge `DogPhotoView` applies, so a puppy without
+                        // a photo sits identically in both tabs.
+                        .offset(x: placeholderIconHeight * DogPhotoView.placeholderOffsetRatio)
                 }
         }
     }

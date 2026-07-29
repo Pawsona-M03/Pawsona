@@ -24,14 +24,14 @@ struct MarketplacePublishConfirmationView: View {
                 .pickerStyle(.segmented)
 
                 if viewModel.listingType == .sale {
-                    TextField("Price in IDR", text: $viewModel.priceText)
+                    TextField("Adoption fee in IDR", text: $viewModel.priceText)
                         .keyboardType(.numberPad)
-                        .accessibilityLabel("Sale price in Indonesian rupiah")
+                        .accessibilityLabel("Adoption fee in Indonesian rupiah")
                 } else {
-                    LabeledContent("Price", value: "Free adoption")
+                    LabeledContent("Adoption fee", value: "Free")
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Price")
-                        .accessibilityValue("Free adoption")
+                        .accessibilityLabel("Adoption fee")
+                        .accessibilityValue("Free")
                 }
 
                 if let sellerProfile = viewModel.sellerProfile {
@@ -45,7 +45,7 @@ struct MarketplacePublishConfirmationView: View {
                     isOn: $viewModel.acceptedPublicSharing
                 )
                 Toggle(
-                    "I consent to sharing my contact details with signed-in interested buyers",
+                    "I consent to sharing my contact details with signed-in interested adopters",
                     isOn: $viewModel.acceptedContactSharing
                 )
 
@@ -60,9 +60,12 @@ struct MarketplacePublishConfirmationView: View {
                 Button("Publish Listing", systemImage: "square.and.arrow.up") {
                     Task { await viewModel.publish(puppy: puppy) }
                 }
+                .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity)
                 .disabled(!viewModel.canPublish || viewModel.isSaving)
+                .listRowBackground(Color.clear)
             }
         }
-        .navigationTitle("List on Marketplace")
+        .navigationTitle("List in the Adoption Hub")
     }
 }
