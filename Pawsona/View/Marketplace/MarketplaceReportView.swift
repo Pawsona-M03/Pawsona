@@ -31,12 +31,12 @@ struct MarketplaceReportView: View {
 
                 Section {
                     Text(
-                        "Reports are sent privately to the Pawsona team and are not shown to other marketplace users."
+                        "Reports are sent privately to the Pawsona team and are not shown to other Adoption Hub users."
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
-                    Text("Submitting this form contacts the Pawsona marketplace safety team.")
+                    Text("Submitting this form contacts the Pawsona Adoption Hub safety team.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

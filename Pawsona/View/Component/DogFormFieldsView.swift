@@ -11,6 +11,7 @@ struct DogFormFieldsView: View {
     @Binding var dateOfBirth: Date
     @Binding var weightText: String
     @Binding var sex: Sex?
+    let showsBreedValidationError: Bool
 
     var body: some View {
         Form {
@@ -18,6 +19,14 @@ struct DogFormFieldsView: View {
             // section — the visual separation tells the user it's the must-fill.
             Section {
                 DogBreedField(breed: $breed)
+            } footer: {
+                if showsBreedValidationError {
+                    Label(
+                        "This field needs to be filled",
+                        systemImage: "exclamationmark.circle.fill"
+                    )
+                    .foregroundStyle(.red)
+                }
             }
 
             // Everything below is optional and grouped together.
@@ -56,6 +65,7 @@ struct DogFormFieldsView: View {
         breed: .constant("Labrador Retriever"),
         dateOfBirth: .constant(.now),
         weightText: .constant("12.4"),
-        sex: .constant(.female)
+        sex: .constant(.female),
+        showsBreedValidationError: false
     )
 }

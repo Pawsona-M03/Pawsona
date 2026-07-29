@@ -10,8 +10,8 @@ enum MarketplaceSortOption: String, CaseIterable, Hashable, Identifiable {
     var displayName: String {
         switch self {
         case .newest: "Newest"
-        case .priceLowToHigh: "Price: Low to High"
-        case .priceHighToLow: "Price: High to Low"
+        case .priceLowToHigh: "Fee: Low to High"
+        case .priceHighToLow: "Fee: High to Low"
         }
     }
 }

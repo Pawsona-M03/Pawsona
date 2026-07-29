@@ -234,7 +234,7 @@
 				CODE_SIGN_ENTITLEMENTS = Pawsona/Pawsona.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 75LP72YY5S;
+				DEVELOPMENT_TEAM = K64G2J8QL7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
@@ -253,7 +253,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jennifer.Pawsona;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -274,7 +274,7 @@
 				CODE_SIGN_ENTITLEMENTS = Pawsona/Pawsona.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 75LP72YY5S;
+				DEVELOPMENT_TEAM = K64G2J8QL7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Pawsona/Info.plist;
@@ -293,7 +293,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jennifer.Pawsona;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nathansudiara.Pawsona;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

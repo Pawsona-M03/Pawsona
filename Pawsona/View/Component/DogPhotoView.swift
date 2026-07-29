@@ -18,9 +18,19 @@ struct DogPhotoView: View {
 
     var body: some View {
         if let uiImage = DogPhotoCache.image(for: dog) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFill()
+            // `scaledToFill` reports the *scaled* size, which is wider than the
+            // container whenever the photo is more landscape than the space it
+            // fills. A caller sizing this with `maxWidth: .infinity` can't
+            // shrink below that, so the oversized width used to escape and drag
+            // the rest of the screen out with it. Overlay content has no say in
+            // its parent's size, so the photo can no longer push anything.
+            Color.clear
+                .overlay {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                }
+                .clipped()
         } else {
             Rectangle()
                 .fill(dog.backgroundColor.pastelColor)

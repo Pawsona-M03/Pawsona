@@ -24,14 +24,14 @@ struct MarketplacePublishConfirmationView: View {
                 .pickerStyle(.segmented)
 
                 if viewModel.listingType == .sale {
-                    TextField("Price in IDR", text: $viewModel.priceText)
+                    TextField("Adoption fee in IDR", text: $viewModel.priceText)
                         .keyboardType(.numberPad)
-                        .accessibilityLabel("Sale price in Indonesian rupiah")
+                        .accessibilityLabel("Adoption fee in Indonesian rupiah")
                 } else {
-                    LabeledContent("Price", value: "Free adoption")
+                    LabeledContent("Adoption fee", value: "Free")
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Price")
-                        .accessibilityValue("Free adoption")
+                        .accessibilityLabel("Adoption fee")
+                        .accessibilityValue("Free")
                 }
 
                 if let sellerProfile = viewModel.sellerProfile {
@@ -45,7 +45,7 @@ struct MarketplacePublishConfirmationView: View {
                     isOn: $viewModel.acceptedPublicSharing
                 )
                 Toggle(
-                    "I consent to sharing my contact details with signed-in interested buyers",
+                    "I consent to sharing my contact details with signed-in interested adopters",
                     isOn: $viewModel.acceptedContactSharing
                 )
 
@@ -61,11 +61,41 @@ struct MarketplacePublishConfirmationView: View {
                     Task { await viewModel.publish(puppy: puppy) }
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color("ActionBrown"))
-                .foregroundStyle(.white)
+                // A `Form` row strips button icons down to the title on its
+                // own, which left this one as bare text in both appearances.
+                .labelStyle(.titleAndIcon)
+                .frame(maxWidth: .infinity)
                 .disabled(!viewModel.canPublish || viewModel.isSaving)
+                .listRowBackground(Color.clear)
             }
         }
-        .navigationTitle("List on Marketplace")
+        .navigationTitle("List in the Adoption Hub")
+    }
+}
+
+/// Publish-ready so the preview shows the button in its enabled state.
+private func previewPublishingViewModel() -> MarketplacePublishingViewModel {
+    let viewModel = MarketplacePublishingViewModel(repository: LazyCloudKitMarketplaceRepository())
+    viewModel.listingType = .adoption
+    viewModel.acceptedPublicSharing = true
+    viewModel.acceptedContactSharing = true
+    return viewModel
+}
+
+#Preview {
+    NavigationStack {
+        MarketplacePublishConfirmationView(
+            viewModel: previewPublishingViewModel(),
+            puppy: MarketplacePuppySnapshot(
+                sourceDogID: "preview",
+                name: "Berry",
+                breed: "Labrador Retriever",
+                backgroundColor: .green,
+                vaccinationSummary: MarketplaceVaccinationSummary(
+                    vaccineNames: ["Parvovirus"],
+                    recordCount: 1
+                )
+            )
+        )
     }
 }

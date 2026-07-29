@@ -7,6 +7,7 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
     case alreadyListed
     case invalidPhoneNumber
     case authenticationRequired
+    case storageQuotaExceeded
     case notAuthorized
     case notFound
     case conflict
@@ -15,40 +16,42 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
     case invalidRecord
     case unsupportedContactMethod
     case serviceUnavailable
-    case quotaExceeded
-    
+
     var errorDescription: String? {
         switch self {
         case .invalidSalePrice:
-            "Enter a sale price greater than zero."
+            "Enter an adoption fee greater than zero."
         case .adoptionCannotHavePrice:
-            "Adoption listings cannot include a price."
+            "Free listings cannot include an adoption fee."
         case .incompleteSellerProfile:
-            "Complete all required seller profile fields first."
+            "Complete all required lister profile fields first."
         case .alreadyListed:
-            "This puppy is already on Marketplace. Manage its listing from the Puppy tab."
+            "This puppy is already in the Adoption Hub. Manage its listing from the Puppy tab."
         case .invalidPhoneNumber:
             "Enter a valid international WhatsApp number."
         case .authenticationRequired:
             "Sign in to iCloud to continue."
+        case .storageQuotaExceeded:
+            """
+            Your iCloud storage is full, so this listing could not be published. \
+            Free up space in Settings > [your name] > iCloud, then try again.
+            """
         case .notAuthorized:
             "Only the listing owner can make this change."
         case .notFound:
-            "This marketplace item is no longer available."
+            "This adoption listing is no longer available."
         case .conflict:
             "This listing changed elsewhere. Refresh and try again."
         case .networkUnavailable:
             "You're offline. Check your connection and try again."
         case .rateLimited:
-            "Marketplace is receiving too many requests. Please try again shortly."
+            "The Adoption Hub is receiving too many requests. Please try again shortly."
         case .invalidRecord:
-            "Pawsona could not read this marketplace item."
+            "Pawsona could not read this adoption listing."
         case .unsupportedContactMethod:
-            "This seller's contact method is not supported."
+            "This lister's contact method is not supported."
         case .serviceUnavailable:
-            "Marketplace is temporarily unavailable. Please try again."
-        case .quotaExceeded:
-            "Your iCloud storage is full. Please free up some space to publish this listing."
+            "The Adoption Hub is temporarily unavailable. Please try again."
         }
     }
 }

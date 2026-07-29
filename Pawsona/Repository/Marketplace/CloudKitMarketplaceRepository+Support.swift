@@ -142,6 +142,11 @@ extension CloudKitMarketplaceRepository {
         switch error.code {
         case .notAuthenticated:
             .authenticationRequired
+        case .quotaExceeded:
+            // Retrying never clears this — the user has to free up iCloud
+            // space — so it needs a message of its own rather than the
+            // generic "temporarily unavailable" fallback.
+            .storageQuotaExceeded
         case .permissionFailure:
             .notAuthorized
         case .unknownItem:
@@ -152,8 +157,6 @@ extension CloudKitMarketplaceRepository {
             .networkUnavailable
         case .requestRateLimited, .zoneBusy:
             .rateLimited
-        case .quotaExceeded:
-            .quotaExceeded
         default:
             .serviceUnavailable
         }

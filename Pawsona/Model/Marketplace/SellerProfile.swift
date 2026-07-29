@@ -16,10 +16,14 @@ struct SellerProfile: Identifiable, Equatable, Hashable {
             && rulesAcceptedAt != nil
     }
 
-    var completenessExplanation: String {
-        """
-        This seller has provided all required contact and profile information. \
+    /// Shown both on a published profile card and in the profile form, so it
+    /// lives here rather than being duplicated as a literal in each view.
+    static let completenessExplanation = """
+        This lister has provided all required contact and profile information. \
         Pawsona has not independently verified their identity.
         """
+
+    var completenessExplanation: String {
+        Self.completenessExplanation
     }
 }

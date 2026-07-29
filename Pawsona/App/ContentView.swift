@@ -41,7 +41,7 @@ struct ContentView: View {
                 VaccineListView()
             }
 
-            Tab("Marketplace", systemImage: "storefront", value: .marketplace) {
+            Tab("Adopt", systemImage: "house", value: .marketplace) {
                 MarketplaceView(
                     repository: marketplaceRepository,
                     blockStore: sellerBlockStore
