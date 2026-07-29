@@ -55,6 +55,9 @@ struct SellerProfileFormView: View {
                 Button("Complete Seller Profile") {
                     Task { await viewModel.saveSellerProfile() }
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(Color("ActionBrown"))
+                .foregroundStyle(.white)
                 .disabled(!viewModel.canSaveProfile || viewModel.isSaving)
             } footer: {
                 Text(

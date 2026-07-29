@@ -152,6 +152,8 @@ extension CloudKitMarketplaceRepository {
             .networkUnavailable
         case .requestRateLimited, .zoneBusy:
             .rateLimited
+        case .quotaExceeded:
+            .quotaExceeded
         default:
             .serviceUnavailable
         }

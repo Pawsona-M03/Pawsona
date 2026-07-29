@@ -32,33 +32,33 @@ struct DogShareCardView: View {
         UIColor(resource: .primaryBrown)
             .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
     )
-
+    
     let dog: Dog
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-
+            
             HStack(alignment: .top, spacing: 74) {
                 photo
-
+                
                 details
-                    // SwiftUI tops-aligns line boxes, but the design aligns the
-                    // name's cap height with the top of the photo, so the text
-                    // drops by the gap between the two.
+                // SwiftUI tops-aligns line boxes, but the design aligns the
+                // name's cap height with the top of the photo, so the text
+                // drops by the gap between the two.
                     .padding(.top, 21)
             }
             .padding(.top, 102)
             .padding(.leading, 173)
-            .padding(.trailing, 176)
-
+            .padding(.trailing, 40)
+            
             Spacer(minLength: 0)
         }
         .frame(width: Self.width, height: Self.height, alignment: .topLeading)
         .background(Color(.appBackground))
         .clipShape(.rect(cornerRadius: Self.cornerRadius))
     }
-
+    
     private var header: some View {
         HStack(alignment: .top, spacing: 43) {
             // ponytail: the artwork is 91x124, so it is upscaled ~3x here and
@@ -68,7 +68,7 @@ struct DogShareCardView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 156, height: 213)
-
+            
             Text("Pawsona")
                 .font(.system(size: 86, weight: .bold))
                 .foregroundStyle(Self.brandBrown)
@@ -76,26 +76,26 @@ struct DogShareCardView: View {
         }
         .padding(.leading, 119)
     }
-
+    
     private var photo: some View {
-        DogPhotoView(dog: dog, placeholderIconHeight: 350)
+        DogPhotoView(dog: dog, placeholderIconHeight: 400)
             .frame(width: 502, height: 516)
             .clipShape(.rect(cornerRadius: 60))
     }
-
+    
     private var details: some View {
         VStack(alignment: .leading, spacing: 0) {
             heading
-
+            
             stats
                 .padding(.top, 11)
-
+            
             vaccineHistory
-                .padding(.top, 15)
+                .padding(.top, 25)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     /// One line when it fits, two when it does not. Side by side the name and
     /// breed compete for the same width and SwiftUI resolves that by truncating
     /// both — "Nova Scotia Duck Tolling Retriev…" — rather than letting
@@ -109,21 +109,21 @@ struct DogShareCardView: View {
                     .foregroundStyle(.secondary)
                 breed
             }
-
+            
             VStack(alignment: .leading, spacing: 2) {
                 name
                 breed
             }
         }
     }
-
+    
     private var name: some View {
         Text(dog.displayName)
             .font(.system(size: 84, weight: .bold))
             .lineLimit(1)
             .minimumScaleFactor(0.4)
     }
-
+    
     private var breed: some View {
         Text(dog.breedText)
             .font(.system(size: 48))
@@ -131,7 +131,7 @@ struct DogShareCardView: View {
             .lineLimit(1)
             .minimumScaleFactor(0.5)
     }
-
+    
     private var stats: some View {
         // No trailing `Spacer` here. In an `HStack` a spacer competes with the
         // text for the proposed width, and `lineLimit(1)` resolves that by
@@ -144,45 +144,37 @@ struct DogShareCardView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     /// The heading stays put when the dog has no records rather than being
     /// replaced by placeholder text: the card is a fixed canvas, so an empty
     /// section keeps every other card's layout identical.
     private var vaccineHistory: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Vaccine history")
                 .font(.system(size: 50, weight: .bold))
-
-            VStack(alignment: .leading, spacing: 3) {
-                ForEach(vaccinations) { vaccination in
-                    DogShareCardVaccineRow(vaccination: vaccination)
+            
+            VStack(alignment: .leading, spacing: 20) {
+                if sortedRecords.isEmpty {
+                    Text("-")
+                        .font(.system(size: 43))
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(sortedRecords) { record in
+                        DogShareCardVaccineRecordRow(record: record)
+                    }
                 }
             }
         }
     }
-
-    /// One row per vaccine *type*, carrying the most recent dose. Listing every
-    /// record instead would repeat the same seven names at every booster and
-    /// push the card far past its fixed height; what a reader wants to know is
-    /// which vaccines this dog has had and how current each one is.
-    ///
-    /// Bounded by `VaccineType.allCases`, which is what lets the height be fixed.
-    private var vaccinations: [DogShareCardVaccination] {
-        let latestDates = (dog.vaccineRecords ?? []).reduce(into: [VaccineType: Date]()) { dates, record in
-            for vaccine in record.vaccines {
-                dates[vaccine] = max(dates[vaccine] ?? .distantPast, record.dateGiven)
-            }
-        }
-
-        return latestDates
-            .map { DogShareCardVaccination(vaccine: $0.key, dateGiven: $0.value) }
-            .sorted { $0.dateGiven == $1.dateGiven ? $0.id < $1.id : $0.dateGiven > $1.dateGiven }
+    
+    private var sortedRecords: [VaccineRecord] {
+        return (dog.vaccineRecords ?? []).sorted { $0.dateGiven > $1.dateGiven }
     }
-
+    
     private var ageText: String {
         PuppyAgeText.largestUnit(from: dog.dateOfBirth) ?? "Not set"
     }
-
+    
     private var sexText: String {
         switch dog.sex {
         case .male: "M"
@@ -190,30 +182,22 @@ struct DogShareCardView: View {
         case nil: "Not set"
         }
     }
-
+    
     private var weightText: String {
         guard let weight = dog.weight else { return "Not set" }
         return "\(weight.formatted(.number.precision(.fractionLength(0...1)))) kg"
     }
 }
 
-/// One line on the card: a vaccine and the date it was most recently given.
-private struct DogShareCardVaccination: Identifiable {
-    let vaccine: VaccineType
-    let dateGiven: Date
-
-    var id: String { vaccine.rawValue }
-}
-
 private struct DogShareCardStat: View {
     let title: String
     let value: String
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 43, weight: .semibold))
-
+            
             Text(value)
                 .font(.system(size: 43))
                 .foregroundStyle(.secondary)
@@ -222,20 +206,21 @@ private struct DogShareCardStat: View {
     }
 }
 
-private struct DogShareCardVaccineRow: View {
-    let vaccination: DogShareCardVaccination
-
+private struct DogShareCardVaccineRecordRow: View {
+    let record: VaccineRecord
+    
     var body: some View {
-        HStack(spacing: 24) {
-            Text(vaccination.vaccine.displayName)
-                .font(.system(size: 43, weight: .semibold))
-
-            Spacer(minLength: 24)
-
-            Text(vaccination.dateGiven.formatted(date: .numeric, time: .omitted))
-                .font(.system(size: 43))
-                .foregroundStyle(.secondary)
-        }
+        Text(record.vaccines.map(\.displayName).joined(separator: ", "))
+            .font(.system(size: 32))
+            .foregroundStyle(.primary)
+            .lineLimit(nil)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.primary.opacity(0.06))
+            .clipShape(.rect(cornerRadius: 32))
     }
 }
 

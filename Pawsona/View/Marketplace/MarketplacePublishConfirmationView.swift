@@ -60,6 +60,9 @@ struct MarketplacePublishConfirmationView: View {
                 Button("Publish Listing", systemImage: "square.and.arrow.up") {
                     Task { await viewModel.publish(puppy: puppy) }
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(Color("ActionBrown"))
+                .foregroundStyle(.white)
                 .disabled(!viewModel.canPublish || viewModel.isSaving)
             }
         }

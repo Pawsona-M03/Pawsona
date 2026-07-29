@@ -15,7 +15,8 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
     case invalidRecord
     case unsupportedContactMethod
     case serviceUnavailable
-
+    case quotaExceeded
+    
     var errorDescription: String? {
         switch self {
         case .invalidSalePrice:
@@ -46,6 +47,8 @@ enum MarketplaceError: Error, Equatable, LocalizedError {
             "This seller's contact method is not supported."
         case .serviceUnavailable:
             "Marketplace is temporarily unavailable. Please try again."
+        case .quotaExceeded:
+            "Your iCloud storage is full. Please free up some space to publish this listing."
         }
     }
 }
