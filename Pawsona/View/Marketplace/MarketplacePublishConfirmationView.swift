@@ -60,7 +60,10 @@ struct MarketplacePublishConfirmationView: View {
                 Button("Publish Listing", systemImage: "square.and.arrow.up") {
                     Task { await viewModel.publish(puppy: puppy) }
                 }
+                .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity)
                 .disabled(!viewModel.canPublish || viewModel.isSaving)
+                .listRowBackground(Color.clear)
             }
         }
         .navigationTitle("List in the Adoption Hub")
