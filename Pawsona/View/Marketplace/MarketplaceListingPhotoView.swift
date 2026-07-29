@@ -7,9 +7,15 @@ struct MarketplaceListingPhotoView: View {
 
     var body: some View {
         if let photoData = listing.photoData, let image = UIImage(data: photoData) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
+            // Kept layout-neutral for the same reason `DogPhotoView` is — see
+            // the note there.
+            Color.clear
+                .overlay {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                }
+                .clipped()
         } else {
             Rectangle()
                 .fill(listing.backgroundColor.pastelColor)

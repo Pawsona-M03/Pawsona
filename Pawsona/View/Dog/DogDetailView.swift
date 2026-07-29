@@ -71,16 +71,13 @@ struct DogDetailView: View {
         .background(Color(.appBackground).ignoresSafeArea(edges: .bottom))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        // The hero behind this bar is always a light pastel, in both
-        // appearances, so the bar's content has to stay dark. Left to resolve
-        // normally the `.primary` tints below go white in Dark Mode and vanish
-        // against the pastel.
-        .toolbarColorScheme(.light, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit", action: showEditDogForm)
                     // These two are chrome, not calls to action, so they opt out
-                    // of the brown the TabView tints everything with.
+                    // of the brown the TabView tints everything with. They stay
+                    // legible over the always-light pastel hero because the
+                    // toolbar's own glass darkens with the appearance.
                     .tint(.primary)
                     .accessibilityShowsLargeContentViewer()
                     .accessibilityLabel("Edit \(displayName)")

@@ -76,10 +76,6 @@ struct MarketplaceDetailView: View {
         .background(Color(.appBackground).ignoresSafeArea(edges: .bottom))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        // The hero behind this bar is always a light pastel in both
-        // appearances, so the bar's content has to stay dark — the same reason
-        // `DogDetailView` pins it.
-        .toolbarColorScheme(.light, for: .navigationBar)
         .task {
             await viewModel.load()
         }

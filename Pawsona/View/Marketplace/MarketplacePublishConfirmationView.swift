@@ -61,11 +61,41 @@ struct MarketplacePublishConfirmationView: View {
                     Task { await viewModel.publish(puppy: puppy) }
                 }
                 .buttonStyle(.borderedProminent)
+                // A `Form` row strips button icons down to the title on its
+                // own, which left this one as bare text in both appearances.
+                .labelStyle(.titleAndIcon)
                 .frame(maxWidth: .infinity)
                 .disabled(!viewModel.canPublish || viewModel.isSaving)
                 .listRowBackground(Color.clear)
             }
         }
         .navigationTitle("List in the Adoption Hub")
+    }
+}
+
+/// Publish-ready so the preview shows the button in its enabled state.
+private func previewPublishingViewModel() -> MarketplacePublishingViewModel {
+    let viewModel = MarketplacePublishingViewModel(repository: LazyCloudKitMarketplaceRepository())
+    viewModel.listingType = .adoption
+    viewModel.acceptedPublicSharing = true
+    viewModel.acceptedContactSharing = true
+    return viewModel
+}
+
+#Preview {
+    NavigationStack {
+        MarketplacePublishConfirmationView(
+            viewModel: previewPublishingViewModel(),
+            puppy: MarketplacePuppySnapshot(
+                sourceDogID: "preview",
+                name: "Berry",
+                breed: "Labrador Retriever",
+                backgroundColor: .green,
+                vaccinationSummary: MarketplaceVaccinationSummary(
+                    vaccineNames: ["Parvovirus"],
+                    recordCount: 1
+                )
+            )
+        )
     }
 }
