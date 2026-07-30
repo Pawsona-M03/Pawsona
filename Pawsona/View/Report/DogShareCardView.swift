@@ -19,10 +19,10 @@ import UIKit
 /// the user picked in `DogShareCardPickerView`.
 struct DogShareCardView: View {
     static let width: CGFloat = 1500
-    /// Fixed, not content-driven. Every field is bounded — the name and breed
-    /// scale down rather than wrap, and the vaccine list is one row per type —
-    /// so both appearances render at the same size and a well-vaccinated dog
-    /// does not turn the card into a portrait poster.
+    /// Fixed, not content-driven, so both appearances render at the same size.
+    /// The name and breed scale down rather than wrap, but the vaccine list is
+    /// one row per *record* and so is unbounded: a dog with a long history runs
+    /// past the bottom of the canvas and is clipped rather than reflowed.
     static let height: CGFloat = 1036
     private static let cornerRadius: CGFloat = 44
     /// One brown on both cards. `PrimaryBrown` lightens to salmon in dark mode,
@@ -32,33 +32,33 @@ struct DogShareCardView: View {
         UIColor(resource: .primaryBrown)
             .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
     )
-    
+
     let dog: Dog
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            
+
             HStack(alignment: .top, spacing: 74) {
                 photo
-                
+
                 details
-                // SwiftUI tops-aligns line boxes, but the design aligns the
-                // name's cap height with the top of the photo, so the text
-                // drops by the gap between the two.
+                    // SwiftUI tops-aligns line boxes, but the design aligns the
+                    // name's cap height with the top of the photo, so the text
+                    // drops by the gap between the two.
                     .padding(.top, 21)
             }
             .padding(.top, 102)
             .padding(.leading, 173)
             .padding(.trailing, 40)
-            
+
             Spacer(minLength: 0)
         }
         .frame(width: Self.width, height: Self.height, alignment: .topLeading)
         .background(Color(.appBackground))
         .clipShape(.rect(cornerRadius: Self.cornerRadius))
     }
-    
+
     private var header: some View {
         HStack(alignment: .top, spacing: 43) {
             // ponytail: the artwork is 91x124, so it is upscaled ~3x here and
@@ -68,7 +68,7 @@ struct DogShareCardView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 156, height: 213)
-            
+
             Text("Pawsona")
                 .font(.system(size: 86, weight: .bold))
                 .foregroundStyle(Self.brandBrown)
@@ -76,26 +76,26 @@ struct DogShareCardView: View {
         }
         .padding(.leading, 119)
     }
-    
+
     private var photo: some View {
         DogPhotoView(dog: dog, placeholderIconHeight: 400)
             .frame(width: 502, height: 516)
             .clipShape(.rect(cornerRadius: 60))
     }
-    
+
     private var details: some View {
         VStack(alignment: .leading, spacing: 0) {
             heading
-            
+
             stats
                 .padding(.top, 11)
-            
+
             vaccineHistory
                 .padding(.top, 25)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    
+
     /// One line when it fits, two when it does not. Side by side the name and
     /// breed compete for the same width and SwiftUI resolves that by truncating
     /// both — "Nova Scotia Duck Tolling Retriev…" — rather than letting
@@ -109,21 +109,21 @@ struct DogShareCardView: View {
                     .foregroundStyle(.secondary)
                 breed
             }
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 name
                 breed
             }
         }
     }
-    
+
     private var name: some View {
         Text(dog.displayName)
             .font(.system(size: 84, weight: .bold))
             .lineLimit(1)
             .minimumScaleFactor(0.4)
     }
-    
+
     private var breed: some View {
         Text(dog.breedText)
             .font(.system(size: 48))
@@ -131,7 +131,7 @@ struct DogShareCardView: View {
             .lineLimit(1)
             .minimumScaleFactor(0.5)
     }
-    
+
     private var stats: some View {
         // No trailing `Spacer` here. In an `HStack` a spacer competes with the
         // text for the proposed width, and `lineLimit(1)` resolves that by
@@ -144,15 +144,15 @@ struct DogShareCardView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    
-    /// The heading stays put when the dog has no records rather than being
-    /// replaced by placeholder text: the card is a fixed canvas, so an empty
-    /// section keeps every other card's layout identical.
+
+    /// The heading stays put when the dog has no records, with a dash standing
+    /// in for the rows: the card is a fixed canvas, so an empty section keeps
+    /// every other card's layout identical.
     private var vaccineHistory: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Vaccine history")
                 .font(.system(size: 50, weight: .bold))
-            
+
             VStack(alignment: .leading, spacing: 20) {
                 if sortedRecords.isEmpty {
                     Text("-")
@@ -166,15 +166,15 @@ struct DogShareCardView: View {
             }
         }
     }
-    
+
     private var sortedRecords: [VaccineRecord] {
-        return (dog.vaccineRecords ?? []).sorted { $0.dateGiven > $1.dateGiven }
+        (dog.vaccineRecords ?? []).sorted { $0.dateGiven > $1.dateGiven }
     }
-    
+
     private var ageText: String {
         PuppyAgeText.largestUnit(from: dog.dateOfBirth) ?? "Not set"
     }
-    
+
     private var sexText: String {
         switch dog.sex {
         case .male: "M"
@@ -182,7 +182,7 @@ struct DogShareCardView: View {
         case nil: "Not set"
         }
     }
-    
+
     private var weightText: String {
         guard let weight = dog.weight else { return "Not set" }
         return "\(weight.formatted(.number.precision(.fractionLength(0...1)))) kg"
@@ -192,12 +192,12 @@ struct DogShareCardView: View {
 private struct DogShareCardStat: View {
     let title: String
     let value: String
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 43, weight: .semibold))
-            
+
             Text(value)
                 .font(.system(size: 43))
                 .foregroundStyle(.secondary)
@@ -208,9 +208,9 @@ private struct DogShareCardStat: View {
 
 private struct DogShareCardVaccineRecordRow: View {
     let record: VaccineRecord
-    
+
     var body: some View {
-        Text(record.vaccines.map(\.displayName).joined(separator: ", "))
+        Text(record.vaccineNames)
             .font(.system(size: 32))
             .foregroundStyle(.primary)
             .lineLimit(nil)
