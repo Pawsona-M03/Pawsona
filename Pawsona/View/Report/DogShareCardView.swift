@@ -19,10 +19,10 @@ import UIKit
 /// the user picked in `DogShareCardPickerView`.
 struct DogShareCardView: View {
     static let width: CGFloat = 1500
-    /// Fixed, not content-driven. Every field is bounded — the name and breed
-    /// scale down rather than wrap, and the vaccine list is one row per type —
-    /// so both appearances render at the same size and a well-vaccinated dog
-    /// does not turn the card into a portrait poster.
+    /// Fixed, not content-driven, so both appearances render at the same size.
+    /// The name and breed scale down rather than wrap, but the vaccine list is
+    /// one row per *record* and so is unbounded: a dog with a long history runs
+    /// past the bottom of the canvas and is clipped rather than reflowed.
     static let height: CGFloat = 1036
     private static let cornerRadius: CGFloat = 44
     /// One brown on both cards. `PrimaryBrown` lightens to salmon in dark mode,
@@ -50,7 +50,7 @@ struct DogShareCardView: View {
             }
             .padding(.top, 102)
             .padding(.leading, 173)
-            .padding(.trailing, 176)
+            .padding(.trailing, 40)
 
             Spacer(minLength: 0)
         }
@@ -78,7 +78,7 @@ struct DogShareCardView: View {
     }
 
     private var photo: some View {
-        DogPhotoView(dog: dog, placeholderIconHeight: 350)
+        DogPhotoView(dog: dog, placeholderIconHeight: 400)
             .frame(width: 502, height: 516)
             .clipShape(.rect(cornerRadius: 60))
     }
@@ -91,7 +91,7 @@ struct DogShareCardView: View {
                 .padding(.top, 11)
 
             vaccineHistory
-                .padding(.top, 15)
+                .padding(.top, 25)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -145,38 +145,30 @@ struct DogShareCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// The heading stays put when the dog has no records rather than being
-    /// replaced by placeholder text: the card is a fixed canvas, so an empty
-    /// section keeps every other card's layout identical.
+    /// The heading stays put when the dog has no records, with a dash standing
+    /// in for the rows: the card is a fixed canvas, so an empty section keeps
+    /// every other card's layout identical.
     private var vaccineHistory: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Vaccine history")
                 .font(.system(size: 50, weight: .bold))
 
-            VStack(alignment: .leading, spacing: 3) {
-                ForEach(vaccinations) { vaccination in
-                    DogShareCardVaccineRow(vaccination: vaccination)
+            VStack(alignment: .leading, spacing: 20) {
+                if sortedRecords.isEmpty {
+                    Text("-")
+                        .font(.system(size: 43))
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(sortedRecords) { record in
+                        DogShareCardVaccineRecordRow(record: record)
+                    }
                 }
             }
         }
     }
 
-    /// One row per vaccine *type*, carrying the most recent dose. Listing every
-    /// record instead would repeat the same seven names at every booster and
-    /// push the card far past its fixed height; what a reader wants to know is
-    /// which vaccines this dog has had and how current each one is.
-    ///
-    /// Bounded by `VaccineType.allCases`, which is what lets the height be fixed.
-    private var vaccinations: [DogShareCardVaccination] {
-        let latestDates = (dog.vaccineRecords ?? []).reduce(into: [VaccineType: Date]()) { dates, record in
-            for vaccine in record.vaccines {
-                dates[vaccine] = max(dates[vaccine] ?? .distantPast, record.dateGiven)
-            }
-        }
-
-        return latestDates
-            .map { DogShareCardVaccination(vaccine: $0.key, dateGiven: $0.value) }
-            .sorted { $0.dateGiven == $1.dateGiven ? $0.id < $1.id : $0.dateGiven > $1.dateGiven }
+    private var sortedRecords: [VaccineRecord] {
+        (dog.vaccineRecords ?? []).sorted { $0.dateGiven > $1.dateGiven }
     }
 
     private var ageText: String {
@@ -197,14 +189,6 @@ struct DogShareCardView: View {
     }
 }
 
-/// One line on the card: a vaccine and the date it was most recently given.
-private struct DogShareCardVaccination: Identifiable {
-    let vaccine: VaccineType
-    let dateGiven: Date
-
-    var id: String { vaccine.rawValue }
-}
-
 private struct DogShareCardStat: View {
     let title: String
     let value: String
@@ -222,20 +206,21 @@ private struct DogShareCardStat: View {
     }
 }
 
-private struct DogShareCardVaccineRow: View {
-    let vaccination: DogShareCardVaccination
+private struct DogShareCardVaccineRecordRow: View {
+    let record: VaccineRecord
 
     var body: some View {
-        HStack(spacing: 24) {
-            Text(vaccination.vaccine.displayName)
-                .font(.system(size: 43, weight: .semibold))
-
-            Spacer(minLength: 24)
-
-            Text(vaccination.dateGiven.formatted(date: .numeric, time: .omitted))
-                .font(.system(size: 43))
-                .foregroundStyle(.secondary)
-        }
+        Text(record.vaccineNames)
+            .font(.system(size: 32))
+            .foregroundStyle(.primary)
+            .lineLimit(nil)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.primary.opacity(0.06))
+            .clipShape(.rect(cornerRadius: 32))
     }
 }
 
