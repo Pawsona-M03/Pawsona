@@ -23,6 +23,7 @@ xcuserdata/
 # --------------------------------------------------
 build/
 DerivedData/
+.derivedData/
 
 # --------------------------------------------------
 # App archives and debug symbol artifacts
@@ -50,6 +51,8 @@ fastlane/test_output/
 # --------------------------------------------------
 *.swp
 *.lock
+docs/
+Docs/
 
 # --------------------------------------------------
 # AI agent tooling
@@ -61,6 +64,22 @@ fastlane/test_output/
 .agents/
 .agent/
 .codex/
+.worktrees/
 .cursor/
 .gemini/
 .mcp.json
+.gemini-swarm/
+skills-lock.json
+
+# --------------------------------------------------
+# Secrets files
+# --------------------------------------------------
+Secrets.swift
+.env
+Config/Secrets.xcconfig
+
+# --------------------------------------------------
+# Agent-generated reports
+# Local working documents, not part of the codebase.
+# --------------------------------------------------
+CODE_AUDIT.md
